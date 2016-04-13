@@ -42,7 +42,7 @@ ${locator.items[0].quantity}                                   xpath=(//*[@class
   Open Browser  ${BROKERS['${broker}'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
   Set Window Size  @{USERS.users['${username}'].size}
   Set Window Position  @{USERS.users['${username}'].position}
-  Run Keyword If  '${username}' != 'Ubiz_Viewer'  Login  ${username}
+  Run Keyword If  '${username}' != 'ubiz_Viewer'  Login  ${username}
 
 Login
   [Arguments]  ${username}
@@ -107,7 +107,7 @@ Login
   Input text    id=TenderForm_op_enquiry_period_end_date          ${enquiry_end_date}
   Input text    id=TenderForm_op_tender_period_start_date        ${start_date}
   Input text    id=TenderForm_op_tender_period_end_date          ${end_date}
- 
+
   Додати предмет   ${items[0]}   0
   Run Keyword if   '${mode}' == 'multi'   Додати багато предметів   items
   Sleep  1
@@ -150,7 +150,7 @@ Set Multi Ids
   Input text                         xpath=(//*[@data-type='item'])[last()]//input[contains(@id, '_op_description')]  ${description}
   Input text                         xpath=(//*[@data-type='item'])[last()]//input[contains(@id, '_op_quantity')]  ${quantity}
   Select From List By Label          xpath=(//*[@data-type='item'])[last()]//select[contains(@id, '_op_unit_id')]  ${unit}
-# TO be debugged, impossible to select checkbox in this AJAX fancytree 
+# TO be debugged, impossible to select checkbox in this AJAX fancytree
 #  Sleep  2
 #  Click Element                      xpath=(//*[@data-type='item'])[last()]//button[contains(., 'CPV')]
 #  Wait Until Element Is Visible      xpath=(//*[@data-type='item'])[last()]//h4[contains(., 'CPV')]
@@ -202,7 +202,7 @@ Set Multi Ids
   Wait Until Page Contains   Допорогові закупівлі України    20
 #  sleep  1
   Wait Until Page Contains Element    id=TenderSearchForm_query    20
-#  sleep  3  
+#  sleep  3
   Input Text    id=TenderSearchForm_query    ${ARGUMENTS[1]}
 #  sleep  1
   ${timeout_on_wait}=  Get Broker Property By Username  ${ARGUMENTS[0]}  timeout_on_wait
