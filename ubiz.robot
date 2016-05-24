@@ -34,7 +34,7 @@ ${locator.items[0].additionalClassifications[0].id}            xpath=(//*[contai
 ${locator.items[0].quantity}                                   xpath=(//*[@class='panel-heading'])[1]//*[contains(@class, 'quantity')]
 
 ${locator.questions[0].title}                                  xpath=(//div[@class='items'])[last()]//*[@class='title-wrapper']//h4
-${locator.questions[0].description}                            xpath=(//div[@class='items'])[last()]//*[@class='question-wrapper']//p
+${locator.questions[0].description}                            xpath=(//div[@class='items'])[last()]//*[@class='question-wrapper'][1]//p
 ${locator.questions[0].date}                                   xpath=(//div[@class='items'])[last()]//*[@class='author-wrapper']//span
 ${locator.questions[0].answer}                                 xpath=(//div[@class='items'])[last()]//*[@class='answer-wrapper']//p
 
@@ -67,19 +67,19 @@ Login
   #Go To  ${USERS.users['${username}'].homepage}
 
 Створити тендер
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  username
-  ...      ${ARGUMENTS[1]} ==  tender_data
-  ${tender_data}=   Add_data_for_GUI_FrontEnds  ${ARGUMENTS[1]}
+  [Arguments]  ${user}  ${tender_data}
+  #${tender_data}=   Add_data_for_GUI_FrontEnds  ${ARGUMENTS[1]}
   ${tender_data}=   procuring_entity_name  ${tender_data}
   ${items}=         Get From Dictionary   ${tender_data.data}               items
   ${title}=         Get From Dictionary   ${tender_data.data}               title
   ${description}=   Get From Dictionary   ${tender_data.data}               description
   ${budget}=        Get From Dictionary   ${tender_data.data.value}         amount
+  ${budget}=        Convert To String     ${budget}
   ${step_rate}=     Get From Dictionary   ${tender_data.data.minimalStep}   amount
+  ${step_rate}=     Convert To String     ${step_rate}
   ${items_description}=   Get From Dictionary   ${items[0]}         description
   ${quantity}=      Get From Dictionary   ${items[0]}                        quantity
+  ${quantity}=      Convert To String     ${quantity}
   ${cpv}=           Get From Dictionary   ${items[0].classification}         id
   ${unit}=          Get From Dictionary   ${items[0].unit}                   name
   ${latitude}       Get From Dictionary   ${items[0].deliveryLocation}    latitude
@@ -95,9 +95,9 @@ Login
   ${enquiry_start_date}=    convert_datetime_for_delivery   ${enquiry_start_date}
   ${enquiry_end_date}=      Get From Dictionary   ${tender_data.data.enquiryPeriod}   endDate
   ${enquiry_end_date}=      convert_datetime_for_delivery   ${enquiry_end_date}
-
-  Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-  Go To                             ${USERS.users['${ARGUMENTS[0]}'].homepage}
+  
+  Selenium2Library.Switch Browser    ${user}
+  Go To                             ${USERS.users['${user}'].homepage}
   Wait Until Page Contains          Закупівлі   10
   Sleep  1
   Click Element                     xpath=//*[contains(@class, 'btn-success')]
@@ -139,10 +139,12 @@ Login
   ${dkpp_id}=       Get From Dictionary   ${ARGUMENTS[0].additionalClassifications[0]}   id
   ${unit}=          Get From Dictionary   ${ARGUMENTS[0].unit}    name
   ${quantity}=      Get From Dictionary   ${ARGUMENTS[0]}         quantity
+  ${quantity}=      Convert To String     ${quantity}
   ${region}=        Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  region
   ${locality}=      Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  locality
   ${street}=        Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  streetAddress
   ${code}=          Get From Dictionary   ${ARGUMENTS[0].deliveryAddress}  postalCode
+  ${code}=          Convert To String     ${code}
   ${delivery_end}=  Get From Dictionary   ${ARGUMENTS[0].deliveryDate}  endDate
   ${delivery_end}=  convert_datetime_for_delivery  ${delivery_end}
 
@@ -152,14 +154,14 @@ Login
   Select From List By Label          xpath=(//*[@data-type='item'])[last()]//select[contains(@id, '_op_unit_id')]  ${unit}
   
 #  Sleep  2
-  Click Element                      xpath=(//*[@data-type='item'])[last()]//button[contains(., 'CPV')]
-  Wait Until Element Is Visible      xpath=(//*[@data-type='item'])[last()]//h4[contains(., 'CPV')]
+  Click Element                      xpath=(//*[@data-type='item'])[last()]//button[contains(., 'Класифікація ДК 021:2015')]
+  Wait Until Element Is Visible      xpath=(//*[@data-type='item'])[last()]//h4[contains(., 'Класифікація ДК 021:2015')]
   Sleep  1
-  Input text                         xpath=(//*[@data-type='item'])[last()]//*[@role='document'][contains(.//h4, 'CPV')]//input[@id='search-input']  ${cpv_id}
-  Press key                          xpath=(//*[@data-type='item'])[last()]//*[@role='document'][contains(.//h4, 'CPV')]//input[@id='search-input']  \\13
+  Input text                         xpath=(//*[@data-type='item'])[last()]//*[@role='document'][contains(.//h4, 'Класифікація ДК 021:2015')]//input[@id='search-input']  ${cpv_id}
+  Press key                          xpath=(//*[@data-type='item'])[last()]//*[@role='document'][contains(.//h4, 'Класифікація ДК 021:2015')]//input[@id='search-input']  \\13
   Wait Until Page Contains Element   xpath=(//*[@data-type='item'])[last()]//span[contains(span/b, '${cpv_id}')]  10
   Click Element                      xpath=(//*[@data-type='item'])[last()]//span[span/b/text()='${cpv_id}']/span[@class='fancytree-checkbox']
-  Click Element                      xpath=(//*[@data-type='item'])[last()]//*[@role='document'][contains(.//h4, 'CPV')]//button[contains(@class, 'js-submit-btn')]
+  Click Element                      xpath=(//*[@data-type='item'])[last()]//*[@role='document'][contains(.//h4, 'Класифікація ДК 021:2015')]//button[contains(@class, 'js-submit-btn')]
   Sleep  1
   
   Click Element                      xpath=(//*[@data-type='item'])[last()]//button[contains(., 'ДКПП')]
@@ -207,14 +209,24 @@ Login
 Шукати і знайти
   Клацнути і дочекатися  xpath=//input[contains(./@class, 'btn-submit')]  xpath=(//*[@class='title-wrapper'])[1]  5
 
+Load And Check Text
+  [Arguments]  ${url}  ${wanted_text}
+  Go To  ${url}
+  Page Should Contain  ${wanted_text}
+
+Load And Wait Text
+  [Arguments]  ${url}  ${wanted_text}  ${retries}
+  Wait Until Keyword Succeeds  ${retries}x  200ms  Load And Check Text  ${url}  ${wanted_text}
+
 Пошук тендера по ідентифікатору
   [Arguments]  @{ARGUMENTS}
   [Documentation]
   ...      ${ARGUMENTS[0]} ==  username
   ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
   Selenium2Library.Switch browser   ${ARGUMENTS[0]}
-  Go To  ${BROKERS['ubiz'].homepage}
-  Wait Until Page Contains   Допорогові закупівлі України    20
+  Load And Wait Text  ${BROKERS['ubiz'].homepage}  Допорогові закупівлі України  4
+  #Go To  ${BROKERS['ubiz'].homepage}
+  #Wait Until Page Contains   Допорогові закупівлі України    20
 #  sleep  1
   Wait Until Page Contains Element    id=TenderSearchForm_query    20
 #  sleep  3  
@@ -361,8 +373,13 @@ Login
   Switch To Questions
   Input text                         id=TenderQuestionForm_op_title               ${title}
   Input text                         id=TenderQuestionForm_op_description           ${description}
+  Sleep  2
   Click Element                      xpath=//*[@type='submit']
   Sleep  1
+  #Click Element                      xpath=//*[@type='submit']
+  #Sleep  1
+  #Click Element                       xpath=//input[@value='Задати питання']
+  #Sleep  1
   Wait Until Page Contains            Питання успішно додане.  10
 
 Відповісти на питання
@@ -470,7 +487,8 @@ Login
 
 Отримати інформацію про minimalStep.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці   minimalStep.amount
-  ${return_value}=   Convert To Number   ${return_value.split(' ')[0]}
+  ${return_value}=  Evaluate  ''.join('${return_value}'.split()[:-1])
+  ${return_value}=   Convert To Number   ${return_value}
   [return]  ${return_value}
 
 Отримати інформацію про value.amount
@@ -559,10 +577,11 @@ Login
   [return]  ${return_value}
 
 Отримати інформацію про items[0].classification.scheme  
-  ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].classification.scheme
-  ${return_value}=   Get Substring  ${return_value}  start=0  end=-1
-  ${return_value}=   Split String From Right  ${return_value}  max_split=1
-  [return]  ${return_value[1]}
+  [return]  CPV
+  #${return_value}=   Отримати текст із поля і показати на сторінці  items[0].classification.scheme
+  #${return_value}=   Get Substring  ${return_value}  start=0  end=-1
+  #${return_value}=   Split String From Right  ${return_value}  max_split=1
+  #[return]  ${return_value[1]}
 
 Отримати інформацію про items[0].classification.id
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].classification.id
