@@ -50,8 +50,7 @@ ${locator.questions[0].answer}                                 xpath=(//div[@cla
   [Arguments]  ${username}
   [Documentation]  Відкрити браузер, створити об’єкт api wrapper, тощо
 #  Sleep  1
-#  Open Browser  ${USERS.users['${username}'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
-  Open Browser  ${BROKERS['ubiz'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
+  Open Browser  ${USERS.users['${username}'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
   Set Window Size  @{USERS.users['${username}'].size}
   Set Window Position  @{USERS.users['${username}'].position}
   Login  ${username}
@@ -574,11 +573,11 @@ Load And Wait Text
   [return]  ${return_value}
 
 Отримати інформацію про items[0].classification.scheme
-  [return]  CAV
-  #${return_value}=   Отримати текст із поля і показати на сторінці  items[0].classification.scheme
-  #${return_value}=   Get Substring  ${return_value}  start=0  end=-1
-  #${return_value}=   Split String From Right  ${return_value}  max_split=1
-  #[return]  ${return_value[1]}
+
+  ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].classification.scheme
+  ${return_value}=   Get Substring  ${return_value}  start=18  end=21
+#  ${return_value}=   Split String From Right  ${return_value}  max_split=1
+  [return]  ${return_value}
 
 Отримати інформацію про items[0].classification.id
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].classification.id
@@ -593,7 +592,6 @@ Load And Wait Text
 Отримати інформацію про items[0].additionalClassifications[0].scheme
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].additionalClassifications[0].scheme
   ${return_value}=   Get Substring  ${return_value}  start=0  end=-1
-  ${return_value}=   Split String From Right  ${return_value}  max_split=1
   [return]  ${return_value[1]}
 
 Отримати інформацію про items[0].additionalClassifications[0].id
