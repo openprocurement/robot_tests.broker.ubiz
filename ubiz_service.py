@@ -41,18 +41,10 @@ def procuring_entity_name(tender_data):
 
 
 def split_take_item(value, separator, index):
-    librarylogger.console('split_take_item')
-    librarylogger.console(value)
-    librarylogger.console(separator)
-    librarylogger.console(index)
     return value.split(separator)[int(index)]
 
 
 def split_take_slice(value, separator, _from=None, to=None):
-    librarylogger.console(value)
-    librarylogger.console(separator)
-    librarylogger.console(_from)
-    librarylogger.console(to)
     l = value.split(separator)
     if to:
         l = l[:int(to)]
@@ -60,17 +52,8 @@ def split_take_slice(value, separator, _from=None, to=None):
         l = l[int(_from):]
     return l
 
-def split_take_slice_from(value, separator, _from):
-    librarylogger.console('split_take_slice_from')
-    return split_take_slice(value, separator, _from)
-
-def split_take_slice_to(value, separator, to):
-    librarylogger.console('split_take_slice_to')
-    return split_take_slice(value, separator, to=to)
 
 def join(l, separator):
-    librarylogger.console('join')
-    librarylogger.console(l)
     return separator.join(l)
 
 

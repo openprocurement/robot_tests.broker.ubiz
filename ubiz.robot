@@ -17,7 +17,6 @@ ${locator.tenderPeriod.startDate}                              xpath=//div[@clas
 ${locator.tenderPeriod.endDate}                                xpath=//div[@class='date-list-wrapper']/div[2]//span
 ${locator.items[0].deliveryDate.endDate}                       css=.delivery_date
 ${locator.status}                                              css=.status_auction
-#xpath=//div[contains(@id, 'collapse')][1]//div[@class='item-wrapper'][4]/span
 ${locator.items[0].deliveryLocation.latitude}                  css=.latitude
 ${locator.items[0].deliveryLocation.longitude}                 css=.longitude
 ${locator.items[0].deliveryAddress.countryName}                xpath=//span[@class='country']
@@ -28,10 +27,8 @@ ${locator.items[0].deliveryAddress.address}                    xpath=//span[@cla
 ${locator.items[0].description}                                xpath=(//*[@class='panel-heading'])[1]//*[contains(@class, 'description')]
 ${locator.items[0].classification.scheme}                      xpath=(//*[contains(@class, 'panel-collapse')])[1]//*[@class='item-wrapper'][1]/label
 ${locator.items[0].classification.id}                          xpath=(//*[contains(@class, 'panel-collapse')])[1]//*[@class='item-wrapper'][1]/span
-#${locator.items[0].classification.description}                 xpath=(//*[contains(@class, 'panel-collapse')])[1]//*[@class='item-wrapper'][1]/span
 ${locator.items[0].additionalClassifications[0].scheme}        xpath=(//*[contains(@class, 'panel-collapse')])[1]//*[@class='item-wrapper'][2]/label
 ${locator.items[0].additionalClassifications[0].id}            xpath=(//*[contains(@class, 'panel-collapse')])[1]//*[@class='item-wrapper'][2]/span
-#${locator.items[0].additionalClassifications[0].description}   xpath=(//*[contains(@class, 'panel-collapse')])[1]//*[@class='item-wrapper'][1]/span
 ${locator.items[0].unit.code}                                  xpath=//span[@class='unit_code']
 ${locator.items[0].quantity}                                   xpath=(//*[@class='panel-heading'])[1]//*[contains(@class, 'quantity')]
 
@@ -49,7 +46,6 @@ ${locator.questions[0].answer}                                 xpath=(//div[@cla
 Підготувати клієнт для користувача
   [Arguments]  ${username}
   [Documentation]  Відкрити браузер, створити об’єкт api wrapper, тощо
-#  Sleep  1
   Open Browser  ${USERS.users['${username}'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
   Set Window Size  @{USERS.users['${username}'].size}
   Set Window Position  @{USERS.users['${username}'].position}
@@ -65,11 +61,9 @@ Login
   Input text   id=UserLoginForm_password      ${USERS.users['${username}'].password}
   Click Button   xpath=//*[@type='submit']
   Wait Until Page Contains          Аукціони   20
-  #Go To  ${USERS.users['${username}'].homepage}
 
 Створити тендер
   [Arguments]  ${user}  ${tender_data}
-  #${tender_data}=   Add_data_for_GUI_FrontEnds  ${ARGUMENTS[1]}
   ${tender_data}=   procuring_entity_name  ${tender_data}
   ${items}=         Get From Dictionary   ${tender_data.data}               items
   ${title}=         Get From Dictionary   ${tender_data.data}               title
@@ -119,13 +113,10 @@ Login
   Sleep  1
 
   Select Checkbox  id=TenderForm_op_mode
-  #Wait Until Page Contains Element   xpath=//*[@type='submit']
   Click Element   xpath=//*[@type='submit']
   Sleep  1
   Wait Until Page Contains   Аукціон успішно створений   10
-  #Sleep   2
   ${tender_UAid}=  Get Text  xpath=//*[contains(@class, 'info-tender-id')]//*[@class='value']
-  #Log To Console  ${tender_UAid}
   ${Ids}=   Convert To String   ${tender_UAid}
   Log  ${Ids}
   [return]  ${Ids}
@@ -153,7 +144,6 @@ Login
   Input text                         xpath=(//*[@data-type='item'])[last()]//input[contains(@id, '_op_quantity')]  ${quantity}
   Select From List By Label          xpath=(//*[@data-type='item'])[last()]//select[contains(@id, '_op_unit_id')]  ${unit}
 
-  #  Sleep  2
     Click Element                      xpath=(//*[@data-type='item'])[last()]//button[contains(., 'Класифікація CAV')]
     Wait Until Element Is Visible      xpath=(//*[@data-type='item'])[last()]//h4[contains(., 'Класифікація ДК 021:2015')]
     Sleep  1
@@ -164,11 +154,8 @@ Login
     Click Element                      xpath=(//*[@data-type='item'])[last()]//*[@role='document'][contains(.//h4, 'Класифікація ДК')]//button[contains(@class, 'js-submit-btn')]
 
     Sleep  1
-    # Execute Javascript  $('[name*="op_classification_id"]').eq(${ARGUMENTS[1]}).attr('value', '6272')
 
   Select Checkbox                    xpath=(//*[@data-type='item'])[last()]//*[@type='checkbox'][contains(@id, '_shipping')]
- # Sleep 1
- # Wait For Element Is Visible        xpath=(//*[@data-type='item'])[last()]//select[contains(@id, '_op_delivery_address_region_id')]  10
   Select From List By Label          xpath=(//*[@data-type='item'])[last()]//select[contains(@id, '_op_delivery_address_region_id')]  ${region}
   Sleep  1
   ${has_locality}=  Run Keyword And Return Status  Element Should Contain  xpath=(//*[@data-type='item'])[last()]//select[contains(@id, '_op_delivery_address_locality_id')]  ${locality}
@@ -216,25 +203,18 @@ Load And Wait Text
   ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
   Selenium2Library.Switch browser   ${ARGUMENTS[0]}
   Load And Wait Text  ${BROKERS['ubiz'].homepage}  Аукціони  4
-  #Go To  ${BROKERS['ubiz'].homepage}
-  #Wait Until Page Contains   Аукціони    20
-#  sleep  1
   Wait Until Page Contains Element    id=TenderSearchForm_query    20
-#  sleep  3
   Input Text    id=TenderSearchForm_query    ${ARGUMENTS[1]}
-#  sleep  1
   ${timeout_on_wait}=  Get Broker Property By Username  ${ARGUMENTS[0]}  timeout_on_wait
   ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout_on_wait} s  0 s  Шукати і знайти
   Run Keyword Unless  ${passed}  Fatal Error  Тендер не знайдено за ${timeout_on_wait} секунд
   sleep  1
   Wait Until Page Contains Element    xpath=(//*[@class='title-wrapper'])[1]    20
-  #sleep  1
   Click Element    xpath=(//*[@class='title-wrapper'])[1]/a
   Sleep  1
   Wait Until Page Contains    ${ARGUMENTS[1]}   60
   Click Element  xpath=//span[@class='expand']
   Wait Until Element Is Visible  ${locator.items[0].classification.id}  10
-  #Sleep  1
   Capture Page Screenshot
 
 Завантажити документ
@@ -289,8 +269,6 @@ Load And Wait Text
   Input text                  xpath=(//input[contains(@id, '_op_value_amount')])[1]  ${bid}
   Click Element               xpath=//form[@id='tender-bid-form']//input[@type='submit']
   Sleep  1
-  #ubiz.Оновити сторінку з тендером  ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  #Wait Until Page Contains    Пропозиція успішно додана.  10
 
 Змінити цінову пропозицію
   [Arguments]  ${username}  ${tender_uaid}  ${amount_locator}  ${new_sum}
@@ -302,7 +280,6 @@ Load And Wait Text
   Input text                  xpath=(//input[contains(@id, '_op_value_amount')])[1]  ${new_sum}
   Click Element               xpath=//form[@id='tender-bid-form']//input[@type='submit']
   Sleep  1
-  #ubiz.Оновити сторінку з тендером  ${provider}  ${tender_uaid}
 
 Завантажити документ в ставку
   [Arguments]  ${provider}  ${filepath}  ${tender_uaid}
@@ -317,7 +294,6 @@ Load And Wait Text
   Sleep  1
   Click Element               xpath=//form[@id='tender-bid-form']//input[@type='submit']
   Sleep  1
-  #ubiz.Оновити сторінку з тендером  ${provider}  ${tender_uaid}
 
 Змінити документ в ставці
   [Arguments]  ${username}  ${filepath}  ${bidid}  ${docid}
@@ -331,7 +307,6 @@ Load And Wait Text
   Sleep  1
   Click Element               xpath=//form[@id='tender-bid-form']//input[@type='submit']
   Sleep  1
-  #ubiz.Оновити сторінку з тендером  ${provider}  ${tender_name}
 
 скасувати цінову пропозицію
   [Arguments]  ${username}  ${tender_uaid}  ${bid_response}
@@ -348,9 +323,7 @@ Load And Wait Text
   ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
   Go To  ${BROKERS['ubiz'].syncpage}
-#  Log To Console  'refresh'
   ubiz.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  #Reload Page
 
 Задати питання
   [Arguments]  ${username}  ${tender_uaid}  ${question}
@@ -360,17 +333,12 @@ Load And Wait Text
 
   Selenium2Library.Switch Browser    ${username}
   ubiz.Пошук тендера по ідентифікатору   ${username}  ${tender_uaid}
-  #Wait date  ${USERS.users['${tender_owner}'].initial_data.data.enquiryPeriod.startDate}
   Switch To Questions
   Input text                         id=TenderQuestionForm_op_title               ${title}
   Input text                         id=TenderQuestionForm_op_description           ${description}
   Sleep  2
   Click Element                      xpath=//*[@type='submit']
   Sleep  1
-  #Click Element                      xpath=//*[@type='submit']
-  #Sleep  1
-  #Click Element                       xpath=//input[@value='Задати питання']
-  #Sleep  1
   Wait Until Page Contains            Питання успішно додане.  10
 
 Відповісти на питання
@@ -384,7 +352,6 @@ Load And Wait Text
   ${answer}=     Get From Dictionary  ${ARGUMENTS[3].data}  answer
 
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-  #ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   Switch To Questions
   Input text                         id=TenderQuestionAnswerForm_op_answer               ${answer}
   Click Element                      xpath=//*[@type='submit']
@@ -400,7 +367,6 @@ Load And Wait Text
   ...      ${ARGUMENTS[2]} =  field_locator (description)
   ...      ${ARGUMENTS[3]} =  text
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-  #ubiz.Пошук тендера по ідентифікатору  ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
   Wait Until Page Contains  Інформація про аукціон  20
   Click Element  xpath=//a[text()='Редагувати']
   Sleep  1
@@ -460,10 +426,7 @@ Load And Wait Text
 
 Отримати текст із поля і показати на сторінці
   [Arguments]   ${fieldname}
-  #sleep  3
-#  відмітити на сторінці поле з тендера   ${fieldname}   ${locator.${fieldname}}
   Wait Until Page Contains Element    ${locator.${fieldname}}    22
-  #Sleep  1
   ${return_value}=   Get Text  ${locator.${fieldname}}
   [return]  ${return_value}
 
@@ -489,11 +452,9 @@ Load And Wait Text
   [return]  ${return_value}
 
 Отримати інформацію про value.currency
-  [return]  UAH
-#  ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
-#  ${return_value}=   Evaluate   "".join("${return_value}".split(' ')[:-3])
-#  ${return_value}=   Convert To Number   ${return_value}
-#  [return]  ${return_value}
+  ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
+  ${return_value}=   Split String  ${return_value}
+  [return]  ${return_value[1]}
 
 Отримати інформацію про value.valueAddedTaxIncluded
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
@@ -576,7 +537,6 @@ Load And Wait Text
 
   ${return_value}=   Отримати текст із поля і показати на сторінці  items[0].classification.scheme
   ${return_value}=   Get Substring  ${return_value}  start=18  end=21
-#  ${return_value}=   Split String From Right  ${return_value}  max_split=1
   [return]  ${return_value}
 
 Отримати інформацію про items[0].classification.id
