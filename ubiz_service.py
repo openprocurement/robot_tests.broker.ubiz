@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -
 from iso8601 import parse_date
-from datetime import datetime
 from robot.libraries.BuiltIn import BuiltIn
-from robot.output import librarylogger
+from datetime import datetime
 
 def get_library():
     return BuiltIn().get_library_instance('Selenium2Library')
@@ -60,7 +59,7 @@ def join(l, separator):
 def get_invisible_text(locator):
     element = get_library()._element_find(locator, False, True)
     return element.attribute('innerText')
-    
+
 
 def get_text_excluding_children(locator):
     element = get_library()._element_find(locator, False, True)

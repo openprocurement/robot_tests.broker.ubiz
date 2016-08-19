@@ -297,8 +297,7 @@ Load And Wait Text
 
 Змінити документ в ставці
   [Arguments]  ${username}  ${filepath}  ${bidid}  ${docid}
-  ${tender_name}=  Get From Dictionary  ${USERS.users['${tender_owner}'].initial_data.data}  title
-  ubiz.Пошук тендера по ідентифікатору  ${provider}  ${tender_name}
+  ubiz.Пошук тендера по ідентифікатору  ${provider}  ${TENDER['TENDER_UAID']}
   Page Should Contain Element  xpath=//div[@class='actions-wrapper']//a[contains(@class, 'btn-info')]
   Click Element                xpath=//div[@class='actions-wrapper']//a[contains(@class, 'btn-info')]
   Sleep  1
@@ -355,9 +354,6 @@ Load And Wait Text
   Switch To Questions
   Input text                         id=TenderQuestionAnswerForm_op_answer               ${answer}
   Click Element                      xpath=//*[@type='submit']
-  Sleep  1
-  Wait Until Page Contains           Відповідь успішно додана.  10
-  Capture Page Screenshot
 
 Внести зміни в тендер
   [Arguments]  @{ARGUMENTS}
@@ -373,9 +369,6 @@ Load And Wait Text
   Wait Until Page Contains  Редагування аукціону  10
   Input text    id=TenderForm_op_description            ${ARGUMENTS[3]}
   Click Element   xpath=//*[@type='submit']
-  Sleep  1
-  Wait Until Page Contains   Дані аукціону успішно змінені.   10
-  Capture Page Screenshot
 
 додати предмети закупівлі
   [Arguments]  @{ARGUMENTS}
@@ -441,14 +434,15 @@ Load And Wait Text
 
 Отримати інформацію про minimalStep.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці   minimalStep.amount
-  ${return_value}=  Evaluate  ''.join('${return_value}'.split()[:-1])
-  ${return_value}=   Convert To Number   ${return_value}
+  ${return_value}=   Split String  ${return_value}  max_split=1
+  ${return_value}=   Convert To Number  ${return_value[0]}
   [return]  ${return_value}
+
 
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
-  ${return_value}=  Evaluate  ''.join('${return_value}'.split()[:-3])
-  ${return_value}=   Convert To Number   ${return_value}
+  ${return_value}=   Split String  ${return_value}  max_split=1
+  ${return_value}=   Convert To Number  ${return_value[0]}
   [return]  ${return_value}
 
 Отримати інформацію про value.currency
