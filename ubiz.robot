@@ -51,7 +51,6 @@ ${locator.documents[1].title}                                  css=.lot_doc_titl
 
 *** Keywords ***
 
-
 Підготувати дані для оголошення тендера
     [Arguments]  @{ARGUMENTS}
     ${period_interval}=  Get Broker Property By Username    ${ARGUMENTS[0]}   period_interval
@@ -63,7 +62,6 @@ ${locator.documents[1].title}                                  css=.lot_doc_titl
 
 Відображення основних даних тендера
    return  ${locator}
-
 
 Підготувати клієнт для користувача
   [Arguments]  ${username}
@@ -85,9 +83,6 @@ Login
   Click Element     css=.login-btn
   Wait Until Page Contains  Особистий кабінет   25
   Go To  ${USERS.users['${username}'].homepage}
-
-
-
 
 Створити тендер
   [Arguments]  @{ARGUMENTS}
@@ -148,8 +143,6 @@ Login
 #  Sleep  1
 #  Wait Until Page Contains Element   css=.btn btn-success btn-lg pull-right  20
 #  Sleep  10
-
-
   Wait Until Page Contains  Успішно додано  60
   Оновити сторінку
   Wait Until Element Is Enabled  id=btn_finished  10
@@ -172,7 +165,6 @@ Login
   ${lotID}=   Отримати інформацію про lotID
   Set Global Variable   ${LOT_ID}     ${lotID}
   Set Global Variable    ${GLOBAL_UAID}    ${tender_UAid}
-
   Log  ${Ids}
   [return]  ${Ids}
 
@@ -206,8 +198,6 @@ Set Multi Ids
   Click Element  css=.active-result
   Sleep  2
   Click Element   xpath=//input[@type='submit']
-
-
 
 Додати багато предметів
   [Arguments]  @{ARGUMENTS}
@@ -250,8 +240,6 @@ Set Multi Ids
   ${status}=   Run Keyword And Return Status   Should Not Be Equal   ${UBIZ_MODIFICATION_DATE}   ${last_mod_date}
   Run Keyword If   ${status}   ubiz.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
   Set Global Variable   ${UBIZ_MODIFICATION_DATE}   ${last_mod_date}
-
-
 
 Завантажити документ
   [Arguments]  @{ARGUMENTS}
@@ -300,15 +288,15 @@ Set Multi Ids
   Wait Until Page Contains Element          id=initial_costs   15
   Input text    id=initial_costs                  ${bid}
   Run keyword if   '${procedure}' == 'Право вимоги'   Додати фінкомпанію
-
-  Click Element                     id=but_to_step_2
-  sleep  5
-  Click Element                     id=but_to_step_3
-  sleep  5
-  Click Element                     id=but_to_step_4
-  sleep  5
-  Click Element                     id=but_save
-  sleep  10
+  Wait Until Element Is Visible   id=but_to_step_2   5
+  Click Element   id=but_to_step_2
+  Wait Until Element Is Visible   id=but_to_step_3   5
+  Click Element   id=but_to_step_3
+  Wait Until Element Is Visible   id=but_to_step_4   5
+  Click Element   id=but_to_step_4
+  Wait Until Element Is Visible   id=but_save   5
+  Click Element   id=but_save
+  Wait Until Page Contains   Заявка на участь в аукціоні збережена   10
   Перевірити та сховати повідомлення
 
 Відправлення заявки на участь
@@ -329,23 +317,23 @@ Set Multi Ids
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
   ${procedure}=   Отримати текст із поля і показати на сторінці   procedure
   Зайти в розділ купую
-  Click Element                     css=.bid-edit
-  Click Element                     id=but_to_step_2
-  sleep  5
-  Click Element                     id=but_to_step_3
-  sleep  5
-  Click Element                     id=but_to_step_4
-  sleep  5
+  Click Element   css=.bid-edit
+  Wait Until Element Is Visible   id=but_to_step_2   5
+  Click Element   id=but_to_step_2
+  Wait Until Element Is Visible   id=but_to_step_3   5
+  Click Element   id=but_to_step_3
+  Wait Until Element Is Visible   id=but_to_step_4   5
+  Click Element   id=but_to_step_4
+  Wait Until Element Is Visible   id=but_save   5
   ${resp}=   Run Keyword And Return Status   Element Should Be Visible   xpath=//a[contains(text(), 'Видалити')]
   Run Keyword If    "${resp}" == "True"   Видалити документ
   Run keyword if   '${procedure}' == 'Право вимоги'   Приєднати документ   id=fileInput21   ${ARGUMENTS[1]}
   Run keyword if   '${procedure}' == 'Майно банку'   Приєднати документ   id=fileInput1   ${ARGUMENTS[1]}
-  Sleep    10
+  Wait Until Page Contains   Видалити   15
   Click Element                    id=but_save
   Перевірити та сховати повідомлення
   Sleep    2
   Відправлення заявки на участь
-
 
 Приєднати документ
   [Arguments]  @{ARGUMENTS}
@@ -353,9 +341,6 @@ Set Multi Ids
   ...      ${ARGUMENTS[0]} ==  ${element}
   ...      ${ARGUMENTS[1]} ==  ${flepath}
   Choose File      ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
-  sleep  10
-
-
 
 Перевірити та сховати повідомлення
   ${resp}=   Run Keyword And Return Status   Element Should Be Visible   id=close_inform_window
@@ -395,8 +380,8 @@ Set Multi Ids
   Click Element   css=.application
 
 Клацнути перший елемент з випадаючого списку
-    Wait Until Element Is Visible   xpath=//button[contains(@class,'btn btn-primary dropdown-toggle')][1]
-    Click Element   xpath=//button[contains(@class,'btn btn-primary dropdown-toggle')][1]
+  Wait Until Element Is Visible   xpath=//button[contains(@class,'btn btn-primary dropdown-toggle')][1]
+  Click Element   xpath=//button[contains(@class,'btn btn-primary dropdown-toggle')][1]
 
 Зайти в розділ списку лотів
   Зайти в розділ заявок на торги
@@ -407,8 +392,6 @@ Set Multi Ids
 Зайти в розділ створення лоту
   Зайти в розділ списку лотів
   Click Element   css=.add-lot
-
-
 
 Отримати інформацію із пропозиції
   [Arguments]  @{ARGUMENTS}
@@ -442,10 +425,8 @@ Set Multi Ids
   Перевірити та сховати повідомлення
   Sleep    10
 
-
 Опублікувати ставку
   Зайти в розділ купую
-
 
 Оновити сторінку з тендером
   [Arguments]  @{ARGUMENTS}
@@ -475,7 +456,6 @@ Set Multi Ids
   Click Element                      xpath=//input[@type='submit']
   Wait Until Page Contains    Питання успішно додане    8
   Перевірити та сховати повідомлення
-
 
 Задати запитання на предмет
   [Arguments]  @{ARGUMENTS}
@@ -585,7 +565,6 @@ Set Multi Ids
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   Run Keyword And Return   Отримати інформацію про ${ARGUMENTS[2]}
 
-
 Отримати текст із поля і показати на сторінці
   [Arguments]   ${fieldname}
   sleep  3
@@ -599,19 +578,19 @@ Set Multi Ids
   ${status}=   convert_ubiz_string_to_common_string   ${return_value}
   [return]   ${status}
 Отримати інформацію про eligibilityCriteria
-    ${return_value}=   Отримати текст із поля і показати на сторінці   eligibilityCriteria
-    [return]   ${return_value}
+  ${return_value}=   Отримати текст із поля і показати на сторінці   eligibilityCriteria
+  [return]   ${return_value}
 Отримати інформацію про procedure
-    ${return_value}=   Отримати текст із поля і показати на сторінці   procedure
-    ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
-    [return]   ${return_value}
+  ${return_value}=   Отримати текст із поля і показати на сторінці   procedure
+  ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
+  [return]   ${return_value}
 
 Отримати інформацію про lotID
-    ${return_value}=   Отримати текст із поля і показати на сторінці   lotID
-    [return]   ${return_value}
+  ${return_value}=   Отримати текст із поля і показати на сторінці   lotID
+  [return]   ${return_value}
 Отримати інформацію про dgfID
-      ${return_value}=   Отримати текст із поля і показати на сторінці   dgfID
-      [return]  ${return_value}
+  ${return_value}=   Отримати текст із поля і показати на сторінці   dgfID
+  [return]  ${return_value}
 Отримати інформацію про title
   ${return_value}=   Отримати текст із поля і показати на сторінці   title
   [return]  ${return_value}
@@ -655,7 +634,6 @@ Set Multi Ids
   ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
   [return]  ${return_value}
 
-
 Отримати інформацію про value.valueAddedTaxIncluded
   ${return_value}=   Отримати текст із поля і показати на сторінці   value.valueAddedTaxIncluded
   ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
@@ -667,29 +645,26 @@ Set Multi Ids
   [return]  ${return_value}
 
 Отримати інформацію про auctionPeriod.startDate
-    Показати вкладку параметри аукціону
-    ${return_value}=   Отримати текст із поля і показати на сторінці    auctionPeriod.startDate
-    ${return_value}=   convert_date_for_compare_full   ${return_value}
-    [return]  ${return_value}
+  Показати вкладку параметри аукціону
+  ${return_value}=   Отримати текст із поля і показати на сторінці    auctionPeriod.startDate
+  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  [return]  ${return_value}
 
 Доступний елемент   ${locator}
   ${present}=  Run Keyword And Return Status    Element Should Be Visible   ${locator}
   [return]    ${present}
 
 Отримати інформацію про auctionPeriod.endDate
-    Показати вкладку параметри аукціону
-    ${return_value}=   Отримати текст із поля і показати на сторінці   auctionPeriod.endDate
-    ${return_value}=   convert_date_for_compare_full   ${return_value}
-    [return]  ${return_value}
-
+  Показати вкладку параметри аукціону
+  ${return_value}=   Отримати текст із поля і показати на сторінці   auctionPeriod.endDate
+  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  [return]  ${return_value}
 
 Отримати інформацію про tenderPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  tenderPeriod.startDate
   ${return_value}=   convert_date_for_compare_full   ${return_value}
   [return]  ${return_value}
-
-
 
 Отримати інформацію про tenderPeriod.endDate
   Показати вкладку параметри аукціону
@@ -699,17 +674,17 @@ Set Multi Ids
   [return]  ${return_value}
 
 Отримати інформацію про qualificationPeriod.startDate
-    Показати вкладку параметри аукціону
-    ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.startDate
-    ${return_value}=   convert_date_for_compare_full   ${return_value}
-    [return]  ${return_value}
+  Показати вкладку параметри аукціону
+  ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.startDate
+  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  [return]  ${return_value}
 
 Отримати інформацію про qualificationPeriod.endDate
-      Показати вкладку параметри аукціону
-      ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.endDate
-      ${return_value}=   convert_date_for_compare_full   ${return_value}
-      Показати вкладку параметри майна
-      [return]  ${return_value}
+  Показати вкладку параметри аукціону
+  ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.endDate
+  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  Показати вкладку параметри майна
+  [return]  ${return_value}
 
 Отримати інформацію про enquiryPeriod.startDate
   Fail  enquiryPeriod відсутній
@@ -795,9 +770,6 @@ Set Multi Ids
   ${lot_id}=    Отримати інформацію про lotID
   Зайти в розділ купую
 
-
-
-
 Підтвердити підписання контракту
   [Arguments]   @{ARGUMENTS}
   [Documentation]
@@ -809,17 +781,18 @@ Set Multi Ids
   ${drop_id}=  concat  ${lot_id}  _pending
   ${id}=     concat  ${lot_id}  _publish_contract
   Клацнути по випадаючому списку     ${drop_id}
+  Wait Until Page Contains   Публікація контракту   5
   Виконати дію    ${id}
-  Sleep    5
+  Wait Until Page Contains   Реєстрація контракту   10
   ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
   ${date}=   get_cur_date
   Input Text    id=OpContract_op_contract_number    123
   Input Text    id=datetimepicker5    ${date}
   Приєднати документ    id=fileInput2   ${file_path}
-  Sleep   65
+  Wait Until Page Contains   Видалити   15
   Click Element   xpath=//input[@class="btn btn-primary bnt-lg pull-right"]
-  Sleep    10
-  Сховати повідомлення
+  Wait Until Page Contains   Договір знаходиться в стані очікування публікації в ЦБД   15
+  Перевірити та сховати повідомлення
 
 Клацнути по випадаючому списку
    [Arguments]   ${id_val}
@@ -829,47 +802,46 @@ Set Multi Ids
   [Arguments]   ${id_val}
   Click Element   id=${id_val}
 
-
 Підтвердження дії в модальном вікні
-      Wait Until Element Is Visible   xpath=//button[contains(., "Підтвердити")]    10
-      Click Element   xpath=//button[contains(., "Підтвердити")]
+  Wait Until Element Is Visible   xpath=//button[contains(., "Підтвердити")]    10
+  Click Element   xpath=//button[contains(., "Підтвердити")]
 
 Підтвердити протокол
-      [Arguments]   ${lot_id}
-      ${drop_id}=  concat  ${lot_id}  _pending
-      ${id}=     concat  ${lot_id}  _confirm_protocol
-      Клацнути по випадаючому списку     ${drop_id}
-      Sleep    2
-      Виконати дію    ${id}
-      Wait Until Page Contains    Учасник по лоту   10
-      Click Element   css=.accepted
-      Підтвердження дії в модальном вікні
-      Sleep    5
+  [Arguments]   ${lot_id}
+  ${drop_id}=  concat  ${lot_id}  _pending
+  ${id}=     concat  ${lot_id}  _confirm_protocol
+  Клацнути по випадаючому списку     ${drop_id}
+  Wait Until Page Contains   Переглянути та підтвердити протокол  5
+  Виконати дію    ${id}
+  Wait Until Page Contains    Учасник по лоту   10
+  Click Element   css=.accepted
+  Підтвердження дії в модальном вікні
+  Wait Until Page Contains   Кваліфікація учасників   20
 
 Підтвердити оплату
-      [Arguments]   ${lot_id}
-      ${drop_id}=  concat  ${lot_id}  _pending
-      ${id}=     concat  ${lot_id}  _confirm_payment
-      Клацнути по випадаючому списку     ${drop_id}
-      Виконати дію    ${id}
-      Sleep    3
-      Підтвердження дії в модальном вікні
-      Sleep    10
-      Сховати повідомлення
+  [Arguments]   ${lot_id}
+  ${drop_id}=  concat  ${lot_id}  _pending
+  ${id}=     concat  ${lot_id}  _confirm_payment
+  Клацнути по випадаючому списку     ${drop_id}
+  Wait Until Page Contains    Підтвердити оплату   5
+  Виконати дію    ${id}
+  Wait Until Page Contains    Ви дійсно підтверджуєте оплату та кваліфікуете учасника?    10
+  Підтвердження дії в модальном вікні
+  Wait Until Page Contains   Учасник кваліфікований   10
+  Перевірити та сховати повідомлення
 
 Підтвердити постачальника
-      [Arguments]   @{ARGUMENTS}
-      [Documentation]
-      ...   ${ARGUMENTS[0]} == username
-      ...   ${ARGUMENTS[1]} == tender_uaid
-
-      ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-      ${lot_id}=    Отримати інформацію про lotID
-      Зайти в розділ кваліфікація
-      Sleep    5
-      Підтвердити протокол  ${lot_id}
-      Wait Until Page Contains   Кваліфікація учасників    15
-      Підтвердити оплату     ${lot_id}
+  [Arguments]   @{ARGUMENTS}
+  [Documentation]
+  ...   ${ARGUMENTS[0]} == username
+  ...   ${ARGUMENTS[1]} == tender_uaid
+  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
+  ${lot_id}=    Отримати інформацію про lotID
+  Зайти в розділ кваліфікація
+  Wait Until Page Contains   Кваліфікація учасників   10
+  Підтвердити протокол  ${lot_id}
+  Wait Until Page Contains   Кваліфікація учасників    10
+  Підтвердити оплату     ${lot_id}
 
 Завантажити ілюстрацію
   [Arguments]   @{ARGUMENTS}
@@ -927,14 +899,12 @@ Set Multi Ids
     ...   ${ARGUMENTS[1]} == tender_uaid
     ...   ${ARGUMENTS[2]} == question_id
     ...   ${ARGUMENTS[3]} == field_name
-
     ubiz.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}  ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
     Wait Until Element Is Visible   id=button_tab3
     Wait Until Keyword Succeeds   15 x   20 s    Дочекатися відображення запитання на сторінці   ${ARGUMENTS[2]}
     ${q_id}=   create_question_id  ${ARGUMENTS[3]}  ${ARGUMENTS[2]}
     ${question_value}=   Get Text   id=${q_id}
     [return]  ${question_value}
-
 
 Отримати інформацію про questions[0].title
   Показати вкладку запитання
@@ -970,16 +940,12 @@ Set Multi Ids
     Показати вкладку запитання
     Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].answer
 
-
-
-
 Отримати інформацію із документа
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field}
   Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${username}   ${tender_uaid}
   Показати вкладку параметри майна
   ${file_title}=   Get Text   xpath=//a[contains(text(),'${doc_id}')]
   [return]   ${file_title}
-
 
 Отримати документ
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
@@ -989,9 +955,3 @@ Set Multi Ids
   ${url}=    Get Element Attribute   xpath=//a[contains(text(),'${doc_id}')]@href
   ${filename}=   download_file_from_url  ${url}  ${OUTPUT_DIR}${/}${file_name}
   [return]   ${filename}
-
-Перейти на лот
-    ubiz.Пошук тендера по ідентифікатору   ${GLOBAL_USER_NAME}   ${GLOBAL_UAID}
-Чи на сторінці лота
-   ${block_param_auction}=  Run Keyword And Return Status    Element Should Be Visible   id=button_tab1
-   Run Keyword If    ${block_param_auction} == 'FAIL'   Перейти на лот
