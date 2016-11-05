@@ -2,6 +2,7 @@
 from iso8601 import parse_date
 from robot.libraries.BuiltIn import BuiltIn
 from datetime import datetime, timedelta
+from pytz import timezone
 import os
 import urllib
 
@@ -78,8 +79,9 @@ def convert_date_for_compare_full(datestr):
 
 def subtract_from_time(date_time, subtr_min, subtr_sec):
     sub = datetime.strptime(date_time, "%d.%m.%Y %H:%M")
-    sub = (sub - timedelta(minutes=int(subtr_min), seconds=int(subtr_sec))).isoformat()
-    return str(sub) + '.000000+03:00'
+    sub = (sub - timedelta(minutes=int(subtr_min),
+                           seconds=int(subtr_sec)))
+    return timezone('Europe/Kiev').localize(sub).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 
 
 def procuring_entity_name(tender_data):

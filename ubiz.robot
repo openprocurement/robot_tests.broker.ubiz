@@ -653,42 +653,38 @@ Set Multi Ids
 Отримати інформацію про auctionPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці    auctionPeriod.startDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0   0
   [return]  ${return_value}
-
-Доступний елемент   ${locator}
-  ${present}=  Run Keyword And Return Status    Element Should Be Visible   ${locator}
-  [return]    ${present}
 
 Отримати інформацію про auctionPeriod.endDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці   auctionPeriod.endDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]  ${return_value}
 
 Отримати інформацію про tenderPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  tenderPeriod.startDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]  ${return_value}
 
 Отримати інформацію про tenderPeriod.endDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  tenderPeriod.endDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   Показати вкладку параметри майна
   [return]  ${return_value}
 
 Отримати інформацію про qualificationPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.startDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]  ${return_value}
 
 Отримати інформацію про qualificationPeriod.endDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.endDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   Показати вкладку параметри майна
   [return]  ${return_value}
 
@@ -923,7 +919,7 @@ Set Multi Ids
 Отримати інформацію про questions[0].date
   Показати вкладку запитання
   ${return_value}=  Отримати текст із поля і показати на сторінці  questions[0].date
-  Run Keyword And Return  convert_date_for_compare_full  ${return_value}
+  Run Keyword And Return  subtract_from_time  ${return_value}  0  0
 
 Отримати інформацію про questions[0].answer
   Показати вкладку запитання
@@ -940,7 +936,7 @@ Set Multi Ids
 Отримати інформацію про questions[1].date
     Показати вкладку запитання
     ${return_value}=  Отримати текст із поля і показати на сторінці  questions[1].date
-    Run Keyword And Return  convert_date_for_compare_full  ${return_value}
+    Run Keyword And Return  subtract_from_time  ${return_value}  0  0
 
 Отримати інформацію про questions[1].answer
     Показати вкладку запитання
