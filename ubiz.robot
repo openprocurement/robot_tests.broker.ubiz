@@ -341,10 +341,12 @@ Set Multi Ids
   ...      ${ARGUMENTS[0]} ==  ${element}
   ...      ${ARGUMENTS[1]} ==  ${flepath}
   Choose File      ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
+  Sleep    10   Ждем зарузки документа
 
 Перевірити та сховати повідомлення
   ${resp}=   Run Keyword And Return Status   Element Should Be Visible   id=close_inform_window
   Run Keyword If    "${resp}" == "True"   Сховати повідомлення
+  Sleep    2    Ждем, закрытия модального окна
 
 Переглянути повідомлення
   Сlick Element   css=.hide-alert
@@ -360,11 +362,14 @@ Set Multi Ids
   Click Element               css=.bid-skas
 
 Зайти в розділ купую
+  Wait Until Element Is Visible   css=.my-cabinet   10
   Click Element               css=.my-cabinet
+  Wait Until Element Is Visible   css=.my-buy-menu   10
   Click Element               css=.my-buy-menu
 
 Зайти в розділ офіс замовника
-  Click Element  css=.my-cabinet
+  Wait Until Element Is Visible   css=.my-cabinet   10
+  Click Element               css=.my-cabinet
   Click Element   css=.customer-office
 
 Зайти в розділ кваліфікація
@@ -562,7 +567,8 @@ Set Multi Ids
   ...      ${ARGUMENTS[0]} ==  username
   ...      ${ARGUMENTS[1]} ==  tedner_uaid
   ...      ${ARGUMENTS[2]} ==  fieldname
-  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
+  ${resp}=   Run Keyword And Return Status   Element Should Be Visible   id=button_tab1
+  Run Keyword If    "${resp}" == "False"   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   Run Keyword And Return   Отримати інформацію про ${ARGUMENTS[2]}
 
 Отримати текст із поля і показати на сторінці
@@ -647,42 +653,38 @@ Set Multi Ids
 Отримати інформацію про auctionPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці    auctionPeriod.startDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0   0
   [return]  ${return_value}
-
-Доступний елемент   ${locator}
-  ${present}=  Run Keyword And Return Status    Element Should Be Visible   ${locator}
-  [return]    ${present}
 
 Отримати інформацію про auctionPeriod.endDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці   auctionPeriod.endDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]  ${return_value}
 
 Отримати інформацію про tenderPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  tenderPeriod.startDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]  ${return_value}
 
 Отримати інформацію про tenderPeriod.endDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  tenderPeriod.endDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   Показати вкладку параметри майна
   [return]  ${return_value}
 
 Отримати інформацію про qualificationPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.startDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]  ${return_value}
 
 Отримати інформацію про qualificationPeriod.endDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці  qualificationPeriod.endDate
-  ${return_value}=   convert_date_for_compare_full   ${return_value}
+  ${return_value}=   subtract_from_time   ${return_value}  0  0
   Показати вкладку параметри майна
   [return]  ${return_value}
 
@@ -917,7 +919,7 @@ Set Multi Ids
 Отримати інформацію про questions[0].date
   Показати вкладку запитання
   ${return_value}=  Отримати текст із поля і показати на сторінці  questions[0].date
-  Run Keyword And Return  convert_date_for_compare_full  ${return_value}
+  Run Keyword And Return  subtract_from_time  ${return_value}  0  0
 
 Отримати інформацію про questions[0].answer
   Показати вкладку запитання
@@ -934,7 +936,7 @@ Set Multi Ids
 Отримати інформацію про questions[1].date
     Показати вкладку запитання
     ${return_value}=  Отримати текст із поля і показати на сторінці  questions[1].date
-    Run Keyword And Return  convert_date_for_compare_full  ${return_value}
+    Run Keyword And Return  subtract_from_time  ${return_value}  0  0
 
 Отримати інформацію про questions[1].answer
     Показати вкладку запитання
