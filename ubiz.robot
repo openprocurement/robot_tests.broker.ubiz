@@ -782,7 +782,9 @@ Set Multi Ids
   Зайти в розділ контракти
   ${drop_id}=  concat  ${lot_id}  _pending
   ${id}=     concat  ${lot_id}  _publish_contract
-  Клацнути по випадаючому списку     ${drop_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Клацнути по випадаючому списку     ${drop_id}
   Wait Until Page Contains   Публікація контракту   5
   Виконати дію    ${id}
   Wait Until Page Contains   Реєстрація контракту   10
@@ -818,7 +820,6 @@ Set Multi Ids
   Wait Until Page Contains    Учасник по лоту   10
   Click Element   css=.accepted
   Підтвердження дії в модальном вікні
-  Wait Until Page Contains   Кваліфікація учасників   20
 
 Підтвердити оплату
   [Arguments]   ${lot_id}
@@ -829,7 +830,7 @@ Set Multi Ids
   Виконати дію    ${id}
   Wait Until Page Contains    Ви дійсно підтверджуєте оплату та кваліфікуете учасника?    10
   Підтвердження дії в модальном вікні
-  Wait Until Page Contains   Учасник кваліфікований   10
+  Sleep   10  Ждем ответа от сервера
   Перевірити та сховати повідомлення
 
 Підтвердити постачальника
@@ -840,8 +841,9 @@ Set Multi Ids
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   ${lot_id}=    Отримати інформацію про lotID
   Зайти в розділ кваліфікація
-  Wait Until Page Contains   Кваліфікація учасників   10
-  Підтвердити протокол  ${lot_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND    Підтвердити протокол  ${lot_id}
   Wait Until Page Contains   Кваліфікація учасників    10
   Підтвердити оплату     ${lot_id}
 
@@ -956,4 +958,4 @@ Set Multi Ids
   ${file_name}=   Get Text   xpath=//a[contains(text(),'${doc_id}')]
   ${url}=    Get Element Attribute   xpath=//a[contains(text(),'${doc_id}')]@href
   ${filename}=   download_file_from_url  ${url}  ${OUTPUT_DIR}${/}${file_name}
-  [return]   ${filename}
+  [return]   ${filename}z
