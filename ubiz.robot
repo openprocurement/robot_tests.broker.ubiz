@@ -958,4 +958,4 @@ Set Multi Ids
   ${file_name}=   Get Text   xpath=//a[contains(text(),'${doc_id}')]
   ${url}=    Get Element Attribute   xpath=//a[contains(text(),'${doc_id}')]@href
   ${filename}=   download_file_from_url  ${url}  ${OUTPUT_DIR}${/}${file_name}
-  [return]   ${filename}z
+  [return]   ${filename}
