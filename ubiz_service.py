@@ -28,8 +28,6 @@ def concat(val1,val2):
 def create_question_id(field,prefix):
     return 'q_'+field+ '_' + prefix
 
-def get_download_file_path():
-    return os.path.join(os.getcwd(), 'test_output')
 
 def convert_ubiz_string_to_common_string(string):
     return {
@@ -71,51 +69,15 @@ def convert_ubiz_string_to_common_string(string):
     u"Скасований": u"cancelled",
     }.get(string, string)
 
-def convert_date_for_compare(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M")
-
-def convert_date_for_compare_full(datestr):
-    return datetime.strptime(datestr, "%d.%m.%Y %H:%M").strftime("%Y-%m-%d %H:%M:%S.0+03:00")
-
 def subtract_from_time(date_time, subtr_min, subtr_sec):
     sub = datetime.strptime(date_time, "%d.%m.%Y %H:%M")
     sub = (sub - timedelta(minutes=int(subtr_min),
                            seconds=int(subtr_sec)))
     return timezone('Europe/Kiev').localize(sub).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 
-
 def procuring_entity_name(tender_data):
     tender_data.data.procuringEntity['name'] = u"ПАТ \"Прайм-Банк\""
     return tender_data
 
-
-def split_take_item(value, separator, index):
-    return value.split(separator)[int(index)]
-
-
-def split_take_slice(value, separator, _from=None, to=None):
-    l = value.split(separator)
-    if to:
-        l = l[:int(to)]
-    if _from:
-        l = l[int(_from):]
-    return l
-
-
 def join(l, separator):
     return separator.join(l)
-
-
-def get_invisible_text(locator):
-    element = get_library()._element_find(locator, False, True)
-    return element.attribute('innerText')
-
-
-def get_text_excluding_children(locator):
-    element = get_library()._element_find(locator, False, True)
-    text = get_webdriver_instance().execute_script("""
-    return jQuery(arguments[0]).contents().filter(function() {
-        return this.nodeType == Node.TEXT_NODE;
-    }).text();
-    """, element)
-    return text.strip()
