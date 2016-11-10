@@ -67,6 +67,8 @@ def convert_ubiz_string_to_common_string(string):
     u"Період кваліфікації": u"active.qualification",
     u"Завершений": u"complete",
     u"Скасований": u"cancelled",
+    u"Аукціон скасовано" : u"active",
+    u"Не відбувся" : u"unsuccessful"
     }.get(string, string)
 
 def subtract_from_time(date_time, subtr_min, subtr_sec):

@@ -6,6 +6,7 @@ Library  ubiz_service.py
 
 
 *** Variables ***
+
 ${doc_index}                                                    0
 ${locator.auctionID}                                           id=auid
 ${locator.title}                                               id=op_name
@@ -48,6 +49,10 @@ ${locator.questions[1].description}                            css=.q_descriptio
 ${locator.questions[1].date}                                   css=.q_date_1
 ${locator.questions[1].answer}                                 css=.q_answer_1
 ${locator.documents[1].title}                                  css=.lot_doc_title_1
+${locator.cancellations[0].status}                             css=.cancellation_status_0
+${locator.cancellations[0].reason}                             css=.cancellation_reason_0
+${locator.cancellations[0].documents[0].title}                 css=.cancelletion_doc_title_0
+${locator.cancellations[0].documents[0].description}           css=.cancelletion_doc_description_0
 
 *** Keywords ***
 
@@ -66,7 +71,8 @@ ${locator.documents[1].title}                                  css=.lot_doc_titl
 Підготувати клієнт для користувача
   [Arguments]  ${username}
   [Documentation]  Відкрити браузер, створити об’єкт api wrapper, тощо
-  Set Global Variable   ${UBIZ_MODIFICATION_DATE}   ${EMPTY}
+  Set Global Variable   ${UBIZ_LOT_ID}   ${EMPTY}
+  Set Global Variable    ${UBIZ_MODIFICATION_DATE}   ${EMPTY}
   Set Global Variable    ${GLOBAL_USER_NAME}    ${username}
   Open Browser  ${BROKERS['${broker}'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
   Set Window Size  @{USERS.users['${username}'].size}
@@ -126,44 +132,34 @@ Login
    Input text     id=OpLotForm_op_dgfID     ${dgfID}
    Input text     id=title                  ${title}
    Input text     id=desc            ${description}
-   Click Element  xpath=//a[contains(@id, 'to_params')]
-   Sleep    5
+   Click Element  id=to_params
+   Wait Until Element Is Visible   id=submit_button   7
    Select From List By Value   xpath=//select[contains(@id, 'procurement_method_type')]  ${procuremnt_type}
    Input text     id=initial_costs_id     ${budget}
    Click Element  id=value_added_tax_included
    Input text     id=step_id            ${step_rate}
    Input text     id=garvnesok_id        ${guarantee}
    Input text     id=datetimepicker5    ${auction_start_date}
-   Sleep    1
-   Click Element                     xpath=//a[contains(@id, 'submit_button')]
-
+   Click Element   id=submit_button
 
   Додати предмет   ${items[0]}   0
-# Run Keyword if   '${mode}' == 'multi'   Додати багато предметів   items
-#  Sleep  1
-#  Wait Until Page Contains Element   css=.btn btn-success btn-lg pull-right  20
-#  Sleep  10
-  Wait Until Page Contains  Успішно додано  60
-  Оновити сторінку
-  Wait Until Element Is Enabled  id=btn_finished  10
+
+  Wait Until Page Contains  Успішно додано  15
+  Перевірити та сховати повідомлення
+  Wait Until Element Is Enabled   id=btn_finished  10
   Click Element  id=btn_finished
-
-  Wait Until Page Contains  Заявка на торги  25
+  Wait Until Page Contains  Заявка на торги  20
   Клацнути перший елемент з випадаючого списку
-  Sleep   1
+  Wait Until Page Contains   Виконати публікацію
   Click Element      css=.publish-lot
-  Wait Until Page Contains  Запис знаходиться в стані очікування публікації в ЦБД  15
-  Reload page
-
-  Sleep  1
+  Wait Until Page Contains  Запис знаходиться в стані очікування публікації в ЦБД  20
+  Перевірити та сховати повідомлення
   ${tender_url}=    Get Element Attribute   css=.lot-url@href
   Go To  ${tender_url}
-  Sleep  1
   Wait Until Page Contains  Лот №   10
   ${tender_UAid}=  Get Text  id=auid
   ${Ids}=   Convert To String   ${tender_UAid}
   ${lotID}=   Отримати інформацію про lotID
-  Set Global Variable   ${LOT_ID}     ${lotID}
   Set Global Variable    ${GLOBAL_UAID}    ${tender_UAid}
   Log  ${Ids}
   [return]  ${Ids}
@@ -191,12 +187,9 @@ Set Multi Ids
   Input text  id=OpItem_op_quantity  ${quantity}
   Select From List By Value   xpath=//select[contains(@id, 'OpItem_op_unit_code')]  ${unit_code}
   Click Element  id=OpItem_op_classification_id_chosen
-  Sleep    2
   Input Text  xpath=//div[@class='chosen-search']/input[@type='text']   ${cav_id}
-  Sleep    3
   Wait Until Element Is Visible  css=.active-result  5
   Click Element  css=.active-result
-  Sleep  2
   Click Element   xpath=//input[@type='submit']
 
 Додати багато предметів
@@ -220,6 +213,10 @@ Set Multi Ids
 Шукати і знайти
     Клацнути і дочекатися  xpath=//a[contains(@class, 'btn btn-default btn-icon')]  xpath=(//*[@class='row itemlot'])  5
 
+Зберегти ід лоту майданчка
+    ${lotID}=  Отримати інформацію про lotID
+    Set Global Variable   ${UBIZ_LOT_ID}  ${lotID}
+
 Пошук тендера по ідентифікатору
     [Arguments]  @{ARGUMENTS}
     [Documentation]
@@ -234,6 +231,8 @@ Set Multi Ids
     Wait Until Page Contains Element    xpath=(//*[@class='row itemlot'])    10
     Click Element    xpath=(//div[@class='images-caption'])/a
     Wait Until Page Contains    ${ARGUMENTS[1]}   10
+    ${flag}=  Run Keyword And Return Status  Should Be Empty  ${UBIZ_LOT_ID}
+    Run Keyword If  ${flag}   Зберегти ід лоту майданчка
 
 Пошук тендера у разі наявності змін
   [Arguments]  ${last_mod_date}  ${username}  ${tender_uaid}
@@ -296,15 +295,15 @@ Set Multi Ids
   Click Element   id=but_to_step_4
   Wait Until Element Is Visible   id=but_save   5
   Click Element   id=but_save
-  Wait Until Page Contains   Заявка на участь в аукціоні збережена   10
+  Wait Until Page Contains   Заявки на участь у торгах   10
   Перевірити та сховати повідомлення
 
 Відправлення заявки на участь
   Зайти в розділ купую
-  Sleep    2    reason=None
+  Wait Until Element Is Visible   css=.bid-send   10
   Click Element   css=.bid-send
   Перевірити та сховати повідомлення
-  Sleep    2    reason=None
+  Wait Until Element Is Visible   css=.bid-proved   10
   Click Element     css=.bid-proved
 Видалити документ
    Click Element   xpath=//a[contains(text(), 'Видалити')]
@@ -346,20 +345,26 @@ Set Multi Ids
 Перевірити та сховати повідомлення
   ${resp}=   Run Keyword And Return Status   Element Should Be Visible   id=close_inform_window
   Run Keyword If    "${resp}" == "True"   Сховати повідомлення
-  Sleep    2    Ждем, закрытия модального окна
 
 Переглянути повідомлення
   Сlick Element   css=.hide-alert
 Сховати повідомлення
   Click Element   id=close_inform_window
+  Sleep    2    Ждем, закрытия модального окна
 
-скасувати цінову пропозицію
+Скасувати цінову пропозицію
   [Arguments]  @{ARGUMENTS}
   [Documentation]
   ...      ${ARGUMENTS[0]} ==  username
   ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
+  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   Зайти в розділ купую
-  Click Element               css=.bid-skas
+  ${visible}=   Run Keyword And Return Status   Element Should Be Visible  css=.bid-send
+  Run Keyword If    "${visible}" == "True"   Відправлення заявки на участь
+  Wait Until Element Is Visible   css=.bid-skas   10
+  Click Element   css=.bid-skas
+  Wait Until Page Contains   Пропозиція скасована   15
+  Перевірити та сховати повідомлення
 
 Зайти в розділ купую
   Wait Until Element Is Visible   css=.my-cabinet   10
@@ -948,8 +953,10 @@ Set Multi Ids
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}  ${field}
   Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${username}   ${tender_uaid}
   Показати вкладку параметри майна
-  ${file_title}=   Get Text   xpath=//a[contains(text(),'${doc_id}')]
-  [return]   ${file_title}
+  ${class}=  Catenate   SEPARATOR=   ${field}  ${doc_id}
+  Run Keyword And Return If  '${username}' == 'ubiz_Owner' and '${username}' == 'description'   Fail   Опис документа відсутній на юбіз
+  ${doc_info}=   Get Text   xpath=//*[contains(@class,'${class}')]
+  [return]   ${doc_info}
 
 Отримати документ
   [Arguments]  ${username}  ${tender_uaid}  ${doc_id}
@@ -959,3 +966,43 @@ Set Multi Ids
   ${url}=    Get Element Attribute   xpath=//a[contains(text(),'${doc_id}')]@href
   ${filename}=   download_file_from_url  ${url}  ${OUTPUT_DIR}${/}${file_name}
   [return]   ${filename}
+
+##################  cancellations  #############################################
+Скасувати закупівлю
+  [Arguments]  @{ARGUMENTS}
+  [Documentation]
+  ...   ${ARGUMENTS[0]} == username
+  ...   ${ARGUMENTS[1]} == tender_uaid
+  ...   ${ARGUMENTS[2]} == cancellation_reason
+  ...   ${ARGUMENTS[3]} == filepath
+  ...   ${ARGUMENTS[4]} == description
+  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
+  Зайти в розділ списку лотів
+  ${drop_id}=  Catenate   SEPARATOR=   lot_  ${UBIZ_LOT_ID}
+  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}  _cancel_lot
+  Клацнути по випадаючому списку  ${drop_id}
+  Wait Until Page Contains    Скасувати аукціон   3
+  Виконати дію    ${action_id}
+  Wait Until Element Is Visible   id=OpCancellation_op_reason   10
+  Input Text    id=OpCancellation_op_reason   ${ARGUMENTS[2]}
+  Приєднати документ   id=fileInput0   ${ARGUMENTS[3]}
+  Click Element  xpath=//input[@type="submit"]
+  Sleep   5   Ждем ответ от сервера
+  Перевірити та сховати повідомлення
+
+Отримати інформацію про cancellations[0].status
+  ${return_value}=   Отримати текст із поля і показати на сторінці   cancellations[0].status
+  ${return_value}=   convert_ubiz_string_to_common_string  ${return_value}
+  [return]  ${return_value}
+
+Отримати інформацію про cancellations[0].reason
+  ${return_value}=   Отримати текст із поля і показати на сторінці   cancellations[0].reason
+  [return]  ${return_value}
+
+Отримати інформацію про cancellations[0].documents[0].description
+  ${description}=   Отримати текст із поля і показати на сторінці   cancellations[0].documents[0].description
+  [return]  ${description}
+
+Отримати інформацію про cancellations[0].documents[0].title
+  ${title}=   Отримати текст із поля і показати на сторінці   cancellations[0].documents[0].title
+  [return]  ${title}
