@@ -787,7 +787,7 @@ Set Multi Ids
   [Arguments]   @{ARGUMENTS}
   Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
   ...   Reload Page
-  ...   AND   Element Should Be Visible   css=.auction-url@href
+  ...   AND   Element Should Be Visible   css=.auction-url
   Run Keyword And Return    Get Element Attribute   css=.auction-url@href
 
 Завантажити протокол аукціону
