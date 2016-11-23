@@ -81,7 +81,7 @@ def subtract_from_time(date_time, subtr_min, subtr_sec):
     return timezone('Europe/Kiev').localize(sub).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 
 def procuring_entity_name(tender_data):
-    tender_data.data.procuringEntity['name'] = u"ПАТ \"Прайм-Банк\""
+    tender_data.data.procuringEntity['name'] = u"ТестБанк"
     return tender_data
 
 def join(l, separator):
