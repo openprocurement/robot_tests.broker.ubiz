@@ -807,32 +807,6 @@ Set Multi Ids
   Wait Until Page Contains   Протокол успішно завантажений в с-му   10
   Перевірити та сховати повідомлення
 
-Підтвердити підписання контракту
-  [Arguments]   @{ARGUMENTS}
-  [Documentation]
-  ...   ${ARGUMENTS[0]} == username
-  ...   ${ARGUMENTS[1]} == tender_uaid
-  ubiz.Оновити сторінку з тендером  ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
-  ${lot_id}=    Отримати інформацію про lotID
-  Зайти в розділ контракти
-  ${drop_id}=  concat  ${lot_id}  _pending
-  ${id}=     concat  ${lot_id}  _publish_contract
-  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
-  ...   Reload Page
-  ...   AND   Клацнути по випадаючому списку     ${drop_id}
-  Wait Until Page Contains   Публікація контракту   5
-  Виконати дію    ${id}
-  Wait Until Page Contains   Реєстрація контракту   10
-  ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
-  ${date}=   get_cur_date
-  Input Text    id=OpContract_op_contract_number    123
-  Input Text    id=datetimepicker5    ${date}
-  Приєднати документ    id=fileInput2   ${file_path}
-  Wait Until Page Contains   Видалити   15
-  Click Element   xpath=//input[@class="btn btn-primary bnt-lg pull-right"]
-  Wait Until Page Contains   Договір знаходиться в стані очікування публікації в ЦБД   15
-  Перевірити та сховати повідомлення
-
 Клацнути по випадаючому списку
    [Arguments]   ${id_val}
    Click Element    id=${id_val}
@@ -847,8 +821,8 @@ Set Multi Ids
 
 Підтвердити протокол
   [Arguments]   ${lot_id}
-  ${drop_id}=  concat  ${lot_id}  _pending
-  ${id}=     concat  ${lot_id}  _confirm_protocol
+  ${drop_id}=   Catenate   SEPARATOR=   ${lot_id}  _pending
+  ${id}=     Catenate   SEPARATOR=    ${lot_id}  _confirm_protocol
   Клацнути по випадаючому списку     ${drop_id}
   Wait Until Page Contains   Переглянути та підтвердити протокол  5
   Виконати дію    ${id}
@@ -858,8 +832,8 @@ Set Multi Ids
 
 Підтвердити оплату
   [Arguments]   ${lot_id}
-  ${drop_id}=  concat  ${lot_id}  _pending
-  ${id}=     concat  ${lot_id}  _confirm_payment
+  ${drop_id}=   Catenate   SEPARATOR=   ${lot_id}  _pending
+  ${id}=     Catenate   SEPARATOR=    ${lot_id}  _confirm_payment
   Клацнути по випадаючому списку     ${drop_id}
   Wait Until Page Contains    Підтвердити оплату   5
   Виконати дію    ${id}
@@ -1036,28 +1010,100 @@ Set Multi Ids
     ${title}=   Отримати текст із поля і показати на сторінці   documents[0].title
     [return]  ${title}
 
-Перейти до перегляду учасника
-  [Arguments]  ${username}  ${tender_uaid}
-  ubiz.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Зайти в розділ кваліфікація
-  ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending
-  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}  _view_member
-  Клацнути по випадаючому списку  ${drop_id}
-  Wait Until Page Contains     Переглянути учасника   3
-  Виконати дію   ${action_id}
-  Wait Until Page Contains   Учасник по лоту   10
+
+Скасування рішення кваліфікаційної комісії
+    [Arguments]  @{ARGUMENTS}
+    [Documentation]
+    ...   ${ARGUMENTS[0]} == username
+    ...   ${ARGUMENTS[1]} == tender_uaid
+    Зайти в розділ кваліфікація
+    ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _active
+    ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _cancel_award
+    Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
+    ...   Reload Page
+    ...   AND   Клацнути по випадаючому списку  ${drop_id}
+    ...   AND   Element Should Be Visible   id=${action_id}
+    Виконати дію   ${action_id}
+    Sleep    5   Ждем отображение модального окна
+    Click Element   xpath=//input[@type="submit"]
+    Wait Until Page Contains    Рішення успішно скасоване   20
+    Перевірити та сховати повідомлення
 
 Отримати кількість документів в ставці
   [Arguments]  ${username}  ${tender_uaid}  ${bid_index}
-  Перейти до перегляду учасника   ${username}  ${tender_uaid}
-  ${bid_doc_number}=   Get Matching Xpath Count   //span[@class="document_title"]
+  ubiz.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+  Зайти в розділ кваліфікація
+  ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending
+  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _confirm_protocol
+  Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Клацнути по випадаючому списку  ${drop_id}
+  ...   AND   Element Should Be Visible   id=${action_id}
+  Виконати дію   ${action_id}
+  Wait Until Page Contains   Учасник по лоту   10
+  Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Page Contains   Підписаний протокол
+  ${bid_doc_number}=   Get Matching Xpath Count   xpath=//a[contains(@class, 'document_title')]
+  Log To Console    ${bid_doc_number}
   [return]  ${bid_doc_number}
 
 Отримати дані із документу пропозиції
   [Arguments]  ${username}  ${tender_uaid}  ${bid_index}  ${document_index}  ${field}
-  ${result}=   Run Keyword And Return Status   Element Should Be Visible   id=member_bylot_uaid
-  Run Keyword If   "${result}" == "False"   Перейти до перегляду учасника   ${username}  ${tender_uaid}
   ${fileid_index}=   Catenate   SEPARATOR=   ${field}   ${document_index}
-  ${doc_value}=   Get Text  ${fileid_index}
+  ${doc_value}=   Get Text   xpath=//span[contains(@class, '${fileid_index}')]
   ${doc_value}=   convert_ubiz_string_to_common_string   ${doc_value}
   [return]  ${doc_value}
+
+Завантажити документ рішення кваліфікаційної комісії
+  [ARGUMENTS]   ${username}   ${file_path}  ${tender_uaid}  ${award_index}
+  Зайти в розділ кваліфікація
+  ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending
+  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _disqualification
+  Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Клацнути по випадаючому списку  ${drop_id}
+  ...   AND   Element Should Be Visible   id=${action_id}
+  Виконати дію   ${action_id}
+  Sleep    5   Ждем отображение модального окна
+  Приєднати документ    id=fileInput0    ${file_path}
+
+Дискваліфікувати постачальника
+  [ARGUMENTS]   ${user_name}   ${tender_uaid}  ${award_index}  ${description}
+  Wait Until Page Contains    Дискваліфікація учасника    10
+  Input Text  id=OpAward_op_title   Дискваліфікація
+  Input Text  id=OpAward_op_description   ${description}
+  Click Element   xpath=//input[@type="submit"]
+  Wait Until Page Contains    Кандидат дискваліфікований. Зачекайте синхронізації   30
+  Перевірити та сховати повідомлення
+
+Завантажити угоду до тендера
+  [ARGUMENTS]   ${username}  ${tender_uaid}  ${index}  ${file_path}
+  Перейти на форму підписання контракту   ${username}  ${tender_uaid}
+  Приєднати документ    id=fileInput2   ${file_path}
+
+Перейти на форму підписання контракту
+    [Arguments]   ${username}   ${tender_uaid}
+    Зайти в розділ контракти
+    ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending
+    ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _publish_contract
+    Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
+    ...   Reload Page
+    ...   AND   Клацнути по випадаючому списку  ${drop_id}
+    ...   AND   Element Should Be Visible   id=${action_id}
+    Виконати дію   ${action_id}
+    Wait Until Page Contains   Реєстрація контракту   10
+
+Підтвердити підписання контракту
+    [Arguments]   ${user_name}   ${tender_uaid}   ${index}
+    ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
+    ${is_contract_view}=   Run Keyword And Return Status    Element Should Not Be Visible   id=datetimepicker5
+    Run Keyword If  ${is_contract_view}   Run Keywords
+    ...   Перейти на форму підписання контракту   ${user_name}   ${tender_uaid}
+    ...   AND  Приєднати документ    id=fileInput2   ${file_path}
+    ${date}=   get_cur_date
+    Input Text    id=OpContract_op_contract_number    111211111-21102121
+    Input Text    id=datetimepicker5    ${date}
+    Click Element   xpath=//input[@class="btn btn-primary bnt-lg pull-right"]
+    Wait Until Page Contains   Договір знаходиться в стані очікування публікації в ЦБД   15
+    Перевірити та сховати повідомлення
