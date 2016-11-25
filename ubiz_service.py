@@ -68,7 +68,10 @@ def convert_ubiz_string_to_common_string(string):
     u"Завершений": u"complete",
     u"Скасований": u"cancelled",
     u"Аукціон скасовано" : u"active",
-    u"Не відбувся" : u"unsuccessful"
+    u"Не відбувся" : u"unsuccessful",
+    u"Ліцензія" : u"financialLicense",
+    u"Підписаний протокол" : u"auctionProtocol",
+    u" - " : u""
     }.get(string, string)
 
 def subtract_from_time(date_time, subtr_min, subtr_sec):
@@ -78,7 +81,7 @@ def subtract_from_time(date_time, subtr_min, subtr_sec):
     return timezone('Europe/Kiev').localize(sub).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 
 def procuring_entity_name(tender_data):
-    tender_data.data.procuringEntity['name'] = u"ПАТ \"Прайм-Банк\""
+     tender_data.data.procuringEntity['name'] = u"ПАТ \"Прайм-Банк\""
     return tender_data
 
 def join(l, separator):
