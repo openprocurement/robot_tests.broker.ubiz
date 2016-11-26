@@ -82,7 +82,7 @@ def subtract_from_time(date_time, subtr_min, subtr_sec):
 
 def procuring_entity_name(tender_data):
      tender_data.data.procuringEntity['name'] = u"ПАТ \"Прайм-Банк\""
-    return tender_data
+     return tender_data
 
 def join(l, separator):
     return separator.join(l)
