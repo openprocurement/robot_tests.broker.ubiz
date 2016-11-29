@@ -83,12 +83,11 @@ Login
   [Arguments]  ${username}
   Wait Until Element Is Visible   id=btn_auth    10
   Click Element    id=btn_auth
-  Sleep    1
+  Wait Until Element Is Visible   id=inputEmail1   5
   Input text   id=inputEmail1         ${USERS.users['${username}'].login}
   Input text   id=inputPassword1      ${USERS.users['${username}'].password}
   Click Element     css=.login-btn
-  Wait Until Page Contains  Особистий кабінет   25
-  Go To  ${USERS.users['${username}'].homepage}
+  Wait Until Page Contains  Особистий кабінет   60
 
 Створити тендер
   [Arguments]  @{ARGUMENTS}
@@ -108,20 +107,9 @@ Login
   ${quantity}=         Get From Dictionary   ${items[0]}               quantity
   ${cav_id}=           Get From Dictionary   ${items[0].classification}         id
   ${unit_code}=        Get From Dictionary   ${items[0].unit}                 code
-  #${latitude}       Get From Dictionary   ${items[0].deliveryLocation}    latitude
-  #${longitude}      Get From Dictionary   ${items[0].deliveryLocation}    longitude
-  #${postalCode}    Get From Dictionary   ${items[0].deliveryAddress}     postalCode
   ${streetAddress}    Get From Dictionary   ${items[0].deliveryAddress}     streetAddress
   ${deliveryDate}   Get From Dictionary   ${items[0].deliveryDate}        endDate
   ${auction_start_date}=    Get From Dictionary   ${tender_data.data.auctionPeriod}   startDate
-   #${start_date}=   Get From Dictionary   ${tender_data.data.tenderPeriod}   startDate
-  #${start_date}=    convert_datetime_for_delivery   ${start_date}
-  #${end_date}=      Get From Dictionary   ${tender_data.data.tenderPeriod}   endDate
-  #${end_date}=      convert_datetime_for_delivery   ${end_date}
-  #${enquiry_start_date}=    Get From Dictionary   ${tender_data.data.enquiryPeriod}   startDate
-  # ${enquiry_start_date}=    convert_datetime_for_delivery   ${enquiry_start_date}
-  #${enquiry_end_date}=      Get From Dictionary   ${tender_data.data.enquiryPeriod}   endDate
-  # ${enquiry_end_date}=    convert_datetime_for_delivery   ${enquiry_start_date}
   ${auction_start_date}=      convert_datetime_for_delivery   ${auction_start_date}
   ${budget} =    Convert To String   ${budget}
   ${step_rate}=  Convert To String   ${step_rate}
@@ -143,26 +131,24 @@ Login
    Click Element   id=submit_button
 
   Додати предмет   ${items[0]}   0
-
   Wait Until Page Contains  Успішно додано  15
   Перевірити та сховати повідомлення
   Wait Until Element Is Enabled   id=btn_finished  10
+  ${lotID}=   Get Text    id=lotID
+  Set Global Variable   ${UBIZ_LOT_ID}   ${lotID}
   Click Element  id=btn_finished
-  Wait Until Page Contains  Заявка на торги  20
-  Клацнути перший елемент з випадаючого списку
-  Wait Until Page Contains   Виконати публікацію
-  Click Element      css=.publish-lot
-  Wait Until Page Contains  Запис знаходиться в стані очікування публікації в ЦБД  20
+  Wait Until Page Contains  Заявка на торги  30
+  ${drop_id}=  Catenate   SEPARATOR=   lot_  ${UBIZ_LOT_ID}
+  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}  _publish_lot
+  Клацнути по випадаючому списку   ${drop_id}
+  Виконати дію   ${action_id}
+  Wait Until Page Contains   Запис знаходиться в стані очікування публікації в ЦБД   60
   Перевірити та сховати повідомлення
-  ${tender_url}=    Get Element Attribute   css=.lot-url@href
-  Go To  ${tender_url}
-  Wait Until Page Contains  Лот №   10
-  ${tender_UAid}=  Get Text  id=auid
-  ${Ids}=   Convert To String   ${tender_UAid}
-  ${lotID}=   Отримати інформацію про lotID
-  Set Global Variable    ${GLOBAL_UAID}    ${tender_UAid}
-  Log  ${Ids}
-  [return]  ${Ids}
+  Wait Until Element Is Visible   xpath=//a[contains(@href,'${UBIZ_LOT_ID}')]   15
+  Click Link   xpath=//a[contains(@href,'${UBIZ_LOT_ID}')]
+  Wait Until Page Contains   Ідентифікатор аукціону   30
+  ${ua_id}=   Get Text  id=auid
+  [return]   ${ua_id}
 
 Set Multi Ids
   [Arguments]  @{ARGUMENTS}
@@ -227,13 +213,11 @@ Set Multi Ids
     ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
     Selenium2Library.Switch browser   ${ARGUMENTS[0]}
     Wait Until Page Contains Element    id=searchBar    10
-    #Input Text    id=inputsearch    ${ARGUMENTS[1]}
     ${timeout_on_wait}=  Get Broker Property By Username  ${ARGUMENTS[0]}  timeout_on_wait
-    ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout_on_wait} s  0 s  Шукати і знайти   ${ARGUMENTS[1]}
+    ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds   3 x  ${timeout_on_wait} s  Шукати і знайти   ${ARGUMENTS[1]}
     Run Keyword Unless  ${passed}  Fatal Error  Тендер не знайдено за ${timeout_on_wait} секунд
-    Wait Until Page Contains Element    xpath=(//*[@class='row itemlot'])    10
     Click Element    xpath=(//div[@class='images-caption'])/a
-    Wait Until Page Contains    ${ARGUMENTS[1]}   10
+    Wait Until Page Contains    ${ARGUMENTS[1]}   30
     ${flag}=  Run Keyword And Return Status  Should Be Empty  ${UBIZ_LOT_ID}
     Run Keyword If  ${flag}   Зберегти ід лоту майданчка
 
@@ -481,12 +465,11 @@ Set Multi Ids
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   Wait Until Page Contains Element   id=create_question   10
   Click Element                      id=create_question
-  Sleep    5
+  Wait Until Element Is Visible   id=OpQuestion_op_title   15
   Input text                         id=OpQuestion_op_title                 ${title}
   Input text                         id=OpQuestion_op_description           ${description}
-  Sleep    1
   Click Element                      xpath=//input[@type='submit']
-  Wait Until Page Contains    Питання успішно додане    8
+  Wait Until Page Contains    Питання успішно додане    50
   Перевірити та сховати повідомлення
 
 Задати запитання на предмет
@@ -499,18 +482,16 @@ Set Multi Ids
   ${title}=        Get From Dictionary  ${ARGUMENTS[3].data}  title
   ${description}=  Get From Dictionary  ${ARGUMENTS[3].data}  description
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  Wait Until Page Contains Element   id=create_question   10
+  Wait Until Page Contains Element   id=create_question   15
   Click Element                      id=create_question
-  Sleep    5
+  Wait Until Element Is Visible   id=OpQuestion_op_title   15
   Select From List By Value   xpath=//select[@id='OpQuestion_op_question_of']   item
-  Sleep    2
   ${item_option}=   Get Text   //option[contains(text(), '${ARGUMENTS[2]}')]
   Select From List By Label   id=OpQuestion_op_related_item   ${item_option}
   Input text                         id=OpQuestion_op_title                 ${title}
   Input text                         id=OpQuestion_op_description           ${description}
-  Sleep    1
   Click Element                      xpath=//input[@type='submit']
-  Wait Until Page Contains    Питання успішно додане    8
+  Wait Until Page Contains    Питання успішно додане    40
   Перевірити та сховати повідомлення
 
 Відповісти на запитання
@@ -523,15 +504,15 @@ Set Multi Ids
   ${answer}=     Get From Dictionary  ${ARGUMENTS[2].data}  answer
   ${id}=   concat   q_add_answer_  ${ARGUMENTS[3]}
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  Sleep    4
+  Wait Until Page Contains   Ідентифікатор аукціону   15
   Показати вкладку запитання
   Wait Until Page Contains Element    id=${id}    5
-  Click Element                       id=${id}
-  Sleep    3
+  Click Element   id=${id}
   Wait Until Page Contains   Дати відповідь  5
-  Input text                         id=OpQuestion_op_answer           ${answer}
-  Click Element                      xpath=//input[@type='submit']
-  Wait Until page Contains   Відповідь успішно опублікована    10
+  Wait Until Element Is Visible   id=OpQuestion_op_answer   20
+  Input text   id=OpQuestion_op_answer   ${answer}
+  Click Element   xpath=//input[@type='submit']
+  Wait Until page Contains   Відповідь успішно опублікована    40
   Перевірити та сховати повідомлення
 
 Внести зміни в тендер
@@ -879,7 +860,6 @@ Set Multi Ids
     ...   ${ARGUMENTS[0]} == username
     ...   ${ARGUMENTS[1]} == tender_uaid
     ...   ${ARGUMENTS[2]} == link
-    #ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
     Зайти в розділ списку лотів
     ${drop_id}=  Catenate   SEPARATOR=   lot_  ${UBIZ_LOT_ID}
     ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}  _add_vdr
@@ -982,7 +962,6 @@ Set Multi Ids
   Виконати дію    ${action_id}
   Wait Until Element Is Visible   id=OpCancellation_reason_id   10
   Select From List By Label   id=OpCancellation_reason_id   ${ARGUMENTS[2]}
-  # Input Text    id=OpCancellation_op_reason   ${ARGUMENTS[2]}
   Приєднати документ   id=fileInput0   ${ARGUMENTS[3]}
   Click Element  xpath=//input[@type="submit"]
   Sleep   5   Ждем ответ от сервера
