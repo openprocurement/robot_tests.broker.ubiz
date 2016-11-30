@@ -168,7 +168,7 @@ Set Multi Ids
   ${cav_id}=        Get From Dictionary   ${ARGUMENTS[0].classification}              id
   ${unit_code}=     Get From Dictionary   ${ARGUMENTS[0].unit}    code
   ${quantity}=      Get From Dictionary   ${ARGUMENTS[0]}         quantity
-
+  Wait Until Page Contains Element   id=OpItem_op_description   20
   Input text  id=OpItem_op_description  ${description}
   Input text  id=OpItem_op_quantity  ${quantity}
   Select From List By Value   xpath=//select[contains(@id, 'OpItem_op_unit_code')]  ${unit_code}
@@ -279,6 +279,7 @@ Set Multi Ids
   Click Element   id=but_save
   Wait Until Page Contains   Заявки на участь у торгах   10
   Перевірити та сховати повідомлення
+  Run keyword if   '${procedure}' != 'Право вимоги'   Відправлення заявки на участь
 
 Відправлення заявки на участь
   Зайти в розділ купую
