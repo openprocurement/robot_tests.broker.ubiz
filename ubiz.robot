@@ -131,7 +131,7 @@ Login
    Click Element   id=submit_button
 
   Додати предмет   ${items[0]}   0
-  Wait Until Page Contains  Успішно додано  15
+  Wait Until Page Contains  Успішно додано  40
   Перевірити та сховати повідомлення
   Wait Until Element Is Enabled   id=btn_finished  10
   ${lotID}=   Get Text    id=lotID
@@ -214,8 +214,8 @@ Set Multi Ids
     Selenium2Library.Switch browser   ${ARGUMENTS[0]}
     Wait Until Page Contains Element    id=searchBar    10
     ${timeout_on_wait}=  Get Broker Property By Username  ${ARGUMENTS[0]}  timeout_on_wait
-    ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds   3 x  ${timeout_on_wait} s  Шукати і знайти   ${ARGUMENTS[1]}
-    Run Keyword Unless  ${passed}  Fatal Error  Тендер не знайдено за ${timeout_on_wait} секунд
+    ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти   ${ARGUMENTS[1]}
+    Run Keyword Unless  ${passed}  Fail  Тендер не знайдено за ${timeout_on_wait} секунд
     Click Element    xpath=(//div[@class='images-caption'])/a
     Wait Until Page Contains    ${ARGUMENTS[1]}   30
     ${flag}=  Run Keyword And Return Status  Should Be Empty  ${UBIZ_LOT_ID}
