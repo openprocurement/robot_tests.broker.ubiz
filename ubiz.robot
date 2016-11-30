@@ -131,7 +131,7 @@ Login
    Click Element   id=submit_button
 
   Додати предмет   ${items[0]}   0
-  Wait Until Page Contains  Успішно додано  15
+  Wait Until Page Contains  Успішно додано  40
   Перевірити та сховати повідомлення
   Wait Until Element Is Enabled   id=btn_finished  10
   ${lotID}=   Get Text    id=lotID
@@ -168,7 +168,7 @@ Set Multi Ids
   ${cav_id}=        Get From Dictionary   ${ARGUMENTS[0].classification}              id
   ${unit_code}=     Get From Dictionary   ${ARGUMENTS[0].unit}    code
   ${quantity}=      Get From Dictionary   ${ARGUMENTS[0]}         quantity
-
+  Wait Until Page Contains Element   id=OpItem_op_description   20
   Input text  id=OpItem_op_description  ${description}
   Input text  id=OpItem_op_quantity  ${quantity}
   Select From List By Value   xpath=//select[contains(@id, 'OpItem_op_unit_code')]  ${unit_code}
@@ -214,8 +214,8 @@ Set Multi Ids
     Selenium2Library.Switch browser   ${ARGUMENTS[0]}
     Wait Until Page Contains Element    id=searchBar    10
     ${timeout_on_wait}=  Get Broker Property By Username  ${ARGUMENTS[0]}  timeout_on_wait
-    ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds   3 x  ${timeout_on_wait} s  Шукати і знайти   ${ARGUMENTS[1]}
-    Run Keyword Unless  ${passed}  Fatal Error  Тендер не знайдено за ${timeout_on_wait} секунд
+    ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти   ${ARGUMENTS[1]}
+    Run Keyword Unless  ${passed}  Fail  Тендер не знайдено за ${timeout_on_wait} секунд
     Click Element    xpath=(//div[@class='images-caption'])/a
     Wait Until Page Contains    ${ARGUMENTS[1]}   30
     ${flag}=  Run Keyword And Return Status  Should Be Empty  ${UBIZ_LOT_ID}
@@ -279,6 +279,7 @@ Set Multi Ids
   Click Element   id=but_save
   Wait Until Page Contains   Заявки на участь у торгах   10
   Перевірити та сховати повідомлення
+  Run keyword if   '${procedure}' != 'Право вимоги'   Відправлення заявки на участь
 
 Відправлення заявки на участь
   Зайти в розділ купую
