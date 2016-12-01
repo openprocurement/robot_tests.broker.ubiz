@@ -867,10 +867,11 @@ Set Multi Ids
     Клацнути по випадаючому списку  ${drop_id}
     Wait Until Page Contains    Прикріпити посилання на вдр   3
     Виконати дію   ${action_id}
-    Wait Until Element Is Visible   id=OpLotForm_op_vdr_link   5
+    Wait Until Element Is Visible   id=OpLotForm_op_vdr_link   10
     Input Text   id=OpLotForm_op_vdr_link  ${ARGUMENTS[2]}
+    Sleep    2
     Click Element  xpath=//input[@type="submit"]
-    Wait Until Page Contains   Посилання успішно прикріплене   10
+    Wait Until Page Contains   Посилання успішно прикріплене   30
     Перевірити та сховати повідомлення
 
 Дочекатися відображення запитання на сторінці
