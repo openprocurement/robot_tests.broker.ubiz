@@ -9,7 +9,8 @@ import urllib
 
 def get_library():
     return BuiltIn().get_library_instance('Selenium2Library')
-
+def convert_date_to_dash_format(date):
+    return datetime.strptime(date,'%d.%m.%Y').strftime('%Y-%m-%d')
 
 def get_webdriver_instance():
     return get_library()._current_browser()
@@ -28,6 +29,12 @@ def concat(val1,val2):
 def create_question_id(field,prefix):
     return 'q_'+field+ '_' + prefix
 
+def adapt_items_data(field_name, value):
+    if field_name == 'quantity':
+        value = int(value)
+    elif field_name == "unit.code":
+        value = convert_ubiz_string_to_common_string(value)
+    return value
 
 def convert_ubiz_string_to_common_string(string):
     return {
@@ -71,7 +78,31 @@ def convert_ubiz_string_to_common_string(string):
     u"Не відбувся" : u"unsuccessful",
     u"Ліцензія" : u"financialLicense",
     u"Підписаний протокол" : u"auctionProtocol",
-    u" - " : u""
+    u" - " : u"",
+    u"Вперше": 1,
+    u"Вдруге": 2,
+    u"Втретє": 3,
+    u"Вчетверте": 4,
+    u"x_presentation": u"fileInput11",
+    u"x_nda": u"fileInput12",
+    u"tenderNotice": u"fileInput13",
+    u"technicalSpecifications": u"fileInput14",
+        u"Повідомлення про аукціон" : "notice",
+        u"Документи аукціону" : u"biddingDocuments",
+        u"Публічний паспорт активу" : u"technicalSpecifications",
+        u"Критерії оцінки" : u"evaluationCriteria",
+        u"Критерії прийнятності" : u"eligibilityCriteria",
+        u"Публічний паспорт торгів" : u"virtualDataRoom",
+        u"Ілюстрація" : u"illustration",
+        u" - " : u"",
+        u"Посилання на публічний паспорт активу" : u"x_dgfPublicAssetCertificate",
+        u"Презентація" : u"x_presentation",
+        u"Договір про нерозголошення(NDA)" : u"x_nda",
+        u"Паспорт торгів" : u"tenderNotice",
+        u"Юридична Інформація Майданчиків" : u"x_dgfPlatformLegalDetails",
+        u'Порядку ознайомлення з активом у кімнаті даних' : u'x_dgfAssetFamiliarization',
+        u"Порядку ознайомлення з майном" : u'x_dgfAssetFamiliarization'
+
     }.get(string, string)
 
 def subtract_from_time(date_time, subtr_min, subtr_sec):
