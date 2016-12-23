@@ -9,6 +9,7 @@ import urllib
 
 def get_library():
     return BuiltIn().get_library_instance('Selenium2Library')
+
 def convert_date_to_dash_format(date):
     return datetime.strptime(date,'%d.%m.%Y').strftime('%Y-%m-%d')
 
@@ -23,6 +24,7 @@ def convert_datetime_for_delivery(isodate):
     iso_dt = parse_date(isodate)
     date_string = iso_dt.strftime("%Y-%m-%d %H:%M")
     return date_string
+
 def concat(val1,val2):
     return val1+val2
 
@@ -57,52 +59,51 @@ def convert_ubiz_string_to_common_string(string):
             u"блок" : u"D64",
             u"гектар" : u"HAR",
             u"кілограми" : u"KGM",
-    u"кілограми": u"кілограм",
-    u"кг.": u"кілограми",
-    u"кг": u"кілограми",
-    u"MTK":u"метри квадратні",
-    u"Право вимоги": u"dgfFinancialAssets",
-    u"Майно банку": u"dgfOtherAssets",
-    u"грн.": u"UAH",
-    u"грн": u"UAH",
-    u" з ПДВ": True,
-    u"послуга":"E48",
-    u"Картонки": u"Картонні коробки",
-    u"Період уточнень/пропозицій": u"active.tendering",
-    u"Період аукціону": u"active.auction",
-    u"Пропозиції розглянуто": u"active.awarded",
-    u"Період кваліфікації": u"active.qualification",
-    u"Завершений": u"complete",
-    u"Скасований": u"cancelled",
-    u"Аукціон скасовано" : u"active",
-    u"Не відбувся" : u"unsuccessful",
-    u"Ліцензія" : u"financialLicense",
-    u"Підписаний протокол" : u"auctionProtocol",
-    u" - " : u"",
-    u"Вперше": 1,
-    u"Вдруге": 2,
-    u"Втретє": 3,
-    u"Вчетверте": 4,
-    u"x_presentation": u"fileInput11",
-    u"x_nda": u"fileInput12",
-    u"tenderNotice": u"fileInput13",
-    u"technicalSpecifications": u"fileInput14",
-        u"Повідомлення про аукціон" : "notice",
-        u"Документи аукціону" : u"biddingDocuments",
-        u"Публічний паспорт активу" : u"technicalSpecifications",
-        u"Критерії оцінки" : u"evaluationCriteria",
-        u"Критерії прийнятності" : u"eligibilityCriteria",
-        u"Публічний паспорт торгів" : u"virtualDataRoom",
-        u"Ілюстрація" : u"illustration",
-        u" - " : u"",
-        u"Посилання на публічний паспорт активу" : u"x_dgfPublicAssetCertificate",
-        u"Презентація" : u"x_presentation",
-        u"Договір про нерозголошення(NDA)" : u"x_nda",
-        u"Паспорт торгів" : u"tenderNotice",
-        u"Юридична Інформація Майданчиків" : u"x_dgfPlatformLegalDetails",
-        u'Порядку ознайомлення з активом у кімнаті даних' : u'x_dgfAssetFamiliarization',
-        u"Порядку ознайомлення з майном" : u'x_dgfAssetFamiliarization'
-
+            u"кілограми": u"кілограм",
+            u"кг.": u"кілограми",
+            u"кг": u"кілограми",
+            u"MTK":u"метри квадратні",
+            u"Право вимоги": u"dgfFinancialAssets",
+            u"Майно банку": u"dgfOtherAssets",
+            u"грн.": u"UAH",
+            u"грн": u"UAH",
+            u" з ПДВ": True,
+            u"послуга":"E48",
+            u"Картонки": u"Картонні коробки",
+            u"Період уточнень/пропозицій": u"active.tendering",
+            u"Період аукціону": u"active.auction",
+            u"Пропозиції розглянуто": u"active.awarded",
+            u"Період кваліфікації": u"active.qualification",
+            u"Завершений": u"complete",
+            u"Скасований": u"cancelled",
+            u"Аукціон скасовано" : u"active",
+            u"Не відбувся" : u"unsuccessful",
+            u"Ліцензія" : u"financialLicense",
+            u"Підписаний протокол" : u"auctionProtocol",
+            u" - " : u"",
+            u"Вперше": 1,
+            u"Вдруге": 2,
+            u"Втретє": 3,
+            u"Вчетверте": 4,
+            u"x_presentation": u"fileInput11",
+            u"x_nda": u"fileInput12",
+            u"tenderNotice": u"fileInput13",
+            u"technicalSpecifications": u"fileInput14",
+            u"Повідомлення про аукціон" : "notice",
+            u"Документи аукціону" : u"biddingDocuments",
+            u"Публічний паспорт активу" : u"technicalSpecifications",
+            u"Критерії оцінки" : u"evaluationCriteria",
+            u"Критерії прийнятності" : u"eligibilityCriteria",
+            u"Публічний паспорт торгів" : u"virtualDataRoom",
+            u"Ілюстрація" : u"illustration",
+            u" - " : u"",
+            u"Посилання на публічний паспорт активу" : u"x_dgfPublicAssetCertificate",
+            u"Презентація" : u"x_presentation",
+            u"Договір про нерозголошення(NDA)" : u"x_nda",
+            u"Паспорт торгів" : u"tenderNotice",
+            u"Юридична Інформація Майданчиків" : u"x_dgfPlatformLegalDetails",
+            u'Порядку ознайомлення з активом у кімнаті даних' : u'x_dgfAssetFamiliarization',
+            u"Порядку ознайомлення з майном" : u'x_dgfAssetFamiliarization'
     }.get(string, string)
 
 def subtract_from_time(date_time, subtr_min, subtr_sec):

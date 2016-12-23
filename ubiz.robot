@@ -214,6 +214,7 @@ Set Multi Ids
   Click Element  id=to_params
   Wait Until Element Is Visible   id=submit_button
   Click Element   id=submit_button
+
 Видалити предмет закупівлі
   [Arguments]  ${username}  ${tender_uaid}  ${item_id}
   ${status}=    Run Keyword And Return Status   Перейти в розділ додавання активів
@@ -316,6 +317,7 @@ Set Multi Ids
 Змінити документ в ставці
    [Arguments]   ${username}   ${tender_uaid}    ${path}   ${docid}
     Fail    Після відправки заявки оператору майданчика  - змінити доки неможливо
+
 Подати цінову пропозицію
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -327,7 +329,7 @@ Set Multi Ids
   ${qualified}=   Get From Dictionary   ${ARGUMENTS[2].data}   qualified
   Run Keyword And Return If   ${qualified} == False   Fail    Учасник не кваліфікований
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  ${procedure}=   Отримати текст із поля і показати на сторінці   procedure
+  ${procedure}=   Отримати текст із поля і показати на сторінці   procurementMethodType
   Click Element   id=take_part_but_wid
   Wait Until Page Contains   Стати учасником:    15
   Wait Until Page Contains Element   id=initial_costs   15
@@ -416,10 +418,11 @@ Set Multi Ids
 Перевірити та сховати повідомлення
   Sleep    1
   ${resp}=   Run Keyword And Return Status   Element Should Be Visible   id=close_inform_window
-  Run Keyword If    ${resp} == True   Сховати повідомлення
+  Run Keyword If   ${resp} == ${True}   Сховати повідомлення
 
 Переглянути повідомлення
   Сlick Element   css=.hide-alert
+
 Сховати повідомлення
   Click Element   id=close_inform_window
   Sleep    2    Ждем закрытия модального окна
@@ -602,11 +605,10 @@ Set Multi Ids
   ${ADDITIONAL_DATA}=  prepare_test_tender_data  ${period_interval}  multi
   ${items}=         Get From Dictionary   ${tender_data.data}               items
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-  Run keyword if   '${TEST NAME}' == 'Можливість додати позицію закупівлі в тендер'   додати позицію
-  Run keyword if   '${TEST NAME}' != 'Можливість додати позицію закупівлі в тендер'   видалити позиції
+  Run keyword if   '${TEST NAME}' == 'Можливість додати позицію закупівлі в тендер'   Додати позицію
+  Run keyword if   '${TEST NAME}' != 'Можливість додати позицію закупівлі в тендер'   Видалити позиції
 
-
-додати позицію
+Додати позицію
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   Sleep  2
   Click Element                     xpath=//a[@class='btn btn-primary ng-scope']
@@ -618,7 +620,7 @@ Set Multi Ids
   Click Element   xpath=//div[@class='form-actions']/button[./text()='Зберегти зміни']
   Wait Until Page Contains    [ТЕСТУВАННЯ]   10
 
-видалити позиції
+Видалити позиції
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
   Click Element                     xpath=//a[@class='btn btn-primary ng-scope']
   Sleep  2
@@ -670,22 +672,20 @@ Set Multi Ids
 Отримати інформацію про eligibilityCriteria
   ${return_value}=   Отримати текст із поля і показати на сторінці   eligibilityCriteria
   [return]   ${return_value}
-Отримати інформацію про procedure
+
+Отримати інформацію про procurementMethodType
   ${return_value}=   Отримати текст із поля і показати на сторінці   procedure
   ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
   [return]   ${return_value}
 
-Отримати інформацію про procurementMethodType
-    ${return_value}=   Отримати текст із поля і показати на сторінці   procedure
-    ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
-    [return]   ${return_value}
-
 Отримати інформацію про lotID
   ${return_value}=   Отримати текст із поля і показати на сторінці   lotID
   [return]   ${return_value}
+
 Отримати інформацію про dgfID
   ${return_value}=   Отримати текст із поля і показати на сторінці   dgfID
   [return]  ${return_value}
+
 Отримати інформацію про title
   ${return_value}=   Отримати текст із поля і показати на сторінці   title
   [return]  ${return_value}
@@ -705,7 +705,6 @@ Set Multi Ids
   ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
   ${return_value}=   Convert To Number   ${return_value}
   [return]  ${return_value}
-
 
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
@@ -740,9 +739,10 @@ Set Multi Ids
   [return]  ${return_value}
 
 Отримати інформацію про tenderAttempts
-    Показати вкладку параметри аукціону
-    ${return_value}=   Отримати текст із поля і показати на сторінці   tenderAttempts
-    [return]   ${value}
+  Показати вкладку параметри аукціону
+  ${return_value}=   Отримати текст із поля і показати на сторінці   tenderAttempts
+  [return]   ${return_value}
+
 Отримати інформацію про auctionPeriod.startDate
   Показати вкладку параметри аукціону
   ${return_value}=   Отримати текст із поля і показати на сторінці    auctionPeriod.startDate
@@ -827,12 +827,11 @@ Set Multi Ids
   Click Link    xpath=//*[contains(@id, 'button_tab3')]
 
 Отримати інформацію із предмету
-    [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${field_name}
-
-    ${field_name_class}=  Catenate    SEPARATOR=   item_   ${field_name}
-    ${item_value}=  Get Text   xpath=//*[contains(@class,'${item_id}') and contains(@class,'${field_name_class}')]
-    ${item_value}=   adapt_items_data   ${field_name}   ${item_value}
-    [return]  ${item_value}
+  [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${field_name}
+  ${field_name_class}=  Catenate    SEPARATOR=   item_   ${field_name}
+  ${item_value}=  Get Text   xpath=//*[contains(@class,'${item_id}') and contains(@class,'${field_name_class}')]
+  ${item_value}=   adapt_items_data   ${field_name}   ${item_value}
+  [return]  ${item_value}
 
 Отримати посилання на аукціон для глядача
   [Arguments]  @{ARGUMENTS}
@@ -1020,21 +1019,21 @@ Set Multi Ids
   Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].answer
 
 Отримати інформацію про questions[1].title
-    Показати вкладку запитання
-    Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].title
+  Показати вкладку запитання
+  Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].title
 
 Отримати інформацію про questions[1].description
-    Показати вкладку запитання
-    Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].description
+  Показати вкладку запитання
+  Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].description
 
 Отримати інформацію про questions[1].date
-    Показати вкладку запитання
-    ${return_value}=  Отримати текст із поля і показати на сторінці  questions[1].date
-    Run Keyword And Return  subtract_from_time  ${return_value}  0  0
+  Показати вкладку запитання
+  ${return_value}=  Отримати текст із поля і показати на сторінці  questions[1].date
+  Run Keyword And Return  subtract_from_time  ${return_value}  0  0
 
 Отримати інформацію про questions[1].answer
-    Показати вкладку запитання
-    Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].answer
+  Показати вкладку запитання
+  Run Keyword And Return  Отримати текст із поля і показати на сторінці  questions[1].answer
 
 Отримати інформацію із документа по індексу
   [Arguments]  ${username}  ${tender_uaid}  ${document_index}  ${field}
@@ -1061,7 +1060,6 @@ Set Multi Ids
   ${filename}=   download_file_from_url  ${url}  ${OUTPUT_DIR}${/}${file_name}
   [return]   ${filename}
 
-##################  cancellations  #############################################
 Скасувати закупівлю
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -1102,28 +1100,27 @@ Set Multi Ids
   [return]  ${title}
 
 Отримати інформацію про documents[0].title
-    Показати вкладку параметри майна
-    ${title}=   Отримати текст із поля і показати на сторінці   documents[0].title
-    [return]  ${title}
-
+  Показати вкладку параметри майна
+  ${title}=   Отримати текст із поля і показати на сторінці   documents[0].title
+  [return]  ${title}
 
 Скасування рішення кваліфікаційної комісії
-    [Arguments]  @{ARGUMENTS}
-    [Documentation]
-    ...   ${ARGUMENTS[0]} == username
-    ...   ${ARGUMENTS[1]} == tender_uaid
-    Зайти в розділ кваліфікація
-    ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _active
-    ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _cancel_award
-    Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
-    ...   Reload Page
-    ...   AND   Клацнути по випадаючому списку  ${drop_id}
-    ...   AND   Element Should Be Visible   id=${action_id}
-    Виконати дію   ${action_id}
-    Sleep    5   Ждем отображение модального окна
-    Click Element   xpath=//input[@type="submit"]
-    Wait Until Page Contains    Рішення успішно скасоване   20
-    Перевірити та сховати повідомлення
+  [Arguments]  @{ARGUMENTS}
+  [Documentation]
+  ...   ${ARGUMENTS[0]} == username
+  ...   ${ARGUMENTS[1]} == tender_uaid
+  Зайти в розділ кваліфікація
+  ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _active
+  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _cancel_award
+  Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Клацнути по випадаючому списку  ${drop_id}
+  ...   AND   Element Should Be Visible   id=${action_id}
+  Виконати дію   ${action_id}
+  Sleep    5   Ждем отображение модального окна
+  Click Element   xpath=//input[@type="submit"]
+  Wait Until Page Contains    Рішення успішно скасоване   20
+  Перевірити та сховати повідомлення
 
 Отримати кількість документів в тендері
   [Arguments]  ${username}  ${tender_uaid}
@@ -1185,27 +1182,27 @@ Set Multi Ids
   Приєднати документ    id=fileInput2   ${file_path}
 
 Перейти на форму підписання контракту
-    [Arguments]   ${username}   ${tender_uaid}
-    Зайти в розділ контракти
-    ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending
-    ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _publish_contract
-    Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
-    ...   Reload Page
-    ...   AND   Клацнути по випадаючому списку  ${drop_id}
-    ...   AND   Element Should Be Visible   id=${action_id}
-    Виконати дію   ${action_id}
-    Wait Until Page Contains   Реєстрація контракту   10
+  [Arguments]   ${username}   ${tender_uaid}
+  Зайти в розділ контракти
+  ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending
+  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _publish_contract
+  Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Клацнути по випадаючому списку  ${drop_id}
+  ...   AND   Element Should Be Visible   id=${action_id}
+  Виконати дію   ${action_id}
+  Wait Until Page Contains   Реєстрація контракту   10
 
 Підтвердити підписання контракту
-    [Arguments]   ${user_name}   ${tender_uaid}   ${index}
-    ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
-    ${is_contract_view}=   Run Keyword And Return Status    Element Should Not Be Visible   id=datetimepicker5
-    Run Keyword If  ${is_contract_view}   Run Keywords
-    ...   Перейти на форму підписання контракту   ${user_name}   ${tender_uaid}
-    ...   AND  Приєднати документ    id=fileInput2   ${file_path}
-    ${date}=   get_cur_date
-    Input Text    id=OpContract_op_contract_number    111211111-21102121
-    Input Text    id=datetimepicker5    ${date}
-    Click Element   xpath=//input[@class="btn btn-primary bnt-lg pull-right"]
-    Wait Until Page Contains   Договір знаходиться в стані очікування публікації в ЦБД   15
-    Перевірити та сховати повідомлення
+  [Arguments]   ${user_name}   ${tender_uaid}   ${index}
+  ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
+  ${is_contract_view}=   Run Keyword And Return Status    Element Should Not Be Visible   id=datetimepicker5
+  Run Keyword If  ${is_contract_view}   Run Keywords
+  ...   Перейти на форму підписання контракту   ${user_name}   ${tender_uaid}
+  ...   AND  Приєднати документ    id=fileInput2   ${file_path}
+  ${date}=   get_cur_date
+  Input Text    id=OpContract_op_contract_number    111211111-21102121
+  Input Text    id=datetimepicker5    ${date}
+  Click Element   xpath=//input[@class="btn btn-primary bnt-lg pull-right"]
+  Wait Until Page Contains   Договір знаходиться в стані очікування публікації в ЦБД   15
+  Перевірити та сховати повідомлення
