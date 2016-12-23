@@ -13,7 +13,7 @@ ${locator.title}                                               id=op_name
 ${locator.status}                                              id=status
 ${locator.lotID}                                               id=lotID
 ${locator.dgfID}                                               id=dgfID
-${locator.procedure}                                           id=procedure
+${locator.procurementMethodType}                               id=procedure
 ${locator.eligibilityCriteria}                                 id=eligibilityCriteria
 ${locator.description}                                         id=op_description
 ${locator.minimalStep.amount}                                  id=min_step_value_amount
@@ -387,7 +387,7 @@ Set Multi Ids
   ...      ${ARGUMENTS[1]} ==  ${filepath}
   ...      ${ARGUMENTS[2]} ==  ${TENDER_UAID}
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
-  ${procedure}=   Отримати текст із поля і показати на сторінці   procedure
+  ${procedure}=   Отримати текст із поля і показати на сторінці   procurementMethodType
   Зайти в розділ купую
   Click Element   css=.bid-edit
   Wait Until Element Is Visible   id=but_to_step_2   5
@@ -674,7 +674,7 @@ Set Multi Ids
   [return]   ${return_value}
 
 Отримати інформацію про procurementMethodType
-  ${return_value}=   Отримати текст із поля і показати на сторінці   procedure
+  ${return_value}=   Отримати текст із поля і показати на сторінці   procurementMethodType
   ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
   [return]   ${return_value}
 
