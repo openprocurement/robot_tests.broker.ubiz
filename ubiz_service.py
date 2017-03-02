@@ -103,7 +103,13 @@ def convert_ubiz_string_to_common_string(string):
             u"Паспорт торгів" : u"tenderNotice",
             u"Юридична Інформація Майданчиків" : u"x_dgfPlatformLegalDetails",
             u'Порядку ознайомлення з активом у кімнаті даних' : u'x_dgfAssetFamiliarization',
-            u"Порядку ознайомлення з майном" : u'x_dgfAssetFamiliarization'
+            u"Порядку ознайомлення з майном" : u'x_dgfAssetFamiliarization',
+            u"Очікується кінець кваліфікації" : u"pending.waiting",
+            u"Очікується протокол" : u"pending.verification",
+            u"Очікується оплата" : u"pending.payment",
+            u"Кандидат забрав гарантійний внесок" : u"cancelled",
+            u"Аукціон неуспішний" : u"unsuccessful",
+            u"Оплачено, очікується підписання договору" : u"active"
     }.get(string, string)
 
 def subtract_from_time(date_time, subtr_min, subtr_sec):

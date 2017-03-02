@@ -1,5 +1,4 @@
 *** Settings ***
-#Library  Selenium2Screenshots
 Library  String
 Library  DateTime
 Library  ubiz_service.py
@@ -56,20 +55,14 @@ ${locator.cancellations[0].status}                             css=.cancellation
 ${locator.cancellations[0].reason}                             css=.cancellation_reason_0
 ${locator.cancellations[0].documents[0].title}                 css=.cancelletion_doc_title_0
 ${locator.cancellations[0].documents[0].description}           css=.cancelletion_doc_description_0
+${locator.awards[0].status}                                    css=.award_status_0
+${locator.awards[1].status}                                    css=.award_status_1
 
 *** Keywords ***
 
 Підготувати дані для оголошення тендера
-    [Arguments]  @{ARGUMENTS}
-    ${period_interval}=  Get Broker Property By Username    ${ARGUMENTS[0]}   period_interval
-    ${INITIAL_TENDER_DATA}=  prepare_test_tender_data   ${period_interval}   ${ARGUMENTS[1]}
-    [return]   ${INITIAL_TENDER_DATA}
-
-Оновити сторінку
-  Reload Page
-
-Відображення основних даних тендера
-   return  ${locator}
+  [Arguments]   @{ARGUMENTS}
+  [return]   ${ARGUMENTS[1]}
 
 Підготувати клієнт для користувача
   [Arguments]  ${username}
@@ -160,14 +153,6 @@ Login
    ${ua_id}=   Get Text  id=auid
    [return]   ${ua_id}
 
-Set Multi Ids
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  ${tender_UAid}
-  ${current_location}=      Get Location
-  ${id}=    Get Substring   ${current_location}   10
-  ${Ids}=   Create List     ${tender_UAid}   ${id}
-
 Додати предмет
   [Arguments]   ${item}   ${index}
   ${description_class}=   Get From Dictionary   ${item.classification}   description
@@ -251,7 +236,6 @@ Set Multi Ids
     ${lotID}=  Отримати інформацію про lotID
     Set Global Variable   ${UBIZ_LOT_ID}  ${lotID}
 
-
 Пошук тендера по ідентифікатору
     [Arguments]  @{ARGUMENTS}
     [Documentation]
@@ -311,12 +295,15 @@ Set Multi Ids
     Перевірити та сховати повідомлення
 
 Додати фінкомпанію
-    Input text    id=PersonForm_op_ua_fin                123456
-    Input text    id=PersonForm_op_ua_fin_legalname       test
+  [Arguments]   ${id}
+  Click Element  id=fin_label
+  Wait Until Element Is Visible   id=PersonForm_op_ua_fin
+  Input text    id=PersonForm_op_ua_fin   ${id}
+  Input text    id=PersonForm_op_ua_fin_legalname       test
 
 Змінити документ в ставці
-   [Arguments]   ${username}   ${tender_uaid}    ${path}   ${docid}
-    Fail    Після відправки заявки оператору майданчика  - змінити доки неможливо
+  [Arguments]   ${username}   ${tender_uaid}    ${path}   ${docid}
+  Fail    Після відправки заявки оператору майданчика  - змінити доки неможливо
 
 Подати цінову пропозицію
   [Arguments]  @{ARGUMENTS}
@@ -334,14 +321,16 @@ Set Multi Ids
   Wait Until Page Contains   Стати учасником:    15
   Wait Until Page Contains Element   id=initial_costs   15
   Input text    id=initial_costs   ${bid}
-  Run keyword if   '${procedure}' == 'Право вимоги'   Додати фінкомпанію
+  Run keyword if   '${procedure}' == 'Право вимоги'   Додати фінкомпанію   ${ARGUMENTS[2].data.tenderers[0].additionalIdentifiers[0].id}
   Wait Until Element Is Visible   id=but_to_step_2   5
   Click Element   id=but_to_step_2
   Wait Until Element Is Visible   id=but_to_step_3   5
   Click Element   id=but_to_step_3
   Wait Until Element Is Visible   id=but_to_step_4   5
   Click Element   id=but_to_step_4
-  Wait Until Element Is Visible   id=but_save   5
+  Wait Until Element Is Visible   id=reglament_label
+  Click Element   id=reglament_label
+  Wait Until Element Is Enabled   id=but_save   5
   Click Element   id=but_save
   Wait Until Page Contains   Заявки на участь у торгах   10
   Перевірити та сховати повідомлення
@@ -354,6 +343,7 @@ Set Multi Ids
   Перевірити та сховати повідомлення
   Wait Until Element Is Visible   css=.bid-proved   10
   Click Element     css=.bid-proved
+
 Видалити документ
    Click Element   xpath=//a[contains(text(), 'Видалити')]
 
@@ -419,9 +409,6 @@ Set Multi Ids
   Sleep    1
   ${resp}=   Run Keyword And Return Status   Element Should Be Visible   id=close_inform_window
   Run Keyword If   ${resp} == ${True}   Сховати повідомлення
-
-Переглянути повідомлення
-  Сlick Element   css=.hide-alert
 
 Сховати повідомлення
   Click Element   id=close_inform_window
@@ -510,9 +497,6 @@ Set Multi Ids
   Перевірити та сховати повідомлення
   Sleep    10
 
-Опублікувати ставку
-  Зайти в розділ купую
-
 Оновити сторінку з тендером
   [Arguments]  @{ARGUMENTS}
   [Documentation]
@@ -582,55 +566,6 @@ Set Multi Ids
   Click Element   xpath=//input[@type='submit']
   Wait Until page Contains   Відповідь успішно опублікована    40
   Перевірити та сховати повідомлення
-
-Внести зміни в тендер
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} =  username
-  ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
-  ${period_interval}=  Get Broker Property By Username  ${ARGUMENTS[0]}  period_interval
-  ${ADDITIONAL_DATA}=  prepare_test_tender_data  ${period_interval}  single
-  ${items}=         Get From Dictionary   ${tender_data.data}               items
-  ${description}=   Get From Dictionary   ${tender_data.data}               description
-  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-
-додати предмети закупівлі
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} =  username
-  ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
-  ...      ${ARGUMENTS[2]} =  3
-  ${period_interval}=  Get Broker Property By Username  ${ARGUMENTS[0]}  period_interval
-
-  ${ADDITIONAL_DATA}=  prepare_test_tender_data  ${period_interval}  multi
-  ${items}=         Get From Dictionary   ${tender_data.data}               items
-  Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
-  Run keyword if   '${TEST NAME}' == 'Можливість додати позицію закупівлі в тендер'   Додати позицію
-  Run keyword if   '${TEST NAME}' != 'Можливість додати позицію закупівлі в тендер'   Видалити позиції
-
-Додати позицію
-  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  Sleep  2
-  Click Element                     xpath=//a[@class='btn btn-primary ng-scope']
-  Sleep  2
-  : FOR    ${INDEX}    IN RANGE    1    ${ARGUMENTS[2]} +1
-  \   Click Element   xpath=.//*[@id='myform']/tender-form/div/button
-  \   Додати предмет   ${items[${INDEX}]}   ${INDEX}
-  Sleep  2
-  Click Element   xpath=//div[@class='form-actions']/button[./text()='Зберегти зміни']
-  Wait Until Page Contains    [ТЕСТУВАННЯ]   10
-
-Видалити позиції
-  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  Click Element                     xpath=//a[@class='btn btn-primary ng-scope']
-  Sleep  2
-  : FOR    ${INDEX}    IN RANGE    1    ${ARGUMENTS[2]} +1
-  \   Click Element   xpath=(//button[@class='btn btn-danger ng-scope'])[last()]
-  \   Sleep  1
-  Sleep  2
-  Wait Until Page Contains Element   xpath=//div[@class='form-actions']/button[./text()='Зберегти зміни']   10
-  Click Element   xpath=//div[@class='form-actions']/button[./text()='Зберегти зміни']
-  Wait Until Page Contains    [ТЕСТУВАННЯ]   10
 
 Відправити документи до цбд
   ${location}=    Get Location
@@ -711,13 +646,6 @@ Set Multi Ids
   ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
   ${return_value}=   Convert To Number   ${return_value}
   [return]  ${return_value}
-
-Відмітити на сторінці поле з тендера
-  [Arguments]   ${fieldname}  ${locator}
-  ${last_note_id}=  Add pointy note   ${locator}   Found ${fieldname}   width=200  position=bottom
-  Align elements horizontally    ${locator}   ${last_note_id}
-  sleep  1
-  Remove element   ${last_note_id}
 
 Отримати інформацію про auctionID
   ${return_value}=   Отримати текст із поля і показати на сторінці   auctionID
@@ -826,6 +754,9 @@ Set Multi Ids
 Показати вкладку запитання
   Click Link    xpath=//*[contains(@id, 'button_tab3')]
 
+Показати вкладку кваліфікація
+  Click Link    xpath=//*[contains(@id, 'button_tab5')]
+
 Отримати інформацію із предмету
   [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${field_name}
   ${field_name_class}=  Catenate    SEPARATOR=   item_   ${field_name}
@@ -861,7 +792,6 @@ Set Multi Ids
   ...   ${ARGUMENTS[1]} == tender_uaid
   ...   ${ARGUMENTS[2]} == filepath
   ...   ${ARGUMENTS[3]} == award_index
-  ubiz.Оновити сторінку з тендером  ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
   Зайти в розділ купую
   Wait Until Element Is Visible   css=.signed-protocol   10
   Click Element   css=.signed-protocol
@@ -882,43 +812,6 @@ Set Multi Ids
 Підтвердження дії в модальном вікні
   Wait Until Element Is Visible   xpath=//button[contains(., "Підтвердити")]    10
   Click Element   xpath=//button[contains(., "Підтвердити")]
-
-Підтвердити протокол
-  [Arguments]   ${lot_id}
-  ${drop_id}=   Catenate   SEPARATOR=   ${lot_id}  _pending
-  ${id}=     Catenate   SEPARATOR=    ${lot_id}  _confirm_protocol
-  Клацнути по випадаючому списку     ${drop_id}
-  Wait Until Page Contains   Переглянути та підтвердити протокол  5
-  Виконати дію    ${id}
-  Wait Until Page Contains    Учасник по лоту   10
-  Click Element   css=.accepted
-  Підтвердження дії в модальном вікні
-
-Підтвердити оплату
-  [Arguments]   ${lot_id}
-  ${drop_id}=   Catenate   SEPARATOR=   ${lot_id}  _pending
-  ${id}=     Catenate   SEPARATOR=    ${lot_id}  _confirm_payment
-  Клацнути по випадаючому списку     ${drop_id}
-  Wait Until Page Contains    Підтвердити оплату   5
-  Виконати дію    ${id}
-  Wait Until Page Contains    Ви дійсно підтверджуєте оплату та кваліфікуете учасника?    10
-  Підтвердження дії в модальном вікні
-  Sleep   10  Ждем ответа от сервера
-  Перевірити та сховати повідомлення
-
-Підтвердити постачальника
-  [Arguments]   @{ARGUMENTS}
-  [Documentation]
-  ...   ${ARGUMENTS[0]} == username
-  ...   ${ARGUMENTS[1]} == tender_uaid
-  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  ${lot_id}=    Отримати інформацію про lotID
-  Зайти в розділ кваліфікація
-  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
-  ...   Reload Page
-  ...   AND    Підтвердити протокол  ${lot_id}
-  Wait Until Page Contains   Кваліфікація учасників    10
-  Підтвердити оплату     ${lot_id}
 
 Завантажити ілюстрацію
   [Arguments]   @{ARGUMENTS}
@@ -945,6 +838,7 @@ Set Multi Ids
   Виконати дію   ${action_id}
   Wait Until Element Is Visible   id=OpLotForm_op_assets_link   10
   Input Text   id=OpLotForm_op_assets_link  ${certificate_url}
+  Sleep    2
   Click Element  xpath=//input[@type="submit"]
   Wait Until Page Contains   Посилання успішно прикріплене   30
   Перевірити та сховати повідомлення
@@ -958,6 +852,7 @@ Set Multi Ids
   Виконати дію   ${action_id}
   Wait Until Element Is Visible   id=OpLotForm_op_accessDetails   10
   Input Text   id=OpLotForm_op_accessDetails  ${accessDetails}
+  Sleep    2
   Click Element  xpath=//input[@type="submit"]
   Wait Until Page Contains   Документ успішно відправлений   30
   Перевірити та сховати повідомлення
@@ -976,9 +871,9 @@ Set Multi Ids
     Виконати дію   ${action_id}
     Wait Until Element Is Visible   id=OpLotForm_op_vdr_link   10
     Input Text   id=OpLotForm_op_vdr_link  ${ARGUMENTS[2]}
-    Sleep    2
+    Sleep    3
     Click Element  xpath=//input[@type="submit"]
-    Wait Until Page Contains   Посилання успішно прикріплене   30
+    Wait Until Page Contains   Посилання успішно прикріплене   45
     Перевірити та сховати повідомлення
 
 Дочекатися відображення запитання на сторінці
@@ -1082,6 +977,18 @@ Set Multi Ids
   Sleep   5   Ждем ответ от сервера
   Перевірити та сховати повідомлення
 
+Отримати інформацію про awards[0].status
+  Показати вкладку кваліфікація
+  ${return_value}=   Отримати текст із поля і показати на сторінці   awards[0].status
+  ${return_value}=   convert_ubiz_string_to_common_string  ${return_value}
+  [return]  ${return_value}
+
+Отримати інформацію про awards[1].status
+  Показати вкладку кваліфікація
+  ${return_value}=   Отримати текст із поля і показати на сторінці   awards[1].status
+  ${return_value}=   convert_ubiz_string_to_common_string  ${return_value}
+  [return]  ${return_value}
+
 Отримати інформацію про cancellations[0].status
   ${return_value}=   Отримати текст із поля і показати на сторінці   cancellations[0].status
   ${return_value}=   convert_ubiz_string_to_common_string  ${return_value}
@@ -1103,24 +1010,6 @@ Set Multi Ids
   Показати вкладку параметри майна
   ${title}=   Отримати текст із поля і показати на сторінці   documents[0].title
   [return]  ${title}
-
-Скасування рішення кваліфікаційної комісії
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...   ${ARGUMENTS[0]} == username
-  ...   ${ARGUMENTS[1]} == tender_uaid
-  Зайти в розділ кваліфікація
-  ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _active
-  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _cancel_award
-  Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
-  ...   Reload Page
-  ...   AND   Клацнути по випадаючому списку  ${drop_id}
-  ...   AND   Element Should Be Visible   id=${action_id}
-  Виконати дію   ${action_id}
-  Sleep    5   Ждем отображение модального окна
-  Click Element   xpath=//input[@type="submit"]
-  Wait Until Page Contains    Рішення успішно скасоване   20
-  Перевірити та сховати повідомлення
 
 Отримати кількість документів в тендері
   [Arguments]  ${username}  ${tender_uaid}
@@ -1169,9 +1058,20 @@ Set Multi Ids
 
 Дискваліфікувати постачальника
   [ARGUMENTS]   ${user_name}   ${tender_uaid}  ${award_index}  ${description}
-  Wait Until Page Contains    Дискваліфікація учасника    10
-  Input Text  id=OpAward_op_title   Дискваліфікація
-  Input Text  id=OpAward_op_description   ${description}
+  Зайти в розділ кваліфікація
+  ${verification}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending.verification
+  ${payment}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending.payment
+  ${active}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _active
+  Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Element Should Be Visible   xpath=//*[contains(@id, '${verification}') or contains(@id,'${payment}') or contains(@id,'${active}')]
+  ...   AND   Click Element   xpath=//*[contains(@id, '${verification}') or contains(@id,'${payment}') or contains(@id,'${active}')]
+  ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _disqualification
+  Wait Until Page Contains   Дискваліфікувати
+  Виконати дію   ${action_id}
+  Wait Until Element Is Visible   id=DisqualificationForm_op_title   10
+  Input Text  id=DisqualificationForm_op_title   Дискваліфікація
+  Input Text  id=DisqualificationForm_op_description   ${description}
   Click Element   xpath=//input[@type="submit"]
   Wait Until Page Contains    Кандидат дискваліфікований. Зачекайте синхронізації   30
   Перевірити та сховати повідомлення
@@ -1206,3 +1106,59 @@ Set Multi Ids
   Click Element   xpath=//input[@class="btn btn-primary bnt-lg pull-right"]
   Wait Until Page Contains   Договір знаходиться в стані очікування публікації в ЦБД   15
   Перевірити та сховати повідомлення
+
+Завантажити протокол аукціону в авард
+   [Arguments]   ${user_name}   ${tender_uaid}   ${auction_protocol_path}   ${award_index}
+   Зайти в розділ кваліфікація
+   ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending.verification
+   ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _uploadprotocol
+   Wait Until Keyword Succeeds   5 x   10 s   Run Keywords
+   ...   Reload Page
+   ...   AND   Клацнути по випадаючому списку  ${drop_id}
+   ...   AND   Element Should Be Visible   id=${action_id}
+   Виконати дію   ${action_id}
+   Wait Until Element Is Visible   id=fileInput1
+   Приєднати документ   id=fileInput1   ${auction_protocol_path}
+   Sleep    2
+   Click Element   xpath=//input[@type="submit"]
+   Wait Until Page Contains   Протокол успішно завантажений. Для переходу до іншого етапу - підтвердіть протокол   10
+   Перевірити та сховати повідомлення
+
+Підтвердити наявність протоколу аукціону
+   [Arguments]   ${user_name}   ${tender_uaid}   ${award_index}
+   Зайти в розділ кваліфікація
+   ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending.verification
+   ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _confirm_protocol
+   Клацнути по випадаючому списку     ${drop_id}
+   Виконати дію   ${action_id}
+   Wait Until Page Contains   Ви дійсно підтверджуєте протокол?   10
+   Підтвердження дії в модальном вікні
+   Перевірити та сховати повідомлення
+
+Підтвердити постачальника
+   [Arguments]   @{ARGUMENTS}
+   [Documentation]
+   ...   ${ARGUMENTS[0]} == username
+   ...   ${ARGUMENTS[1]} == tender_uaid
+   Зайти в розділ кваліфікація
+   ${drop_id}=  Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _pending.payment
+   ${action_id}=   Catenate   SEPARATOR=   ${UBIZ_LOT_ID}   _confirm_payment
+   Клацнути по випадаючому списку     ${drop_id}
+   Виконати дію   ${action_id}
+   Wait Until Page Contains   Ви дійно підтверджуєте оплату?   10
+   Підтвердження дії в модальном вікні
+   Wait Until Page Contains   Оплата підтверджена. Завантажте та активуйте контракт   10
+   Перевірити та сховати повідомлення
+
+Скасування рішення кваліфікаційної комісії
+   [Arguments]  @{ARGUMENTS}
+   [Documentation]
+   ...   ${ARGUMENTS[0]} == username
+   ...   ${ARGUMENTS[1]} == tender_uaid
+   Зайти в розділ купую
+   Wait Until Element Is Visible   css=.return-guarantee   15
+   Click Element   css=.return-guarantee
+   Wait Until Page Contains   Ви дійсно відмовляєтесь очікувати дискваліфікації першого кандидата та забираєте гарантійний внесок?   10
+   Підтвердження дії в модальном вікні
+   Wait Until Page Contains   Заявка знята з черги на кваліфікацію. Очікуйте повернення гарантійного внеску   15
+   Перевірити та сховати повідомлення
