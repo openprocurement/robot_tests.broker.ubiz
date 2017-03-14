@@ -93,7 +93,7 @@ Login
 
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
   Click Element                     xpath=//*[contains(@class, 'btn-add')]
-  Wait Until Page Contains          Основні параметри закупівлі
+  Wait Until Element Is Visible  id=submitBtn
   Input text    id=TenderForm_op_title                  ${title}
   Input text    id=TenderForm_op_description            ${description}
   ${budget}=    Convert To String    ${budget}
@@ -165,13 +165,13 @@ Set Multi Ids
   Click Element                      css=.item-shipping
   Wait Until Page Contains    Адреси доставки
   Click Element                      css=.showAddForm
-  Wait Until Page Contains    Додати адресу
+  Wait Until Element Is Visible  id=add_new_address
   Input text                         id=DeliveryAddress_city   ${locality}
   Input text                         id=DeliveryAddress_address   ${streetAddress}
   Input text                         id=DeliveryAddress_postalCode   ${postalCode}
   Execute Javascript  document.getElementById('DeliveryAddress_region_id').selectedIndex=1
   Click Element                      id=add_new_address
-
+  Wait Until Element Is Visible    css=.delivery-date-start
   ${deliveryEndDate}=      convert_datetime_for_delivery   ${deliveryEndDate}
   Input text    xpath=(//*[contains(@class,'delivery-date-start')])[1+${ARGUMENTS[1]}]        ${deliveryEndDate}
   Input text    xpath=(//*[contains(@class,'delivery-date-end')])[1+${ARGUMENTS[1]}]          ${deliveryEndDate}
@@ -214,7 +214,7 @@ Set Multi Ids
   ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds  ${timeout_on_wait} s  0 s  Шукати і знайти
   Run Keyword Unless  ${passed}  Fatal Error  Тендер не знайдено за ${timeout_on_wait} секунд
   Wait Until Page Contains Element    xpath=(//*[@class='tender-item-title'])[1]    20
-  Click Element    xpath=(//*[@class='tender-item-title'])[1] 
+  Click Element    xpath=(//*[@class='tender-item-title'])[1]
   Wait Until Page Contains    ${ARGUMENTS[1]}    60
   Capture Page Screenshot
 
@@ -357,7 +357,9 @@ Set Multi Ids
 
   Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  Wait Until Page Contains Element   id=addQuestion
+  Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Element Should Be Visible   id=addQuestion
   Click Element                      id=addQuestion
 
   Wait Until Page Contains Element   id=TenderQuestionForm_op_title
