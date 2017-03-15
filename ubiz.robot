@@ -477,13 +477,13 @@ Set Multi Ids
 
 Отримати інформацію про minimalStep.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці   minimalStep.amount
-  ${return_value}=   Evaluate   "".join("${return_value}".split(' '))
+  ${return_value}=   join   ${return_value}   ' '
   ${return_value}=   Convert To Number   ${return_value}
   [return]  ${return_value}
 
 Отримати інформацію про value.amount
   ${return_value}=   Отримати текст із поля і показати на сторінці  value.amount
-  ${return_value}=   Evaluate   "".join("${return_value}".split(' '))
+  ${return_value}=   join   ${return_value}   ' '
   ${return_value}=   Convert To Number   ${return_value}
   [return]  ${return_value}
 
@@ -605,7 +605,7 @@ Set Multi Ids
 
 Отримати інформацію про items[0].quantity
   ${return_value}=   Отримати текст із поля і показати на сторінці   items[0].quantity
-  ${return_value}=   Evaluate   "".join("${return_value}".split(' '))
+  ${return_value}=   join   ${return_value}   ' '
   ${return_value}=   Convert To Number   ${return_value}
   [return]  ${return_value}
 

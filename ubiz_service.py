@@ -79,3 +79,6 @@ def procuring_entity_name(tender_data):
      tender_data.data.procuringEntity['name'] = u"4k-soft"
      return tender_data
 
+def join(l, separator):
+     return separator.join(l)
+
