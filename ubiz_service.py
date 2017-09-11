@@ -65,6 +65,7 @@ def convert_ubiz_string_to_common_string(string):
             u"MTK":u"метри квадратні",
             u"Право вимоги": u"dgfFinancialAssets",
             u"Майно банку": u"dgfOtherAssets",
+            u"Голандський аукціон": u"dgfInsider",
             u"грн.": u"UAH",
             u"грн": u"UAH",
             u" з ПДВ": True,
