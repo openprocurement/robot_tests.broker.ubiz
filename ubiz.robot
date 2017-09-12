@@ -295,33 +295,45 @@ Login
     Перевірити та сховати повідомлення
 
 Додати фінкомпанію
-  [Arguments]   ${id}
+  [Arguments]   ${tenderers}
   Click Element  id=fin_label
-  Wait Until Element Is Visible   id=PersonForm_op_ua_fin
-  Input text    id=PersonForm_op_ua_fin   ${id}
-  Input text    id=PersonForm_op_ua_fin_legalname       test
+  Input text    id=PersonForm_op_ua_fin_legalname   Тестова фінансова компанія
+  ${financialExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tenderers.additionalIdentifiers[0]}  id
+  Run Keyword And Return If    ${financialExist}   Input text    id=PersonForm_op_ua_fin   ${tenderers.additionalIdentifiers[0].id}
+  Input text    id=PersonForm_op_ua_fin   AO 154842121
 
 Змінити документ в ставці
   [Arguments]   ${username}   ${tender_uaid}    ${path}   ${docid}
   Fail    Після відправки заявки оператору майданчика  - змінити доки неможливо
 
+Ввести цінову пропозицію
+   [Arguments]   ${valueAmount}
+   ${toString}=   Convert To String   ${valueAmount}
+   Input text   id=initial_costs   ${toString}
+
+Чи фінасова процедура
+  ${procedureType}=   Отримати текст із поля і показати на сторінці   procurementMethodType
+  ${procedureType}=   convert_ubiz_string_to_common_string   ${procedureType}
+  ${isOther}=   Run Keyword And Return Status  Should Be Equal   '${procedureType}'  'dgfOtherAssets'
+  Return From Keyword If   ${isOther}   ${FALSE}
+  ${isFinancial}=  Run Keyword And Return Status   Should Be Equal   '${procedureType}'  'dgfFinancialAssets'
+  Return From Keyword If   ${isFinancial}    ${isFinancial}
+  ${subProcedureType}=   Get Text    id=procedure_dutch
+  ${dutchisFinancial}=  Run Keyword And Return Status   Should Be Equal   '${subProcedureType}'  'Права вимоги'
+  Return From Keyword    ${dutchisFinancial}
+
 Подати цінову пропозицію
-  [Arguments]  @{ARGUMENTS}
-  [Documentation]
-  ...      ${ARGUMENTS[0]} ==  username
-  ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
-  ...      ${ARGUMENTS[2]} ==  ${test_bid_data}
-  ${bid}=             Get From Dictionary   ${ARGUMENTS[2].data.value}   amount
-  ${bid}=             Convert To String   ${bid}
-  ${qualified}=   Get From Dictionary   ${ARGUMENTS[2].data}   qualified
+  [Arguments]   ${username}   ${auction_id}   ${bid}
+  ${qualified}=   Get From Dictionary   ${bid.data}   qualified
   Run Keyword And Return If   ${qualified} == False   Fail    Учасник не кваліфікований
-  ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
-  ${procedure}=   Отримати текст із поля і показати на сторінці   procurementMethodType
+  ubiz.Пошук тендера по ідентифікатору   ${username}   ${auction_id}
+  ${isFinancial}=  Run Keyword  Чи фінасова процедура
+  Wait Until Element Is Visible   id=take_part_but_wid   10
   Click Element   id=take_part_but_wid
   Wait Until Page Contains   Стати учасником:    15
-  Wait Until Page Contains Element   id=initial_costs   15
-  Input text    id=initial_costs   ${bid}
-  Run keyword if   '${procedure}' == 'Право вимоги'   Додати фінкомпанію   ${ARGUMENTS[2].data.tenderers[0].additionalIdentifiers[0].id}
+  ${valueExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${bid.data}  value
+  Run Keyword If   ${valueExist}   Ввести цінову пропозицію   ${bid.data.value.amount}
+  Run keyword if   ${isFinancial}   Додати фінкомпанію   ${bid.data.tenderers[0]}
   Wait Until Element Is Visible   id=but_to_step_2   5
   Click Element   id=but_to_step_2
   Wait Until Element Is Visible   id=but_to_step_3   5
@@ -334,7 +346,7 @@ Login
   Click Element   id=but_save
   Wait Until Page Contains   Заявки на участь у торгах   10
   Перевірити та сховати повідомлення
-  Run keyword if   '${procedure}' != 'Право вимоги'   Відправлення заявки на участь
+  Run keyword if   ${isFinancial} == False   Відправлення заявки на участь
 
 Відправлення заявки на участь
   Зайти в розділ купую
@@ -343,6 +355,8 @@ Login
   Перевірити та сховати повідомлення
   Wait Until Element Is Visible   css=.bid-proved   10
   Click Element     css=.bid-proved
+  Wait Until Page Contains   Повідомлення   15
+  Перевірити та сховати повідомлення
 
 Видалити документ
    Click Element   xpath=//a[contains(text(), 'Видалити')]
@@ -362,10 +376,9 @@ Login
     Wait Until Element Is Visible   id=but_to_step_4   5
     Click Element   id=but_to_step_4
     Wait Until Element Is Visible   id=but_save   5
-    ${resp}=   Run Keyword And Return Status   Element Should Be Visible   xpath=//a[contains(text(), 'Видалити')]
-    Run Keyword If    "${resp}" == "True"   Видалити документ
+    ${prevDocuemnt}=   Run Keyword And Return Status   Element Should Be Visible   xpath=//a[contains(text(), 'Видалити')]
+    Run Keyword If    ${prevDocuemnt}   Видалити документ
     Приєднати документ   id=fileInput21   ${ARGUMENTS[2]}
-    Wait Until Page Contains   Видалити   15
     Click Element   id=but_save
     Перевірити та сховати повідомлення
     Відправлення заявки на участь
@@ -377,7 +390,7 @@ Login
   ...      ${ARGUMENTS[1]} ==  ${filepath}
   ...      ${ARGUMENTS[2]} ==  ${TENDER_UAID}
   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}   ${ARGUMENTS[2]}
-  ${procedure}=   Отримати текст із поля і показати на сторінці   procurementMethodType
+  ${isFinancial}=  Run Keyword And Return Status   Чи фінасова процедура
   Зайти в розділ купую
   Click Element   css=.bid-edit
   Wait Until Element Is Visible   id=but_to_step_2   5
@@ -387,14 +400,12 @@ Login
   Wait Until Element Is Visible   id=but_to_step_4   5
   Click Element   id=but_to_step_4
   Wait Until Element Is Visible   id=but_save   5
-  ${resp}=   Run Keyword And Return Status   Element Should Be Visible   xpath=//a[contains(text(), 'Видалити')]
-  Run Keyword If    "${resp}" == "True"   Видалити документ
-  Run keyword if   '${procedure}' == 'Право вимоги'   Приєднати документ   id=fileInput21   ${ARGUMENTS[1]}
-  Run keyword if   '${procedure}' == 'Майно банку'   Приєднати документ   id=fileInput1   ${ARGUMENTS[1]}
-  Wait Until Page Contains   Видалити   15
-  Click Element                    id=but_save
-  Перевірити та сховати повідомлення
+  ${prevDocuemnt}=   Run Keyword And Return Status   Element Should Be Visible   xpath=//a[contains(text(), 'Видалити')]
+  Run Keyword If    ${prevDocuemnt}   Видалити документ
+  Run keyword if    ${isFinancial}   Приєднати документ   id=fileInput21   ${ARGUMENTS[1]}
   Sleep    2
+  Click Element   id=but_save
+  Перевірити та сховати повідомлення
   Відправлення заявки на участь
 
 Приєднати документ
