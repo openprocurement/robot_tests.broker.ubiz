@@ -601,6 +601,7 @@ Login
   [return]  ${return_value}
 
 Отримати інформацію про status
+  Reload Page
   ${return_value}=   Отримати текст із поля і показати на сторінці   status
   ${status}=   convert_ubiz_string_to_common_string   ${return_value}
   [return]   ${status}
