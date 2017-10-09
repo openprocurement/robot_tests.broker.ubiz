@@ -417,9 +417,8 @@ Login
   Sleep    5   Ждем зарузки документа
 
 Перевірити та сховати повідомлення
-  Sleep    1
-  ${resp}=   Run Keyword And Return Status   Element Should Be Visible   id=close_inform_window
-  Run Keyword If   ${resp} == ${True}   Сховати повідомлення
+  ${isVisible}=   Run Keyword And Ignore Error   Wait Until Element Is Visible   id=close_inform_window   10
+  Run Keyword If   ${isVisible}   Сховати повідомлення
 
 Сховати повідомлення
   Click Element   id=close_inform_window
@@ -791,6 +790,9 @@ Login
 
 Отримати посилання на аукціон
   [Arguments]   @{ARGUMENTS}
+  Switch Browser   ${ARGUMENTS[0]}
+  ${isAuctionView}=   Run Keyword And Return Status   Element Should Be Visible    id=auid
+  Run Keyword If    ${isAuctionView} == ${False}   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
   Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
   ...   Reload Page
   ...   AND   Element Should Be Visible   css=.auction-url
