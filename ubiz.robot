@@ -68,9 +68,11 @@ ${locator.awards[1].status}                                    css=.award_status
   [Arguments]  ${username}
   [Documentation]  Відкрити браузер, створити об’єкт api wrapper, тощо
   Set Global Variable   ${UBIZ_LOT_ID}   ${EMPTY}
-  Set Global Variable    ${UBIZ_MODIFICATION_DATE}   ${EMPTY}
-  Set Global Variable    ${GLOBAL_USER_NAME}    ${username}
-  Open Browser  ${BROKERS['${broker}'].homepage}  ${USERS.users['${username}'].browser}  alias=${username}
+  Set Global Variable   ${UBIZ_MODIFICATION_DATE}   ${EMPTY}
+  Set Global Variable   ${GLOBAL_USER_NAME}    ${username}
+  ${alias}=   Catenate   SEPARATOR=   role_  ${username}
+  Set Global Variable   ${BROWSER_ALIAS}   ${alias}
+  Open Browser  ${BROKERS['${broker}'].homepage}  ${USERS.users['${username}'].browser}  alias=${BROWSER_ALIAS}
   Set Window Size  @{USERS.users['${username}'].size}
   Set Window Position  @{USERS.users['${username}'].position}
   Run Keyword If  '${username}' != 'ubiz_Viewer'  Login  ${username}
@@ -241,7 +243,7 @@ Login
     [Documentation]
     ...      ${ARGUMENTS[0]} ==  username
     ...      ${ARGUMENTS[1]} ==  ${TENDER_UAID}
-    Selenium2Library.Switch browser   ${ARGUMENTS[0]}
+    Switch Browser   ${BROWSER_ALIAS}
     Wait Until Page Contains Element    id=searchBar    30
     ${timeout_on_wait}=  Get Broker Property By Username  ${ARGUMENTS[0]}  timeout_on_wait
     ${passed}=  Run Keyword And Return Status  Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти   ${ARGUMENTS[1]}
@@ -512,7 +514,7 @@ Login
   [Documentation]
   ...      ${ARGUMENTS[0]} =  username
   ...      ${ARGUMENTS[1]} =  ${TENDER_UAID}
-  Selenium2Library.Switch Browser    ${ARGUMENTS[0]}
+  Switch Browser   ${BROWSER_ALIAS}    
   Go To  ${BROKERS['ubiz'].syncpage}
   Go To  ${BROKERS['ubiz'].homepage}
   ubiz.Пошук тендера по ідентифікатору    ${ARGUMENTS[0]}   ${ARGUMENTS[1]}
@@ -689,7 +691,10 @@ Login
   [return]  ${return_value}
 
 Отримати інформацію про auctionPeriod.endDate
-  Показати вкладку параметри аукціону
+  Wait Until Keyword Succeeds   15 x   40 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Показати вкладку параметри аукціону
+  ...   AND   Element Should Be Visible   css=.auction_period_end
   ${return_value}=   Отримати текст із поля і показати на сторінці   auctionPeriod.endDate
   ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]  ${return_value}
@@ -791,7 +796,7 @@ Login
 
 Отримати посилання на аукціон
   [Arguments]   @{ARGUMENTS}
-  Switch Browser   ${ARGUMENTS[0]}
+  Switch Browser   ${BROWSER_ALIAS}
   ${isAuctionView}=   Run Keyword And Return Status   Element Should Be Visible    id=auid
   Run Keyword If    ${isAuctionView} == ${False}   ubiz.Пошук тендера по ідентифікатору   ${ARGUMENTS[0]}  ${ARGUMENTS[1]}
   Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
@@ -1170,7 +1175,9 @@ Login
    ...   ${ARGUMENTS[0]} == username
    ...   ${ARGUMENTS[1]} == tender_uaid
    Зайти в розділ купую
-   Wait Until Element Is Visible   css=.return-guarantee   15
+   Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
+   ...   Reload Page
+   ...   AND   Element Should Be Visible   css=.return-guarantee
    Click Element   css=.return-guarantee
    Wait Until Page Contains   Ви дійсно відмовляєтесь очікувати дискваліфікації першого кандидата та забираєте гарантійний внесок?   10
    Підтвердження дії в модальном вікні
