@@ -393,6 +393,7 @@ Login
   Wait Until Element Is Visible   id=BidChangeValueAmount-value-amount
   ${valueAmountToString}=         Convert To String   ${value}
   Input Text                      id=BidChangeValueAmount-value-amount   ${valueAmountToString}
+  Sleep                           1
   Click Element                   xpath=//button[contains(text(), 'Змінити цінову пропозицію')]
   Wait Until Page Contains        Пропозиція успішно оновлена   30
   Закрити модальне вікно
