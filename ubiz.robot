@@ -218,15 +218,6 @@ Login
   \   На форму додавання активу
   \   Додати актив   ${items[${index}]}
 
-Клацнути і дочекатися
-    [Arguments]  ${click_locator}  ${wanted_locator}  ${timeout}
-    [Documentation]
-    ...      click_locator: Where to click
-    ...      wanted_locator: What are we waiting for
-    ...      timeout: Timeout
-    Click Element  ${click_locator}
-    Wait Until Page Contains Element  ${wanted_locator}  ${timeout}
-
 Шукати і знайти
   [Arguments]   ${auction_id}
   Input Text                           id=main-auctionsearch-title   ${auction_id}
