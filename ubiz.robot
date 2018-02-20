@@ -157,14 +157,12 @@ Set classification
   ${procurementTypeExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tender_data.data}  procurementMethodType
   ${procurementMethodType}=  Run Keyword If  ${procurementTypeExist} == True   Get From Dictionary  ${tender_data.data}  procurementMethodType
   ...  ELSE  Convert To String    belowThreshold
-
   ${procurementMethodType}=  convert_ubiz_string_to_common_string    ${procurementMethodType}
   Set Global Variable  ${procurementMethodType}
   ${procurementMethodTypeLower}=   string_lower    ${procurementMethodType}
   Set Global Variable  ${procurementMethodTypeLower}
   ${procurementMethodTypeStudly}=   string_studly    ${procurementMethodType}
   Set Global Variable  ${procurementMethodTypeStudly}
-
   ${title}=               Get From Dictionary   ${tender_data.data}               title
   ${description}=         Get From Dictionary   ${tender_data.data}               description
   ${budget}=              Get From Dictionary   ${tender_data.data.value}         amount
@@ -193,8 +191,6 @@ Set classification
   ${causeDescriptionExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tender_data.data}  causeDescription
   ${causeDescription}=  Run Keyword If  ${causeDescriptionExist} == True   Get From Dictionary  ${tender_data.data}  causeDescription
   Run Keyword IF  ${causeDescriptionExist} == True   Input Text  xpath=//*[contains(@id, '${procurementMethodTypeLower}-causedescription')]  ${causeDescription}
-
-
   ${budget}=    Convert To String    ${budget}
   ${minimalStep}=    Convert To String    ${minimalStep}
   Run Keyword If  ${lotsExist} == False   Input text    xpath=//input[contains(@id, '${procurementMethodTypeStudly}-value-amount')]                  ${budget}
@@ -1149,7 +1145,7 @@ Wait Element Visibility And Click
   \  Run Keyword IF  ${index} > 0  Wait Element Visibility And Click  id=add-item
   \  Додати предмет  ${items[${index}]}   ${features}
 
-Вікрити блок предмету
+Відкрити блок предмету
   [Arguments]  ${item_id}
   Wait Until Element Is Visible  xpath=//div[@id='lots']//a[contains(text(),'${item_id}')]
   Click Element                  xpath=//div[@id='lots']//a[contains(text(),'${item_id}')]
@@ -1159,7 +1155,7 @@ Wait Element Visibility And Click
   [Arguments]  ${username}  ${tender_uaid}  ${item_id}  ${field_name}
   Scroll To Tabs
   Run Keyword IF  ${lotsExist}  Розгорнути все
-  Run Keyword If  ${lotsExist} == ${False}  Вікрити блок предмету  ${item_id}
+  Run Keyword If  ${lotsExist} == ${False}  Відкрити блок предмету  ${item_id}
   ${class}=  Run Keyword If  '${field_name}' == 'unit.code'   Catenate  SEPARATOR=  items.  unit.name
   ...  ELSE  Catenate  SEPARATOR=  items.  ${fieldname}
   Wait Until Element Is Visible  xpath=//div[contains(@data-item-description,'${item_id}')]//*[contains(@class,'${locator.${class}}')]

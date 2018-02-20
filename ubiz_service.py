@@ -146,7 +146,7 @@ def prepare_test_data(tender_data):
     tender_data.data.procuringEntity['identifier']['id'] = u'12345678'
     tender_data.data.procuringEntity['address']['streetAddress'] = u'Хрещатик, 1'
     tender_data.data.procuringEntity['address']['region'] = u'місто Київ'
-    tender_data.data.procuringEntity['address']['locality'] = u'Киїі'
+    tender_data.data.procuringEntity['address']['locality'] = u'Київ'
     tender_data.data.procuringEntity['address']['postalCode'] = u'12345'
     tender_data.data.procuringEntity['contactPoint']['telephone'] = u'0505554444'
     tender_data.data.procuringEntity['contactPoint']['faxNumber'] = u'0505554445'
