@@ -135,7 +135,7 @@ Set period aboveThreshold
   [Arguments]  ${tender_data}
   ${end_date}=  Get From Dictionary   ${tender_data.data.tenderPeriod}   endDate
   ${end_date}=  convert_datetime_for_input   ${end_date}
-  Input text    xpath=//input[contains(@id, '${procurementMethodTypeLower}-tenderperiod-enddate')]    ${end_date}
+  Execute JavaScript  $('#${procurementMethodTypeLower}-tenderperiod-enddate').val('${end_date}');
 
 Set classification
   [Arguments]  ${classificationId}   ${code}   ${scheme}
@@ -621,7 +621,7 @@ Set classification
 Змінити період пропозицій
   [Arguments]   ${tenderPeriodEndDateISO}
   ${toInputFormat}=   convert_datetime_for_input   ${tenderPeriodEndDateISO}
-  Input text    xpath=//input[contains(@id, '${procurementMethodTypeLower}-tenderperiod-enddate')]        ${toInputFormat}
+  Execute JavaScript  $('#${procurementMethodTypeLower}-tenderperiod-enddate').val('${toInputFormat}');
 
 Внести зміни в тендер
   [Arguments]  ${user_name}  ${tenderId}  ${parameter}  ${value}
