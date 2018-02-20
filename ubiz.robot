@@ -81,8 +81,6 @@ ${locator.items.additionalClassifications[0].scheme}           classification-sc
 ${locator.items.unit.name}                                     unit-name
 ${locator.items.quantity}                                      item-quantity
 ${locator.items.description}                                   item-description
-
-# ${locator.questions.url}                                       css=.question-link
 ${locator.questions[0].title}                                  css=.question-title
 ${locator.questions[0].description}                            css=.question-description
 ${locator.questions[0].date}                                   css=.question-date
@@ -156,9 +154,6 @@ Set classification
 
 Створити тендер
   [Arguments]   ${username}   ${tender_data}
-  ${lotsExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tender_data.data}  lots
-  Set Global Variable  ${lotsExist}
-
   ${procurementTypeExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tender_data.data}  procurementMethodType
   ${procurementMethodType}=  Run Keyword If  ${procurementTypeExist} == True   Get From Dictionary  ${tender_data.data}  procurementMethodType
   ...  ELSE  Convert To String    belowThreshold
@@ -206,7 +201,6 @@ Set classification
   ${minimalStepInput}=  Run Keyword And Return Status  Element Should Be Visible    xpath=//input[contains(@id, 'minimalStep-amount')]
   Run Keyword If  ${minimalStepInput}  Input Text  xpath=//input[contains(@id, 'minimalStep-amount')]  ${minimalStep}
   ${valueAddedTaxIncluded}=   Get From Dictionary   ${tender_data.data.value}   valueAddedTaxIncluded
-  # Run Keyword If    ${valueAddedTaxIncluded}   Click Element   ${procurementMethodTypeStudly}-value-valueAddedTaxIncluded
   Execute Javascript  setMySwitchBox('${procurementMethodTypeStudly}-value-valueAddedTaxIncluded', '${valueAddedTaxIncluded}')
 
   Run Keyword IF
