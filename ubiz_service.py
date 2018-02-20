@@ -161,3 +161,8 @@ def download_document_from_url(url, file_name, output_dir):
 def get_percent(value):
     value = value * 100
     return format(value, '.0f')
+
+def convert_date_for_compare_without_time(datestr):
+    iso_dt = parse_date(datestr)
+    date_string = iso_dt.strftime("%Y-%m-%d")
+    return date_string
