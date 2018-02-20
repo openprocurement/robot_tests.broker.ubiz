@@ -532,14 +532,13 @@ Set classification
   Wait Until Page Contains Element    id=bidEditTender
   Click Link   id=bidEditTender
   Wait Until Page Contains Element    id=bidPublication
-  ${isMulty}=   Run Keyword And Return Status    Page Should Contain   мультилотова
-  Run Keyword If   ${isMulty}   Цінова пропозиція мультилот   ${value}
+  Run Keyword If   ${lotsExist}   Цінова пропозиція мультилот   ${value}
   ...  ELSE   Цінова пропозиція безлот   ${value}
   Click Element   id=bid-isqualificationcriterion
   Click Element   id=bid-nogroundsrejecting
   Видалити повідомлення
   Click Element   id=bidPublication
-  Run Keyword If   ${isMulty}   Підтвердити пропозицію у модальному вікні
+  Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
 
 Змінити тип документа в пропозиції
   [Arguments]   ${locator}   ${doc_type}
@@ -567,8 +566,7 @@ Set classification
   Click Element   id=bid-isqualificationcriterion
   Click Element   id=bid-nogroundsrejecting
   Click Element   id=bidPublication
-  ${isMulty}=   Run Keyword And Return Status    Page Should Contain   мультилотова
-  Run Keyword If   ${isMulty}   Підтвердити пропозицію у модальному вікні
+  Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
 
 Змінити документ в ставці
   [Arguments]  ${user_name}  ${tender_id}  ${file_path}  ${document_id}
@@ -586,8 +584,7 @@ Set classification
   Click Element   id=bid-isqualificationcriterion
   Click Element   id=bid-nogroundsrejecting
   Click Element   id=bidPublication
-  ${isMulty}=   Run Keyword And Return Status    Page Should Contain   мультилотова
-  Run Keyword If   ${isMulty}   Підтвердити пропозицію у модальному вікні
+  Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
 
 Змінити документацію в ставці
   [Arguments]   ${user_name}   ${tender_id}   ${doc_data}   ${document_id}
@@ -605,8 +602,7 @@ Set classification
   Click Element   id=bid-isqualificationcriterion
   Click Element   id=bid-nogroundsrejecting
   Click Element   id=bidPublication
-  ${isMulty}=   Run Keyword And Return Status    Page Should Contain   мультилотова
-  Run Keyword If   ${isMulty}   Підтвердити пропозицію у модальному вікні
+  Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
 
 Оновити сторінку з тендером
   [Arguments]  @{ARGUMENTS}
