@@ -151,9 +151,16 @@ def prepare_test_data(tender_data):
     tender_data.data.procuringEntity['contactPoint']['telephone'] = u'0505554444'
     tender_data.data.procuringEntity['contactPoint']['faxNumber'] = u'0505554445'
     tender_data.data.procuringEntity['identifier']['legalName'] = u'ТОВАРИСТВО З ОБМЕЖЕНОЮ ВІДПОВІДАЛЬНІСТЮ 4k-soft'
-    tender_data.data['items'][0]['deliveryDate']['startDate'] = convert_date_for_compare_without_time(tender_data.data['items'][0]['deliveryDate']['startDate'])
-    tender_data.data['items'][0]['deliveryDate']['endDate'] = convert_date_for_compare_without_time(tender_data.data['items'][0]['deliveryDate']['endDate'])
+    for item in tender_data.data['items']:
+        if item.has_key('deliveryDate'):
+            item['deliveryDate']['startDate'] = delivery_date_to_broker_format(item['deliveryDate']['startDate'])
+            item['deliveryDate']['endDate']   = delivery_date_to_broker_format(item['deliveryDate']['endDate'])
     return tender_data
+
+def delivery_date_to_broker_format(isoDate):
+    parseDate = parse_date(isoDate)
+    timeZone  = parseDate.strftime('%z')
+    return parseDate.strftime("%Y-%m-%d") + 'T00:00:00' + timeZone
 
 def download_document_from_url(url, file_name, output_dir):
     urllib.urlretrieve(url, ('{}/{}'.format(output_dir, file_name)))
