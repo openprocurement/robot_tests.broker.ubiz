@@ -1334,6 +1334,7 @@ Scroll Page To Element
 
 Отримати інформацію із нецінового показника
   [Arguments]  ${username}  ${tender_uaid}  ${feature_id}  ${field_name}
+  На початок сторінки
   Wait Until Page Contains Element   xpath=//*[contains(@id,'show-features')]
   Click Element    xpath=//*[contains(@id,'show-features')]
   Execute Javascript  showAllCollapsed()
