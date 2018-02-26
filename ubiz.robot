@@ -311,12 +311,14 @@ Set classification
   Wait Until Page Contains   Нецінові показники лоту
   ${inputId}=    Get Element Attribute   xpath=//input[contains(@value, '${feature_id}')]@id
   Execute Javascript   $('#${inputId}').closest('tr').find('.js-input-remove').click()
+  Sleep  2
   Click Element   id=next
 
 Видалити неціновий показник
   [Arguments]  ${user_name}  ${tender_id}  ${feature_id}
   ubiz.Пошук тендера по ідентифікатору  ${user_name}  ${tender_id}
   ${of}=   ubiz.Отримати інформацію із нецінового показника   ${user_name}   ${tender_id}   ${feature_id}   featureOf
+  Reload Page
   Wait Until Element Is Visible   id=editTender  30
   Click Element                   id=editTender
   Wait Until Element Is Visible   id=endEdit
@@ -597,7 +599,7 @@ Set classification
   Перейти в кінець сторінки
   Wait Until Element Is Visible   css=.private
   Click Element   css=.private
-  Wait Until Page Contains   Причини конфіденційності документа
+  Wait Until Element Is Visible  xpath=//div[contains(@id, 'privateReason')]//textarea
   Input Text   xpath=//div[contains(@id, 'privateReason')]//textarea   ${doc_data.data.confidentialityRationale}
   Click Element   id=bid-isqualificationcriterion
   Click Element   id=bid-nogroundsrejecting
@@ -1346,6 +1348,7 @@ Scroll Page To Element
 
 Перейти в прекваліфікаію
   [Arguments]   ${user_name}   ${tender_id}
+  Set Global Variable  ${TENDER_VIEW_URL}  ${EMPTY}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${tender_id}
   Wait Until Element Is Visible         id=preQualificationTender
   Click Link                            id=preQualificationTender
