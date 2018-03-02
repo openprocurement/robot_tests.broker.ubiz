@@ -8,7 +8,9 @@ Library  Collections
 
 ${locator.tenderId}                                            id=tenderId
 ${locator.title}                                               id=tenderTitle
+${locator.title_en}                                            id=tenderTitleEn
 ${locator.description}                                         id=tenderDescription
+${locator.description_en}                                      id=tenderDescriptionEn
 ${locator.cause}                                               id=tenderCause
 ${locator.causeDescription}                                    id=tenderCauseDescription
 ${locator.minimalStep.amount}                                  id=tenderMinimalStepAmount
@@ -81,6 +83,7 @@ ${locator.items.additionalClassifications[0].scheme}           classification-sc
 ${locator.items.unit.name}                                     unit-name
 ${locator.items.quantity}                                      item-quantity
 ${locator.items.description}                                   item-description
+${locator.items.deliveryAddress.countryName_en}                country_en
 ${locator.questions[0].title}                                  css=.question-title
 ${locator.questions[0].description}                            css=.question-description
 ${locator.questions[0].date}                                   css=.question-date
@@ -152,6 +155,13 @@ Set classification
   Click Element                 id=save-and-hide-modal-btn
   Sleep                         3
 
+Англ поля тендера
+  [Arguments]  ${tender_data}
+  ${titleEn}=        Get From Dictionary  ${tender_data.data}  title_en
+  ${descriptionEn}=  Get From Dictionary  ${tender_data.data}  description_en
+  Run Keyword And Ignore Error  Input Text  xpath=//input[contains(@id, 'titleen')]  ${titleEn}
+  Run Keyword And Ignore Error  Input Text  xpath=//textarea[contains(@id, 'descriptionen')]  ${descriptionEn}
+
 Створити тендер
   [Arguments]   ${username}   ${tender_data}
   ${procurementTypeExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tender_data.data}  procurementMethodType
@@ -180,8 +190,9 @@ Set classification
   Input text    xpath=//input[contains(@id, '${procurementMethodTypeLower}-title')]                  ${title}
   Input text    xpath=//textarea[contains(@id, '${procurementMethodTypeLower}-description')]           ${description}
   ${title_enExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tender_data.data}  title_en
-  ${title_en}=  Run Keyword If  ${title_enExist} == True   Get From Dictionary  ${tender_data.data}  title_en
-  Run Keyword IF  '${procurementMethodType}' == 'aboveThresholdEu'   Input Text  xpath=//input[contains(@id, '${procurementMethodTypeLower}-titleen')]  ${title_en}
+  Run Keyword If  ${title_enExist}  Англ поля тендера  ${tender_data}
+  # ${title_en}=  Run Keyword If  ${title_enExist} == True   Get From Dictionary  ${tender_data.data}  title_en
+  # Run Keyword IF  '${procurementMethodType}' == 'aboveThresholdEu'   Input Text  xpath=//input[contains(@id, '${procurementMethodTypeLower}-titleen')]  ${title_en}
 
   ${causeExist}=  Run Keyword And Return Status   Dictionary Should Contain Key  ${tender_data.data}  cause
   ${cause}=  Run Keyword If  ${causeExist} == True   Get From Dictionary  ${tender_data.data}  cause
@@ -249,6 +260,7 @@ Set classification
 
 Додати неціновий показник
   [Arguments]   ${feature}   ${featureIndex}
+  Wait Until Element Is Visible  id=feature-features-${featureIndex}-title
   Input Text   id=feature-features-${featureIndex}-title   ${feature.title}
   Input Text   id=feature-features-${featureIndex}-description   ${feature.description}
   @{enums}=    Get From Dictionary   ${feature}   enum
@@ -507,6 +519,7 @@ Set classification
 
 Отримати інформацію із пропозиції
   [Arguments]  ${user_name}   ${tender_id}   ${field}
+  Set Global Variable   ${TENDER_VIEW_URL}  ${EMPTY}
   ubiz.Пошук тендера по ідентифікатору  ${user_name}  ${tender_id}
   Показати вкладку моя пропозиція
   Run Keyword And Return If    '${field}' == 'status'   Отримати статус цінової пропозиції
@@ -681,9 +694,9 @@ Set classification
   Run Keyword And Return If   '${field_name}' == 'awards[0].suppliers[0].name'   Отримати інформацію про назву організації з протоколу розкриття
   Run Keyword And Return If   '${field_name}' == 'awards[0].suppliers[0].identifier.legalName'   Отримати інформацію про назву організації з протоколу розкриття
 
-  Run Keyword And Return If   '${field_name}' == 'title_en'   Fail   Поле не відображаем
+  # Run Keyword And Return If   '${field_name}' == 'title_en'   Fail   Поле не відображаем
   Run Keyword And Return If   '${field_name}' == 'title_ru'   Fail   Поле не відображаем
-  Run Keyword And Return If   '${field_name}' == 'description_en'   Fail   Поле не відображаем
+  # Run Keyword And Return If   '${field_name}' == 'description_en'   Fail   Поле не відображаем
   Run Keyword And Return If   '${field_name}' == 'description_ru'   Fail   Поле не відображаем
   Run Keyword And Return If   '${field_name}' == 'items[0].deliveryLocation.latitude'   Fail   Поле не відображаем
   Run Keyword And Return If   '${field_name}' == 'items[0].deliveryAddress.countryName_ru'   Fail   Поле не відображаем
@@ -827,8 +840,16 @@ Set classification
   ${return_value}=   Отримати текст із поля і показати на сторінці   title
   [return]  ${return_value}
 
+Отримати інформацію про title_en
+  ${return_value}=   Отримати текст із поля і показати на сторінці   title_en
+  [return]  ${return_value}
+
 Отримати інформацію про description
   ${return_value}=   Отримати текст із поля і показати на сторінці   description
+  [return]  ${return_value}
+
+Отримати інформацію про description_en
+  ${return_value}=   Отримати текст із поля і показати на сторінці   description_en
   [return]  ${return_value}
 
 Отримати інформацію про cause
@@ -972,7 +993,10 @@ Set classification
   [return]  ${return_value}
 
 Отримати інформацію про status
-  Reload Page
+  Run Keyword If  'періоду блокування' in '${TEST_NAME}'  Run Keywords
+  ...   Run Keyword And Ignore Error  Click Element  id=reloadTender
+  ...   AND  Wait Until Element Is Visible  id=publisher-info
+  Run Keyword Unless  'періоду блокування' in '${TEST_NAME}'  Reload Page
   ${return_value}=   Отримати текст із поля і показати на сторінці   status
   ${return_value}=   convert_ubiz_string_to_common_string   ${return_value}
   [return]  ${return_value}
@@ -1230,6 +1254,7 @@ Wait Element Visibility And Click
 Отримати інформацію із скарги
   [Arguments]  ${username}  ${tender_uaid}  ${complaintID}  ${field_name}  ${award_index}
   ubiz.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
+  Run Keyword If  '${field_name}' == 'status'  Run Keyword And Ignore Error  ubiz.Оновити сторінку з тендером  ${username}  ${tender_uaid}
   Scroll To Tabs
   ${isAwardComplaint}=  Run Keyword And Return Status  Element Should Be Visible  xpath=//a[@href='#awards']
   Run Keyword If  ${isAwardComplaint}  Click Element   xpath=//a[@href='#awards']

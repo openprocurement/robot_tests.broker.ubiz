@@ -155,6 +155,7 @@ def prepare_test_data(tender_data):
         if item.has_key('deliveryDate'):
             item['deliveryDate']['startDate'] = delivery_date_to_broker_format(item['deliveryDate']['startDate'])
             item['deliveryDate']['endDate']   = delivery_date_to_broker_format(item['deliveryDate']['endDate'])
+        item['unit']['name'] = item['unit']['name'].lower()
     return tender_data
 
 def delivery_date_to_broker_format(isoDate):
