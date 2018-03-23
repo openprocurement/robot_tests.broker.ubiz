@@ -1103,8 +1103,6 @@ Set classification
   ${deliveryDateStart}=   Get From Dictionary   ${item.deliveryDate}          startDate
   ${deliveryDateStart}=    convert_datetime_for_delivery   ${deliveryDateStart}
 
-  Wait Until Page Contains          Назва предмета закупівлі     60
-
   Wait Until Page Contains Element   xpath=//textarea[contains(@id, '${procurementMethodTypeLower}item-description')]
   Input text    xpath=//textarea[contains(@id, '${procurementMethodTypeLower}item-description')]     ${itemsDescription}
   Run Keyword IF  '${procurementMethodType}' == 'aboveThresholdEu'   Input text    xpath=//textarea[contains(@id, '${procurementMethodTypeLower}item-descriptionen')]   ${description_en}
