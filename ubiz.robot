@@ -1447,7 +1447,6 @@ Scroll To Tabs
   ${valueAmount}                    Get From Dictionary         ${supplier_data.data.value}   amount
   ${valueAmount}                    Convert To String           ${valueAmount}
   Input Text                        id=Supplier-value-amount    ${valueAmount}
-  Input Text                        id=supplier-legal_name      ${supplier_data.data.suppliers[0].identifier.legalName}
   Input Text                        id=supplier-edrpou          ${supplier_data.data.suppliers[0].identifier.id}
   Input text                        id=contactPoint-name        ${supplier_data.data.suppliers[0].contactPoint.name}
   Input text                        id=contactPoint-email       ${supplier_data.data.suppliers[0].contactPoint.email}
@@ -1460,14 +1459,13 @@ Scroll To Tabs
   Input Text                        id=addressFirm-locality         ${supplier_data.data.suppliers[0].address.locality}
   Input Text                        id=addressFirm-address          ${supplier_data.data.suppliers[0].address.streetAddress}
   Input text                        id=addressFirm-postalCode       ${supplier_data.data.suppliers[0].address.postalCode}
-  #Click Element                     xpath=//div[@id='supplier-qualified']//input
   Click Element                     id=next
   Wait Until Page Contains Element  xpath=//p[contains(text(), 'Кваліфікація')]
   Sleep                             2
   Execute Javascript                $('.fa-plus').trigger('click');
   Sleep                             1
   Scroll Page To Element            css=.box-body
-  Click Element                     xpath=//a[contains(text(), 'Допустити')]
+  Click Element                     xpath=//a[contains(@href, '#active-')]
 
   Wait Until Element Is Visible     css=.add-item
   Click Element                     css=.add-item
@@ -1488,8 +1486,8 @@ Scroll To Tabs
   Click Link                         css=.back_tend
 
 Чекбокси кваліфікації
-  Click Element  xpath=//input[contains(@id, 'qualification-qualified')]
-  Click Element  xpath=//input[contains(@id, 'qualification-eligible')]
+  Run Keyword And Ignore Error   Click Element  xpath=//input[contains(@id, 'qualification-qualified')]
+  Run Keyword And Ignore Error   Click Element  xpath=//input[contains(@id, 'qualification-eligible')]
 
 Отримати інформацію із документа до скарги
   [Arguments]  ${user_name}   ${tender_uaid}   ${complaint_id}  ${doc_id}  ${field}
@@ -1592,6 +1590,11 @@ Scroll To Tabs
   ${currentDate}=                             get_contract_end_date
   Execute Javascript                          $('#contract-period-enddate').val('${currentDate}');
   Execute Javascript                          $('#contract-period-enddate-disp').val('${currentDate}');
+  ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
+  Click Element                               css=.add-item
+  Wait Until Element Is Visible               css=.delete-document
+  Choose File                                 css=.document-img  ${file_path}
+  Wait Until Page Contains                    Done
 
   Run Keyword And Return If  ${isNegotiation}  Підтвердити контракт для переговорної
   Click Element                                xpath=//button[@data-status='4']
