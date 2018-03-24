@@ -480,8 +480,8 @@ Set classification
   ${isMulty}=   Run Keyword And Return Status   Dictionary Should Contain Key  ${bid_data.data}   lotValues
   Run Keyword If   ${isMulty}   Пропозиція на мультилот   ${bid_data.data}
   ...   ELSE   Цінова пропозиція безлот   ${bid_data.data.value.amount}
-  Click Element   id=bid-isqualificationcriterion
-  Click Element   id=bid-nogroundsrejecting
+  # Click Element   id=bid-isqualificationcriterion
+  # Click Element   id=bid-nogroundsrejecting
   Видалити повідомлення
   Click Element    id=bidPublication
   Run Keyword If   ${isMulty}   Підтвердити пропозицію у модальному вікні
@@ -549,8 +549,8 @@ Set classification
   Wait Until Page Contains Element    id=bidPublication
   Run Keyword If   ${lotsExist}   Цінова пропозиція мультилот   ${value}
   ...  ELSE   Цінова пропозиція безлот   ${value}
-  Click Element   id=bid-isqualificationcriterion
-  Click Element   id=bid-nogroundsrejecting
+  # Click Element   id=bid-isqualificationcriterion
+  # Click Element   id=bid-nogroundsrejecting
   Видалити повідомлення
   Click Element   id=bidPublication
   Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
@@ -578,8 +578,8 @@ Set classification
   Choose File   ${locator}//input[@class='document-img']   ${file_path}
   Wait Until Page Contains   Done
   Run Keyword If    '${doc_type}' != ''   Змінити тип документа в пропозиції   ${locator}   ${doc_type}
-  Click Element   id=bid-isqualificationcriterion
-  Click Element   id=bid-nogroundsrejecting
+  # Click Element   id=bid-isqualificationcriterion
+  # Click Element   id=bid-nogroundsrejecting
   Click Element   id=bidPublication
   Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
 
@@ -596,8 +596,8 @@ Set classification
   Wait Until Page Contains   ${document_id}
   Choose File   css=.document-img   ${file_path}
   Wait Until Page Contains   Done
-  Click Element   id=bid-isqualificationcriterion
-  Click Element   id=bid-nogroundsrejecting
+  # Click Element   id=bid-isqualificationcriterion
+  # Click Element   id=bid-nogroundsrejecting
   Click Element   id=bidPublication
   Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
 
@@ -614,8 +614,8 @@ Set classification
   Click Element   css=.private
   Wait Until Element Is Visible  xpath=//div[contains(@id, 'privateReason')]//textarea
   Input Text   xpath=//div[contains(@id, 'privateReason')]//textarea   ${doc_data.data.confidentialityRationale}
-  Click Element   id=bid-isqualificationcriterion
-  Click Element   id=bid-nogroundsrejecting
+  # Click Element   id=bid-isqualificationcriterion
+  # Click Element   id=bid-nogroundsrejecting
   Click Element   id=bidPublication
   Run Keyword If   ${lotsExist}   Підтвердити пропозицію у модальному вікні
 
