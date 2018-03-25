@@ -1533,8 +1533,8 @@ Scroll To Tabs
   ...   Reload Page
   ...   AND   Wait Until Element Is Visible   id=qualificationTender
   ...   AND   Click Element                   id=qualificationTender
-  Wait Until Element Is Visible      xpath=//a[contains(text(), 'Допустити')]
-  Click Element                      xpath=//a[contains(text(), 'Допустити')]
+  Wait Until Element Is Visible      xpath=//a[contains(@href, '#active-')]
+  Click Element                      xpath=//a[contains(@href, '#active-')]
   Wait Until Element Is Visible      css=.add-item
   Click Element                      css=.add-item
   Wait Until Element Is Visible      css=.delete-document
