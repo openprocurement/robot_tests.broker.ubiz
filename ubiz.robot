@@ -4,7 +4,7 @@ Library  DateTime
 Library  ubiz_service.py
 
 
-*** Variables ***
+*** Variables ****
 
 ${locator.auctionID}                                           css=.auction-auctionID
 ${locator.title}                                               css=.auction-title
