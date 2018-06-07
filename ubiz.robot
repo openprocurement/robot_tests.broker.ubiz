@@ -39,7 +39,10 @@ ${locator.minNumberOfQualifiedBids}                            css=.auction-minN
 
 Підготувати дані для оголошення тендера
   [Arguments]  ${user_name}   ${auction_data}   ${role_name}
+  Log To Console   ${role_name}
+  Log To Console   ${auction_data}
   ${auction_data}=   before_create_auction   ${auction_data}   ${role_name}
+  Log To Console   ${auction_data}
   [return]   ${auction_data}
 
 Підготувати клієнт для користувача
@@ -932,3 +935,223 @@ Scroll To Element
   Змінити ціновий показник    ${field.replace('.', '-')}    ${value}
   Click Element               xpath=//button[contains(text(), 'Оновити')]
   Wait Until Page Contains    Продаю
+
+Створити об'єкт МП
+  [Arguments]   ${user_name}   ${adapted_data}
+  Go To    http://test.ubiz.com.ua/privatization/asset
+  Wait Until Element Is Visible   css=.add_tender
+  Click Element                   css=.add_tender
+  Wait Until Element Is Visible   id=assetdraft-title
+  Input Text                      id=assetdraft-title   ${adapted_data.data.title}
+  Input Text                      id=assetdraft-description   ${adapted_data.data.description}
+  Input Text                      css=input[name='AssetDraft[decisions][0][title]']   ${adapted_data.data.decisions[0].title}
+  Input Text                      css=input[name='AssetDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
+  ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
+  ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
+
+  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
+  Input Text                      id=decision-date-0   ${decisionDate}
+
+  ${contactPoint}=                Get From Dictionary   ${adapted_data.data.assetCustodian}   contactPoint
+  Input Text                      id=contactPerson-name        ${contactPoint.name}
+  Input Text                      id=contactPerson-telephone   ${contactPoint.telephone}
+  Input Text                      id=contactPerson-faxNumber   ${contactPoint.faxNumber}
+  Input Text                      id=contactPerson-email       ${contactPoint.email}
+
+  #AssetHolder section
+  SwitchBox                       assetdraft-assetholderswitch   true
+  Sleep                           1
+  ${assetHolder}=                 Get From Dictionary   ${adapted_data.data}   assetHolder
+  Input Text                      id=assetdraft-assetholdername   ${assetHolder.name}
+  Input Text                      id=assetdraft-assetholderedrpou  ${assetHolder.identifier.id}
+
+  Input Text                      id=assetHolderContactPerson-name        ${assetHolder.contactPoint.name}
+  Input Text                      id=assetHolderContactPerson-telephone   ${assetHolder.contactPoint.telephone}
+  Input Text                      id=assetHolderContactPerson-faxNumber   ${assetHolder.contactPoint.faxNumber}
+  Input Text                      id=assetHolderContactPerson-email       ${assetHolder.contactPoint.email}
+
+  SelectBox                       assetHolderAddress-regionId        ${assetHolder.address.region}
+  Input Text                      id=assetHolderAddress-locality     ${assetHolder.address.locality}
+  Input Text                      id=assetHolderAddress-address      ${assetHolder.address.streetAddress}
+  ${postalCode}=                  Convert To String                  ${assetHolder.address.postalCode}
+  Input Text                      id=assetHolderAddress-postalCode   ${postalCode}
+
+
+  Click Element                   xpath=//button[contains(text(), 'Далі')]
+  ${items}=                       Get From Dictionary   ${adapted_data.data}   items
+
+  Wait Until Element Is Visible   id=itemdraft-description
+  Click Element                   css=a[href*='/privatization/asset-draft/items']
+  Wait Until Element Is Visible   css=a[href*='/privatization/asset-draft/add-item']
+  Додати активи до об`єкту        ${items}
+
+  Wait Until Element Is Visible   css=a[href*='/privatization/asset-draft/add-item']
+  ${assetDraftId}=                Execute JavaScript   return $('span[data-asset-draft-id]').attr('data-asset-draft-id')
+  Click Element                   id=endEdit
+
+  Wait Until Element Is Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
+  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Click Element                   xpath=//a[contains(@href, '/privatization/asset-draft/publication?id=${assetDraftId}')]
+  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
+  Перейти в мої об`єкти
+
+  Click Element                   css=.lot_image
+  Wait Until Element Is Visible   css=.asset-assetID
+  ${assetID}=                     Get Text   css=.asset-assetID
+  [return]                        ${assetID}
+
+
+Додати активи до об`єкту
+  [Arguments]   ${items}
+  ${count}=   Get Length   ${items}
+  : FOR    ${index}    IN RANGE   ${count}
+  \   Wait Until Element Is Visible   css=a[href*='/privatization/asset-draft/add-item']
+  \   Click Element                   css=a[href*='/privatization/asset-draft/add-item']
+  \   Wait Until Element Is Visible   id=itemdraft-description
+  \   Додати актив до об`єкту         ${items[${index}]}
+
+Додати актив до об`єкту
+  [Arguments]   ${item}
+  Input Text                       id=itemdraft-description   ${item.description}
+  ${quantity}=                     Convert To String          ${item.quantity}
+  Input Text                       id=itemdraft-quantity      ${quantity}
+  ${unitName}=                     Get From Dictionary        ${item.unit}   name
+  SelectBox                        itemdraft-unitid           ${unitName}
+
+  ${currilicRegistrationStatus}=   getRegistrationDetailsStatus          ${item.registrationDetails.status}
+  SelectBox                        itemdraft-registrationdetailsstatus   ${currilicRegistrationStatus}
+
+  ${classificationId}=             Get From Dictionary   ${item.classification}   id
+  ${classificationScheme}=         Get From Dictionary   ${item.classification}   scheme
+  Обрати класифікатор              //div[@data-attr='classifications']//button[contains(@class,'choose')]   ${classificationId}   ${classificationScheme}
+
+  ${address}=                      Get From Dictionary     ${item}   address
+
+  SelectBox                        address-regionId        ${address.region}
+  Input Text                       id=address-locality     ${address.locality}
+  Input Text                       id=address-address      ${address.streetAddress}
+  ${postalCode}=                   Convert To String       ${address.postalCode}
+  Input Text                       id=address-postalCode   ${postalCode}
+
+  Click Element                    xpath=//button[contains(text(), 'Зберегти')]
+
+Обрати класифікатор
+  [Arguments]   ${path}   ${id}   ${scheme}
+  Click Element                   xpath=${path}
+  Wait Until Element Is Visible   xpath=//div[@class='fade modal in']//input[contains(@class,'input-search')]
+  Click Element                   xpath=//div[@class='fade modal in']//a[@data-type='${scheme}']
+  Input Text                      xpath=//div[@class='fade modal in']//input[contains(@class,'input-search')]   ${id}
+  Sleep                           2
+  Execute JavaScript              $('span:contains("${id}")').siblings('.fancytree-checkbox').trigger('click')
+  Wait Until Element Is Visible   xpath=//div[@class='fade modal in']//span[@class='remove']
+  Click Element                   xpath=//div[@class='fade modal in']//a[contains(@class,'close-modal')]
+  Sleep                           2
+
+Перейти в мої об`єкти
+  Click Element                   id=category-select
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/asset/sell']
+  Click Link                      xpath=//a[@href='/privatization/asset/sell']
+
+Пошук об’єкта МП по ідентифікатору
+  [Arguments]   ${user_name}   ${asset_id}
+  Switch Browser                      ${BROWSER_ALIAS}
+  Wait Until Page Contains Element    id=main-assetsearch-title
+  ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
+  ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти об`єкт   ${asset_id}
+  Run Keyword Unless                  ${passed}   Fail   Об`єкт не знайдено за ${timeout_on_wait} секунд
+  ${assetViewUrl}=                    Get Element Attribute   xpath=//div[contains(@class, 'one_card')]//a[contains(@class, 'auct_image')]@href
+  Execute JavaScript                  window.location.href = '${assetViewUrl}';
+  Wait Until Page Contains Element    xpath=//span[contains(@class, 'asset-assetID')]   45
+
+Шукати і знайти об`єкт
+  [Arguments]   ${asset_id}
+  Input Text                         id=main-assetsearch-title   ${asset_id}
+  Click Element                      id=search-main
+  Wait Until Page Contains Element   xpath=//span[contains(text() ,'${asset_id}')]   10
+
+Оновити сторінку з об'єктом МП
+  [Arguments]   ${user_name}   ${asset_id}
+  ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${asset_id}
+  Click Element                          css=.asset-reload
+  Wait Until Page Contains Element       xpath=//span[contains(@class, 'asset-assetID')]   45
+
+Отримати інформацію із об'єкта МП
+  [Arguments]   ${user_name}   ${asset_id}   ${field}
+  Run Keyword And Return If   '${field}' == 'title'  Get Text  css=.title
+  Run Keyword And Return If   '${field}' == 'description'  Get Text  css=.description
+  Run Keyword And Return If   '${field}' == 'status'   Get Element Attribute   xpath=//span[@class='status']@data-origin-status
+  Run Keyword And Return   Отримати інформацію про ${field}
+
+Отримати інформацію про assetID
+  Run Keyword And Return  Get Text  css=.asset-assetID
+
+Отримати інформацію про date
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='date-create']@data-origin-date
+
+Отримати інформацію про rectificationPeriod.endDate
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='rectification-period-end']@data-origin-rectification-period-end
+
+Отримати інформацію про decisions[0].title
+  Відкрити таб рішень
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title']
+
+Отримати інформацію про decisions[0].decisionID
+  Відкрити таб рішень
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id']
+
+Відкрити таб рішень
+  Click Element   xpath=//a[@href='#decisions']
+  Sleep           1
+
+Отримати інформацію про assetHolder.name
+   Click Element                   xpath=//a[@data-target='#assetHolder-info-modal']
+   Wait Until Element Is Visible   css=.assetHolder-name
+   Run Keyword And Return          Get Text   css=.assetHolder-name
+
+Отримати інформацію про assetHolder.identifier.scheme
+  Run Keyword And Return   Get Text   css=.assetHolder-identifier-scheme
+
+Отримати інформацію про assetHolder.identifier.id
+  ${identifierId}=   Get Text   csassetHolder-identifier-id
+  Click Element      css=.close
+  Закрити модальне вікно
+  [return]           ${identifierId}
+
+Отримати інформацію assetCustodian.identifier.scheme
+  Click Element                   xpath=//a[@data-target='#assetCustodian-info-modal']
+  Wait Until Element Is Visible   css=.assetCustodian-identifier-scheme
+  Run Keyword And Return          Get Text   css=.assetCustodian-identifier-scheme
+
+Отримати інформацію assetCustodian.identifier.id
+  Run Keyword And Return   Get Text   css=.assetCustodian-identifier-id
+
+Отримати інформацію assetCustodian.identifier.legalName
+  Run Keyword And Return   Get Text   css=.assetCustodian-name
+
+Отримати інформацію assetCustodian.contactPoint.name
+  Run Keyword And Return   Get Text   css=.assetCustodian-contact-point-name
+
+Отримати інформацію assetCustodian.contactPoint.telephone
+  Run Keyword And Return   Get Text   css=.assetCustodian-contact-point-telephone
+
+Отримати інформацію assetCustodian.contactPoint.email
+  ${contactPointEmail}=   Get Text   css=.assetCustodian-contact-point-email
+  Закрити модальне вікно
+  [return]                ${contactPointEmail}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
