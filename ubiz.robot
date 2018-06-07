@@ -1291,4 +1291,45 @@ Scroll To Element
 
 
 
+Створити лот
+  [Arguments]   ${user_name}   ${adapted_data}   ${asset_uaid}
+  Go To    http://test.ubiz.com.ua/privatization/lot
+  Wait Until Element Is Visible   css=.add_tender
+  Click Element                   css=.add_tender
+  Wait Until Element Is Visible   id=select2-lotdraft-asset-container
+  SelectBox                       lotdraft-asset        ${asset_uaid}
+  Input Text                      css=input[name='LotDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
+  ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
+  ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
+  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
+  Input Text                      id=decision-date-0   ${decisionDate}
+  Click Element                   xpath=//button[contains(text(), 'Далі')]
+
+  Wait Until Element Is Visible   xpath=//a[contains(text(), '${asset_uaid}')]
+
+  # ${lotDraftId}=                Execute JavaScript   return $('span[data-asset-draft-id]').attr('data-asset-draft-id')
+
+    # Wait Until Element Is Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
+    Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+    Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication?id=')]
+    Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+    ...   Reload Page
+    ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
+    Перейти в мої лоти
+
+    Click Element                   css=.lot_image
+    Wait Until Element Is Visible   css=.auction-auctionID
+    ${lotID}=                     Get Text   css=.auction-auctionID
+  [return]                        ${lotID}
+
+Перейти в мої лоти
+  Click Element                   id=category-select
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/sell']
+  Click Link                      xpath=//a[@href='/privatization/lot/sell']
+
+Додати умови проведення аукціону
+  [Аргументи] ${user_name}   ${auction}  ${auction_index} ${tender_uaid}
+  Click Element                   xpath=//a[contains(@href, '#auctions')]
+
+
 
