@@ -1525,3 +1525,31 @@ Scroll To Element
   Run Keyword And Return If   '${field}' == 'unit.name'                    Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-unit-name']
   Run Keyword And Return If   '${field}' == 'quantity'                     Отримати кількість одиниць виміру активу об’єкта МП   ${uniq_id}
   Run Keyword And Return If   '${field}' == 'registrationDetails.status'   Get Element Attribute   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-registration-details-status']@data-origin-registration-details-status
+
+Отримати інформацію про auctions[0].procurementMethodType
+  Відкрити таб аукціонів в редагуванні лоту
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[0].status
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[0].tenderAttempts
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[0].value.amount
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[0].minimalStep.amount
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[0].guarantee.amount
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[0].registrationFee.amount
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[0].auctionPeriod.startDate
+  Run Keyword And Return   Get Text   css=.a
+
+Отримати інформацію про auctions[1].tenderingDuration
+  Run Keyword And Return   Get Text   css=.a
