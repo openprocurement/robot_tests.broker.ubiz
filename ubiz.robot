@@ -1331,6 +1331,7 @@ Scroll To Element
   Click Element                   id=category-select
   Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/sell']
   Click Link                      xpath=//a[@href='/privatization/lot/sell']
+  Wait Until Element Is Visible   css=.lot_image
 
 Оновити сторінку з лотом
   [Arguments]   ${user_name}   ${lot_id}
@@ -1371,12 +1372,7 @@ Scroll To Element
 
 Додати умови проведення аукціону
   [Arguments]   ${user_name}   ${auction_data}  ${auction_index}  ${asset_id}
-  Перейти в мої лоти
-
-  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
-  Sleep                            1
-  Click Element                    xpath=//a[contains(@href, '/privatization/lot-edit')]
-
+  Відкрити лот на редагування
   Відкрити таб аукціонів в редагуванні лоту
 
   ${auction_index}=                Evaluate   ${auction_index} + 1
@@ -1458,13 +1454,13 @@ Scroll To Element
 
 
 Відкрити лот на редагування
-  [Arguments]   ${lot_id}
   Перейти в мої лоти
   Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Sleep    1
   Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/')]
   Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
   ...   Reload Page
-  ...   AND   Wait Until Page Contains Element    css=.auction-auctionID   45
+  ...   AND   Wait Until Page Contains Element    id=endEdit  45
 
 Отримати інформацію про lotID
   Run Keyword And Return  Get Text  css=.auction-auctionID
