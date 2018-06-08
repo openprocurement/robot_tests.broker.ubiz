@@ -1304,6 +1304,7 @@ Scroll To Element
   Wait Until Element Is Visible   css=.add_tender
   Click Element                   css=.add_tender
   Wait Until Element Is Visible   id=select2-lotdraft-asset-container
+  Log To Console    ${asset_uaid}
   SelectBox                       lotdraft-asset        ${asset_uaid}
   Input Text                      css=input[name='LotDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
   ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
@@ -1313,21 +1314,16 @@ Scroll To Element
   Click Element                   xpath=//button[contains(text(), 'Далі')]
 
   Wait Until Element Is Visible   xpath=//a[contains(text(), '${asset_uaid}')]
+  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication?id=')]
+  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
+  Перейти в мої лоти
 
-  # ${lotDraftId}=                Execute JavaScript   return $('span[data-asset-draft-id]').attr('data-asset-draft-id')
-
-    # Wait Until Element Is Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
-    Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
-    Sleep                           1
-    Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
-    Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
-    ...   Reload Page
-    ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
-    Перейти в мої лоти
-
-    Click Element                   css=.lot_image
-    Wait Until Element Is Visible   css=.auction-auctionID
-    ${lotID}=                     Get Text   css=.auction-auctionID
+  Click Element                   css=.lot_image
+  Wait Until Element Is Visible   css=.auction-auctionID
+  ${lotID}=                       Get Text   css=.auction-auctionID
   [return]                        ${lotID}
 
 Перейти в мої лоти
@@ -1340,7 +1336,8 @@ Scroll To Element
   Log To Console   not implemented
 
 Додати умови проведення аукціону
-  [Arguments]   ${user_name}   ${auction}   ${auction_index}   ${tender_uaid}
+  [Аргументи] ${user_name}   ${auction}  ${auction_index} ${tender_uaid}
+  Перейти в мої лоти
   Click Element                   xpath=//a[contains(@href, '#auctions')]
 
 Перейти в модуль реєстра об’єктів
@@ -1373,9 +1370,4 @@ Scroll To Element
   Click Element                      id=search-main
   Wait Until Page Contains Element   xpath=//span[contains(text() ,'${lot_id}')]   10
   Sleep                              3
-
-
-
-
-
 
