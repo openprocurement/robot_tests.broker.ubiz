@@ -884,7 +884,8 @@ Login
 
 Таб Активи аукціону
   Скролл до табів
-  Click Link            xpath=//a[@href='#items']
+  Click Link        xpath=//a[@href='#items']
+  Sleep             1
 
 Таб Документи
   Скролл до табів
@@ -1319,7 +1320,7 @@ Scroll To Element
   Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
   Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
   ...   Reload Page
-  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
+  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '${asset_uaid}')]
   Перейти в мої лоти
 
   Click Element                   css=.lot_image
@@ -1525,3 +1526,54 @@ Scroll To Element
   Run Keyword And Return If   '${field}' == 'unit.name'                    Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-unit-name']
   Run Keyword And Return If   '${field}' == 'quantity'                     Отримати кількість одиниць виміру активу об’єкта МП   ${uniq_id}
   Run Keyword And Return If   '${field}' == 'registrationDetails.status'   Get Element Attribute   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-registration-details-status']@data-origin-registration-details-status
+
+Завантажити ілюстрацію в лот
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}
+  ubiz.Завантажити документ в лот з типом   ${user_name}   ${lot_id}   ${file_path}   illustration
+
+Завантажити документ в лот з типом
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}   ${document_type}
+  Відкрити лот на редагування
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/lot')]
+  Wait Until Element Is Visible   id=lotpublished-description
+                                  Розгорнути блоки
+  Click Element                   xpath=//div[@id='documents-box']//button[contains(@class, 'add-item')]
+  Sleep                           2
+  ${addedBlock}=                  Execute JavaScript   return $('#documents-list-w0-documents').find('.form-documents-item').last().attr('id');
+  Choose File                     xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
+  Wait Until Page Contains        Done    30
+  Select From List By Value       xpath=//div[@id='${addedBlock}']//select  ${document_type}
+  Click Element                   css=.inactive-btn
+
+Завантажити документ в умови проведення аукціону
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}   ${document_type}   ${auction_index}
+  Відкрити лот на редагування
+  Відкрити таб аукціонів в редагуванні лоту
+  ${auction_index}=           Evaluate   ${auction_index} + 1
+  Click List                  css=.position-${index}
+                              Розгорнути блоки
+  Click Element               xpath=//div[@id='documents-box']//button[contains(@class, 'add-item')]
+  Sleep                       2
+  ${addedBlock}=              Execute JavaScript   return $('#documents-list-w0-documents').find('.form-documents-item').last().attr('id');
+  Choose File                 xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
+  Wait Until Page Contains    Done    30
+  Select From List By Value   xpath=//div[@id='${addedBlock}']//select  ${document_type}
+  Click Element               css=.inactive-btn
+
+
+Внести зміни в лот
+  [Arguments]   ${user_name}   ${lot_id}   ${field}   ${value}
+  Відкрити лот на редагування
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/lot')]
+  Wait Until Element Is Visible   id=lotpublished-description
+  Run Keyword If   '${field}' == 'title'         Input Text  id=lotpublished-title         ${value}
+  Run Keyword If   '${field}' == 'description'   Input Text  id=lotpublished-description   ${value}
+  Click Element     css=.inactive-btn
+
+Внести зміни в актив лоту
+  [Arguments]   ${user_name}   ${uniq_id}   ${lot_id}   ${field}   ${value}
+  Відкрити лот на редагування
+  Таб Активи аукціону
+  #Click Element    xpath=//table[@class='table']//a[contains(@href, '/privatization/asset-edit/item')]
+  #Run Keyword If  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу об’єкта МП   ${value}
+  Click Element    css=.inactive-btn
