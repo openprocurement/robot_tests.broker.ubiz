@@ -1330,6 +1330,7 @@ Scroll To Element
 
 Перейти в мої лоти
   Click Element                   id=category-select
+  Sleep                           1
   Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/sell']
   Click Link                      xpath=//a[@href='/privatization/lot/sell']
   Wait Until Element Is Visible   css=.lot_image
@@ -1455,6 +1456,7 @@ Scroll To Element
 
 
 Відкрити лот на редагування
+  На початок сторінки
   Перейти в мої лоти
   Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
   Sleep    1
@@ -1549,17 +1551,17 @@ Scroll To Element
   [Arguments]   ${user_name}   ${lot_id}   ${file_path}   ${document_type}   ${auction_index}
   Відкрити лот на редагування
   Відкрити таб аукціонів в редагуванні лоту
-  ${auction_index}=           Evaluate   ${auction_index} + 1
-  Click List                  css=.position-${index}
-                              Розгорнути блоки
-  Click Element               xpath=//div[@id='documents-box']//button[contains(@class, 'add-item')]
-  Sleep                       2
-  ${addedBlock}=              Execute JavaScript   return $('#documents-list-w0-documents').find('.form-documents-item').last().attr('id');
-  Choose File                 xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
-  Wait Until Page Contains    Done    30
-  Select From List By Value   xpath=//div[@id='${addedBlock}']//select  ${document_type}
-  Click Element               css=.inactive-btn
-
+  ${auction_index}=               Evaluate   ${auction_index} + 1
+  Click Link                      css=.position-${auction_index}
+  Wait Until Element Is Visible   id=AuctionLot-value-amount
+                                  Розгорнути блоки
+  Click Element                   xpath=//div[@id='documents-box']//button[contains(@class, 'add-item')]
+  Sleep                           2
+  ${addedBlock}=                  Execute JavaScript   return $('#documents-list-w0-documents').find('.form-documents-item').last().attr('id');
+  Choose File                     xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
+  Wait Until Page Contains        Done    30
+  Select From List By Value       xpath=//div[@id='${addedBlock}']//select  ${document_type}
+  Click Element                   css=.inactive-btn
 
 Внести зміни в лот
   [Arguments]   ${user_name}   ${lot_id}   ${field}   ${value}
@@ -1570,10 +1572,16 @@ Scroll To Element
   Run Keyword If   '${field}' == 'description'   Input Text  id=lotpublished-description   ${value}
   Click Element     css=.inactive-btn
 
+Внести зміни до кількості одиниць виміру активу лоту
+  [Arguments]    ${value}
+  ${quantity}=   Convert To String           ${value}
+  Input Text     id=itempublished-quantity   ${quantity}
+
 Внести зміни в актив лоту
   [Arguments]   ${user_name}   ${uniq_id}   ${lot_id}   ${field}   ${value}
   Відкрити лот на редагування
   Таб Активи аукціону
-  #Click Element    xpath=//table[@class='table']//a[contains(@href, '/privatization/asset-edit/item')]
-  #Run Keyword If  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу об’єкта МП   ${value}
-  Click Element    css=.inactive-btn
+  Execute JavaScript               $('td:contains("${uniq_id}")').siblings('td').last().find('a').last().click();
+  Wait Until Element Is Visible    id=itempublished-quantity
+  Run Keyword If                  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу лоту   ${value}
+  Click Element                    css=.inactive-btn
