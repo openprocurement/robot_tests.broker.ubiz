@@ -1581,7 +1581,8 @@ Scroll To Element
   [Arguments]   ${user_name}   ${uniq_id}   ${lot_id}   ${field}   ${value}
   Відкрити лот на редагування
   Таб Активи аукціону
-  Execute JavaScript               $('td:contains("${uniq_id}")').siblings('td').last().find('a').last().click();
+  ${itemEditUrl}=                  Execute JavaScript   return $('td:contains("${uniq_id}")').siblings('td').last().find('a').last().attr('href')
+  Click Element                    xpath=//a[@href='${itemEditUrl}']
   Wait Until Element Is Visible    id=itempublished-quantity
   Run Keyword If                  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу лоту   ${value}
   Click Element                    css=.inactive-btn
