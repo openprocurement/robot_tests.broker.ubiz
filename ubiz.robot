@@ -1365,6 +1365,8 @@ Scroll To Element
 
 Внести інформацію по 2 аукціону
   [Arguments]   ${auction_data}
+  SelectBox       auctionlot-tenderingduration   30
+  Click Element   css=.inactive-btn
 
 
 Додати умови проведення аукціону
@@ -1380,11 +1382,14 @@ Scroll To Element
   ${auction_index}=                Evaluate   ${auction_index} + 1
   Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
   Click Element                    xpath=//a[contains(@class, 'position-${auction_index}')]
+
   Wait Until Element Is Visible    css=.inactive-btn
   Run Keyword If   ${auction_index} == 1   Внести інформацію по 1 аукціону  ${auction_data}
   Run Keyword If   ${auction_index} == 2   Внести інформацію по 2 аукціону  ${auction_data}
   Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
-
+  Run Keyword If   ${auction_index} == 2   Run Keywords
+  ...   Click Element  xpath=//a[contains(@href, '/privatization/lot/verification')]
+  ...   AND   Відкрити всі лоти
 
 Перейти в модуль реєстра об’єктів
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
@@ -1440,3 +1445,9 @@ Scroll To Element
   Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
   Wait Until Element Is Visible    css=.terminate
   Click Element                    css=.terminate
+
+Відкрити всі лоти
+  На початок сторінки
+  Click Element                   id=category-select
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/index']
+  Click Link                      xpath=//a[@href='/privatization/lot/index']
