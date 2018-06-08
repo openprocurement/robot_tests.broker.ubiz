@@ -1418,3 +1418,25 @@ Scroll To Element
   Wait Until Page Contains Element   xpath=//span[contains(text() ,'${lot_id}')]   10
   Sleep                              3
 
+Завантажити документ для видалення лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}
+  Перейти в мої лоти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
+  Wait Until Element Is Visible    css=.upload-documents
+  Click Element                    css=.add-item
+  Wait Until Element Is Visible    css=.delete-document
+  Choose File                      css=.document-img   ${file_path}
+  Wait Until Page Contains         Done    30
+  Click Element                    css=.upload-documents
+
+
+Видалити лот
+  [Arguments]   ${user_name}   ${lot_id}
+  Перейти в мої лоти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
+  Wait Until Element Is Visible    css=.terminate
+  Click Element                    css=.terminate
