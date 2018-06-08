@@ -1395,7 +1395,6 @@ Scroll To Element
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
   ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
   Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
-  Wait Until Element Is Visible   css=.inactive-btn
 
 Отримати інформацію із лоту
   [Arguments]   ${user_name}   ${lot_id}   ${field}
@@ -1461,3 +1460,57 @@ Scroll To Element
   Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
   ...   Reload Page
   ...   AND   Wait Until Page Contains Element    css=.auction-auctionID   45
+
+Отримати інформацію про lotID
+  Run Keyword And Return  Get Text  css=.auction-auctionID
+
+Отримати інформацію про assets
+  Run Keyword And Return  Get Text  css=.assetID
+
+
+Отримати інформацію про decisions[1].title
+  Відкрити таб рішень
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title']
+
+Отримати інформацію про decisions[1].decisionID
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id']
+
+Отримати інформацію про decisions[1].decisionDate
+  ${decisionDate}=   Get Text   xpath=//td[@class='decision-date']
+  ${decisionDate}=   convert_date_to_dash_format   ${decisionDate}
+  [return]           ${decisionDate}
+
+Отримати інформацію про lotHolder.name
+  Click Element                   xpath=//a[@data-target='#lotHolder-info-modal']
+  Wait Until Element Is Visible   css=.lotHolder-name
+  Run Keyword And Return          Get Text   css=.lotHolder-name
+
+Отримати інформацію про lotHolder.identifier.scheme
+  Run Keyword And Return   Get Text   css=.lotHolder-identifier-scheme
+
+Отримати інформацію про lotHolder.identifier.id
+  ${identifierId}=   Get Text   css=.lotHolder-identifier-id
+                     Закрити модальне вікно
+  [return]           ${identifierId}
+
+Отримати інформацію про lotCustodian.identifier.scheme
+  Click Element                   xpath=//a[@data-target='#lotCustodian-info-modal']
+  Wait Until Element Is Visible   css=.lotCustodian-identifier-scheme
+  Run Keyword And Return          Get Text   css=.lotCustodian-identifier-scheme
+
+Отримати інформацію про lotCustodian.identifier.id
+  Run Keyword And Return   Get Text   css=.lotCustodian-identifier-id
+
+Отримати інформацію про lotCustodian.identifier.legalName
+  Run Keyword And Return   Get Text   css=.lotCustodian-name
+
+Отримати інформацію про lotCustodian.contactPoint.name
+  Run Keyword And Return   Get Text   css=.lotCustodian-contact-point-name
+
+Отримати інформацію про lotCustodian.contactPoint.telephone
+  Run Keyword And Return   Get Text   css=.lotCustodian-contact-point-telephone
+
+Отримати інформацію про lotCustodian.contactPoint.email
+  ${contactPointEmail}=   Get Text   css=.lotCustodian-contact-point-email
+                          Закрити модальне вікно
+  [return]                ${contactPointEmail}
