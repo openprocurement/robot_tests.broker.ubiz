@@ -1396,11 +1396,16 @@ Scroll To Element
   ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
   Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
 
+Отримати інформацію про статус лоту
+   Reload Page
+   Wait Until Element Is Visible   xpath=//span[@class='status']@data-origin-status
+   Run Keyword And Return          Get Element Attribute   xpath=//span[@class='status']@data-origin-status
+
 Отримати інформацію із лоту
   [Arguments]   ${user_name}   ${lot_id}   ${field}
   Run Keyword And Return If   '${field}' == 'title'        Get Text  css=.title
   Run Keyword And Return If   '${field}' == 'description'  Get Text  css=.description
-  Run Keyword And Return If   '${field}' == 'status'       Get Element Attribute   xpath=//span[@class='status']@data-origin-status
+  Run Keyword And Return If   '${field}' == 'status'       Отримати інформацію про статус лоту
   Run Keyword And Return       Отримати інформацію про ${field}
 
 Пошук лоту по ідентифікатору
@@ -1470,13 +1475,13 @@ Scroll To Element
 
 Отримати інформацію про decisions[1].title
   Відкрити таб рішень
-  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title']
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title-1']
 
 Отримати інформацію про decisions[1].decisionID
-  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id']
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id-1']
 
 Отримати інформацію про decisions[1].decisionDate
-  ${decisionDate}=   Get Text   xpath=//td[@class='decision-date']
+  ${decisionDate}=   Get Text   xpath=//td[@class='decision-date-1']
   ${decisionDate}=   convert_date_to_dash_format   ${decisionDate}
   [return]           ${decisionDate}
 
@@ -1514,3 +1519,13 @@ Scroll To Element
   ${contactPointEmail}=   Get Text   css=.lotCustodian-contact-point-email
                           Закрити модальне вікно
   [return]                ${contactPointEmail}
+
+Отримати інформацію з активу лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${uniq_id}   ${field}
+  Таб Активи аукціону
+  Run Keyword And Return If   '${field}' == 'description'                  Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//p[contains(@class, 'item-description')]
+  Run Keyword And Return If   '${field}' == 'classification.scheme'        Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-classification-scheme']
+  Run Keyword And Return If   '${field}' == 'classification.id'            Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-classification-id']
+  Run Keyword And Return If   '${field}' == 'unit.name'                    Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-unit-name']
+  Run Keyword And Return If   '${field}' == 'quantity'                     Отримати кількість одиниць виміру активу об’єкта МП   ${uniq_id}
+  Run Keyword And Return If   '${field}' == 'registrationDetails.status'   Get Element Attribute   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-registration-details-status']@data-origin-registration-details-status
