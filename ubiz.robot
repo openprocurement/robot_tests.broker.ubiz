@@ -1108,13 +1108,13 @@ Scroll To Element
 
 Отримати інформацію про decisions[0].title
   Відкрити таб рішень
-  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title']
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title-0']
 
 Отримати інформацію про decisions[0].decisionID
-  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id']
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id-0']
 
 Отримати інформацію про decisions[0].decisionDate
-  ${decisionDate}=   Get Text   xpath=//td[@class='decision-date']
+  ${decisionDate}=   Get Text   xpath=//td[@class='decision-date-0']
   ${decisionDate}=   convert_date_to_dash_format   ${decisionDate}
   [return]           ${decisionDate}
 
@@ -1394,7 +1394,7 @@ Scroll To Element
 
 Отримати інформацію про статус лоту
    Reload Page
-   Wait Until Element Is Visible   xpath=//span[@class='status']@data-origin-status
+   Wait Until Element Is Visible   xpath=//span[@class='status']
    Run Keyword And Return          Get Element Attribute   xpath=//span[@class='status']@data-origin-status
 
 Отримати інформацію із лоту
