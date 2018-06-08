@@ -1345,14 +1345,31 @@ Scroll To Element
   ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
   Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
 
-Видалити лот
+Отримати інформацію із лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${field}
+  Run Keyword And Return If   '${field}' == 'title'        Get Text  css=.title
+  Run Keyword And Return If   '${field}' == 'description'  Get Text  css=.description
+  Run Keyword And Return If   '${field}' == 'status'       Get Element Attribute   xpath=//span[@class='status']@data-origin-status
+  Run Keyword And Return       Отримати інформацію про ${field}
+
+Пошук лоту по ідентифікатору
   [Arguments]   ${user_name}   ${lot_id}
-  Перейти в мої лоти
-  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
-  Sleep                            1
-  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
-  Wait Until Element Is Visible    css=.terminate
-  Click Element                    css=.terminate
+  Switch Browser                      ${BROWSER_ALIAS}
+  Go To                               http://test.ubiz.com.ua/privatization/lot
+  Wait Until Page Contains Element    id=main-lotsearch-title
+  ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
+  ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти лот   ${lot_id}
+  Run Keyword Unless                  ${passed}   Fail   Лот не знайдено за ${timeout_on_wait} секунд
+  ${lotViewUrl}=                      Get Element Attribute   xpath=//div[contains(@class, 'one_card')]//a[contains(@class, 'auct_image')]@href
+  Execute JavaScript                  window.location.href = '${lotViewUrl}';
+  Wait Until Page Contains Element    css=.auction-auctionID   45
+
+Шукати і знайти лот
+  [Arguments]   ${lot_id}
+  Input Text                         id=main-lotsearch-title   ${lot_id}
+  Click Element                      id=search-main
+  Wait Until Page Contains Element   xpath=//span[contains(text() ,'${lot_id}')]   10
+  Sleep                              3
 
 Завантажити документ для видалення лоту
   [Arguments]   ${user_name}   ${lot_id}   ${file_path}
@@ -1366,3 +1383,13 @@ Scroll To Element
   Choose File                      css=.document-img   ${file_path}
   Wait Until Page Contains         Done    30
   Click Element                    css=.upload-documents
+
+
+Видалити лот
+  [Arguments]   ${user_name}   ${lot_id}
+  Перейти в мої лоти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
+  Wait Until Element Is Visible    css=.terminate
+  Click Element                    css=.terminate
