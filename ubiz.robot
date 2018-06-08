@@ -1336,9 +1336,7 @@ Scroll To Element
   Log To Console   not implemented
 
 Додати умови проведення аукціону
-  [Аргументи] ${user_name}   ${auction}  ${auction_index} ${tender_uaid}
-  Перейти в мої лоти
-  Click Element                   xpath=//a[contains(@href, '#auctions')]
+  [Arguments]   ${user_name}   ${auction}   ${auction_index}    ${tender_uaid}
 
 Перейти в модуль реєстра об’єктів
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
@@ -1393,3 +1391,12 @@ Scroll To Element
   Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
   Wait Until Element Is Visible    css=.terminate
   Click Element                    css=.terminate
+
+Відкрити лот на редагування
+  [Arguments]   ${lot_id}
+  Перейти в мої лоти
+  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/')]
+  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Page Contains Element    css=.auction-auctionID   45
