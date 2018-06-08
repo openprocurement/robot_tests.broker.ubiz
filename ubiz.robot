@@ -1517,6 +1517,80 @@ Scroll To Element
                           Закрити модальне вікно
   [return]                ${contactPointEmail}
 
+Отримати інформацію про auctions[0].procurementMethodType
+    Відкрити таб аукціонів в редагуванні лоту
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-1']@data-origin-procurementMethodType
+
+Отримати інформацію про auctions[1].procurementMethodType
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-2']@data-origin-procurementMethodType
+
+Отримати інформацію про auctions[2].procurementMethodType
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-3']@data-origin-procurementMethodType
+
+Отримати інформацію про auctions[0].status
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-1']@data-origin-auction-status
+
+Отримати інформацію про auctions[1].status
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-2']@data-origin-auction-status
+
+Отримати інформацію про auctions[2].status
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-3']@data-origin-auction-status
+
+Отримати інформацію про auctions[0].tenderAttempts
+    Run Keyword And Return   Get Text   class=auction-tenderAttempts-1
+
+Отримати інформацію про auctions[1].tenderAttempts
+    Run Keyword And Return   Get Text   class=auction-tenderAttempts-2
+
+Отримати інформацію про auctions[2].tenderAttempts
+    Run Keyword And Return   Get Text   class=auction-tenderAttempts-3
+
+Отримати інформацію про auctions[0].value.amount
+    Run Keyword And Return   Get Text   class=auction-value-amount-1
+
+Отримати інформацію про auctions[1].value.amount
+    Run Keyword And Return   Get Text   class=auction-value-amount-2
+
+Отримати інформацію про auctions[2].value.amount
+    Run Keyword And Return   Get Text   class=auction-value-amount-3
+
+Отримати інформацію про auctions[0].minimalStep.amount
+    Run Keyword And Return   Get Text   class=auction-minimalStep-amount-1
+
+Отримати інформацію про auctions[1].minimalStep.amount
+    Run Keyword And Return   Get Text   class=auction-minimalStep-amount-2
+
+Отримати інформацію про auctions[0].guarantee.amount
+    Run Keyword And Return   Get Text   class=auction-guarantee-amount-1
+
+Отримати інформацію про auctions[1].guarantee.amount
+    Run Keyword And Return   Get Text   class=auction-guarantee-amount-2
+
+Отримати інформацію про auctions[2].guarantee.amount
+    Run Keyword And Return   Get Text   class=auction-guarantee-amount-3
+
+Отримати інформацію про auctions[0].registrationFee.amount
+    Run Keyword And Return   Get Text   class=auction-registrationFee-amount-1
+
+Отримати інформацію про auctions[1].registrationFee.amount
+    Run Keyword And Return   Get Text   class=auction-registrationFee-amount-2
+
+Отримати інформацію про auctions[2].registrationFee.amount
+    Run Keyword And Return   Get Text   class=auction-registrationFee-amount-3
+
+Отримати інформацію про auctions[0].auctionPeriod.startDate
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
+
+Отримати інформацію про auctions[1].tenderingDuration
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-auction-tenderingDuration
+
+Отримати інформацію про auctions[2].tenderingDuration
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-auction-tenderingDuration
+
+Отримати інформацію про auctions[0].auctionPeriod.startDate
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
+
+
 Отримати інформацію з активу лоту
   [Arguments]   ${user_name}   ${lot_id}   ${uniq_id}   ${field}
   Таб Активи аукціону
