@@ -1321,26 +1321,9 @@ Scroll To Element
   ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
   Перейти в мої лоти
 
-<<<<<<< HEAD
   Click Element                   css=.lot_image
   Wait Until Element Is Visible   css=.auction-auctionID
   ${lotID}=                       Get Text   css=.auction-auctionID
-=======
-  # ${lotDraftId}=                Execute JavaScript   return $('span[data-asset-draft-id]').attr('data-asset-draft-id')
-
-    # Wait Until Element Is Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
-    Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
-    Sleep                           1
-    Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
-    Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
-    ...   Reload Page
-    ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
-    Перейти в мої лоти
-
-    Click Element                   css=.lot_image
-    Wait Until Element Is Visible   css=.auction-auctionID
-    ${lotID}=                     Get Text   css=.auction-auctionID
->>>>>>> 624d0b3bf58ffaa13964f8dd0bfb2a8a5068e90e
   [return]                        ${lotID}
 
 Перейти в мої лоти
@@ -1353,22 +1336,11 @@ Scroll To Element
   Log To Console   not implemented
 
 Додати умови проведення аукціону
-<<<<<<< HEAD
   [Аргументи] ${user_name}   ${auction}  ${auction_index} ${tender_uaid}
   Перейти в мої лоти
-
-=======
-  [Arguments]   ${user_name}   ${auction}   ${auction_index}   ${tender_uaid}
->>>>>>> 624d0b3bf58ffaa13964f8dd0bfb2a8a5068e90e
   Click Element                   xpath=//a[contains(@href, '#auctions')]
 
 Перейти в модуль реєстра об’єктів
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
   ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
   Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
-
-
-
-
-
-
