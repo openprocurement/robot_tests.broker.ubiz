@@ -1065,7 +1065,7 @@ Scroll To Element
 Пошук об’єкта МП по ідентифікатору
   [Arguments]   ${user_name}   ${asset_id}
   Switch Browser                      ${BROWSER_ALIAS}
-  Go To    http://test.ubiz.com.ua/privatization/asset
+  Перейти в модуль реєстра об’єктів
   Wait Until Page Contains Element    id=main-assetsearch-title
   ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
   ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти об`єкт   ${asset_id}
@@ -1342,6 +1342,14 @@ Scroll To Element
 Додати умови проведення аукціону
   [Arguments]   ${user_name}   ${auction}   ${auction_index}   ${tender_uaid}
   Click Element                   xpath=//a[contains(@href, '#auctions')]
+
+Перейти в модуль реєстра об’єктів
+  Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
+  ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
+  Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
+
+
+
 
 
 
