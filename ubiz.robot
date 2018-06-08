@@ -1451,3 +1451,13 @@ Scroll To Element
   Click Element                   id=category-select
   Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/index']
   Click Link                      xpath=//a[@href='/privatization/lot/index']
+
+
+Відкрити лот на редагування
+  [Arguments]   ${lot_id}
+  Перейти в мої лоти
+  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/')]
+  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Page Contains Element    css=.auction-auctionID   45
