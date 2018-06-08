@@ -1315,7 +1315,8 @@ Scroll To Element
 
   Wait Until Element Is Visible   xpath=//a[contains(text(), '${asset_uaid}')]
   Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
-  Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication?id=')]
+  Sleep                           1
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
   Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
   ...   Reload Page
   ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
@@ -1333,17 +1334,63 @@ Scroll To Element
 
 Оновити сторінку з лотом
   [Arguments]   ${user_name}   ${lot_id}
-  Log To Console   not implemented
+  ubiz.Пошук лоту по ідентифікатору   ${user_name}   ${lot_id}
+  Click Element                          css=.lot-reload
+  Wait Until Page Contains Element       xpath=//span[contains(@class, 'auction-auctionID')]   45
+
+
+Відкрити таб аукціонів в редагуванні лоту
+  Wait Until Element Is Visible   xpath=//a[contains(@href, '#auctions')]
+  Click Element                   xpath=//a[contains(@href, '#auctions')]
+  Sleep                           1
+
+Внести інформацію по 1 аукціону
+  [Arguments]   ${auction_data}
+  ${auctionPeriodStartDate}=   auction_period_to_broker_format   ${auction_data.auctionPeriod.startDate}
+  ${valueAmount} =             Convert To String      ${auction_data.value.amount}
+  ${valueAddedTaxIncluded}     Convert To String      ${auction_data.value.valueAddedTaxIncluded}
+  ${valueAddedTaxIncluded}     Convert To Lowercase   ${valueAddedTaxIncluded}
+  ${minimalStepAmount}=        Convert To String      ${auction_data.minimalStep.amount}
+  ${guaranteeAmount}=          Convert To String      ${auction_data.guarantee.amount}
+
+  Execute JavaScript           $('#auctionlot-auctionperiod-startdate-disp').removeAttr('readonly');
+  Input Text                   id=auctionlot-auctionperiod-startdate-disp   ${auctionPeriodStartDate}
+  Input Text                   id=AuctionLot-value-amount               ${valueAmount}
+  SelectBox                    AuctionLot-value-valueAddedTaxIncluded   ${valueAddedTaxIncluded}
+  Input Text                   id=AuctionLot-minimalStep-amount         ${minimalStepAmount}
+  Input Text                   id=AuctionLot-guarantee-amount           ${guaranteeAmount}
+  Click Element                css=.document_box
+  Click Element                css=.inactive-btn
+
+
+Внести інформацію по 2 аукціону
+  [Arguments]   ${auction_data}
+
 
 Додати умови проведення аукціону
-  [Аргументи] ${user_name}   ${auction}  ${auction_index} ${tender_uaid}
+  [Arguments]   ${user_name}   ${auction_data}  ${auction_index}  ${asset_id}
   Перейти в мої лоти
-  Click Element                   xpath=//a[contains(@href, '#auctions')]
+
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot-edit')]
+
+  Відкрити таб аукціонів в редагуванні лоту
+
+  ${auction_index}=                Evaluate   ${auction_index} + 1
+  Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
+  Click Element                    xpath=//a[contains(@class, 'position-${auction_index}')]
+  Wait Until Element Is Visible    css=.inactive-btn
+  Run Keyword If   ${auction_index} == 1   Внести інформацію по 1 аукціону  ${auction_data}
+  Run Keyword If   ${auction_index} == 2   Внести інформацію по 2 аукціону  ${auction_data}
+  Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
+
 
 Перейти в модуль реєстра об’єктів
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
   ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
   Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
+  Wait Until Element Is Visible   css=.inactive-btn
 
 Отримати інформацію із лоту
   [Arguments]   ${user_name}   ${lot_id}   ${field}
