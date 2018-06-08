@@ -1271,21 +1271,27 @@ Scroll To Element
   Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
   Sleep                            1
   Click Element                    xpath=//a[contains(@href, '/privatization/asset/delete')]
-  Wait Until Element Is Visible    css=.inactive-btn
+  Wait Until Element Is Visible    css=.upload-documents
   Click Element                    css=.add-item
   Wait Until Element Is Visible    css=.delete-document
   Choose File                      css=.document-img   ${file_path}
   Wait Until Page Contains         Done    30
+  Click Element                    css=.upload-documents
 
 Видалити об'єкт МП
-  [Arguments]   ${user_name}  ${asset_id}
-  Click Element   css=.inactive-btn
+  [Arguments]   ${user_name}   ${asset_id}
+  Перейти в мої об`єкти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/asset/delete')]
+  Wait Until Element Is Visible    css=.terminate
+  Click Element                    css=.terminate
 
 Отримати документ з об’єкту
   [Arguments]   ${user_name}   ${asset_id}   ${document_id}
   Таб Документи
   ${fileName}=   Get Text                 xpath=//div[@id='documents_asset']//a[contains(text(), '${document_id}')]
-  ${fileUrl}=    Get Element Attribute    xpath=//div[@id='documents_asset']//a[contains(text(), '${document_id}')]a@href
+  ${fileUrl}=    Get Element Attribute    xpath=//div[@id='documents_asset']//a[contains(text(), '${document_id}')]@href
   ${fileName}=   download_file_from_url   ${fileUrl}   ${OUTPUT_DIR}${/}${fileName}
   [return]       ${fileName}
 
@@ -1293,6 +1299,7 @@ Scroll To Element
 
 Створити лот
   [Arguments]   ${user_name}   ${adapted_data}   ${asset_uaid}
+  Log To Console   ${asset_uaid}
   Go To    http://test.ubiz.com.ua/privatization/lot
   Wait Until Element Is Visible   css=.add_tender
   Click Element                   css=.add_tender
@@ -1314,9 +1321,26 @@ Scroll To Element
   ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
   Перейти в мої лоти
 
+<<<<<<< HEAD
   Click Element                   css=.lot_image
   Wait Until Element Is Visible   css=.auction-auctionID
   ${lotID}=                       Get Text   css=.auction-auctionID
+=======
+  # ${lotDraftId}=                Execute JavaScript   return $('span[data-asset-draft-id]').attr('data-asset-draft-id')
+
+    # Wait Until Element Is Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
+    Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+    Sleep                           1
+    Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
+    Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+    ...   Reload Page
+    ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${asset_uaid}')]
+    Перейти в мої лоти
+
+    Click Element                   css=.lot_image
+    Wait Until Element Is Visible   css=.auction-auctionID
+    ${lotID}=                     Get Text   css=.auction-auctionID
+>>>>>>> 624d0b3bf58ffaa13964f8dd0bfb2a8a5068e90e
   [return]                        ${lotID}
 
 Перейти в мої лоти
@@ -1324,10 +1348,18 @@ Scroll To Element
   Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/sell']
   Click Link                      xpath=//a[@href='/privatization/lot/sell']
 
+Оновити сторінку з лотом
+  [Arguments]   ${user_name}   ${lot_id}
+  Log To Console   not implemented
+
 Додати умови проведення аукціону
+<<<<<<< HEAD
   [Аргументи] ${user_name}   ${auction}  ${auction_index} ${tender_uaid}
   Перейти в мої лоти
 
+=======
+  [Arguments]   ${user_name}   ${auction}   ${auction_index}   ${tender_uaid}
+>>>>>>> 624d0b3bf58ffaa13964f8dd0bfb2a8a5068e90e
   Click Element                   xpath=//a[contains(@href, '#auctions')]
 
 
