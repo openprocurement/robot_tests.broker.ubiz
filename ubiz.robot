@@ -1344,3 +1344,25 @@ Scroll To Element
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
   ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
   Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
+
+Видалити лот
+  [Arguments]   ${user_name}   ${lot_id}
+  Перейти в мої лоти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
+  Wait Until Element Is Visible    css=.terminate
+  Click Element                    css=.terminate
+
+Завантажити документ для видалення лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}
+  Перейти в мої лоти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
+  Wait Until Element Is Visible    css=.upload-documents
+  Click Element                    css=.add-item
+  Wait Until Element Is Visible    css=.delete-document
+  Choose File                      css=.document-img   ${file_path}
+  Wait Until Page Contains         Done    30
+  Click Element                    css=.upload-documents
