@@ -27,6 +27,10 @@ def auction_period_to_broker_format(isodate):
     toFormat = parseDateTime.strftime("%d-%m-%Y %H:%M")
     return toFormat
 
+def parse_iso(isoDate, toFormat):
+    parseDateTime = parse_date(isoDate)
+    return parseDateTime.strftime(toFormat)
+
 def adapt_items_data(field_name, value):
     if field_name == 'quantity':
         value = float(value)
@@ -58,6 +62,14 @@ def cdb_format_to_view_format(string):
         u"bidder2": u"Два",
         u"sub_False": u"Продажу",
         u"sub_True":  u"Оренди"
+    }.get(string, string)
+
+def getRegistrationDetailsStatus(string):
+    return {
+        u"unknown":     u'Дефолтне значення',
+        u"registering": u'Об’єкт реєструється',
+        u"complete":    u'Об’єкт зареєстровано',
+
     }.get(string, string)
 
 def view_to_cdb_fromat(string):
@@ -137,6 +149,7 @@ def subtract_from_time(date_time, subtr_min, subtr_sec):
     sub = (sub - timedelta(minutes=int(subtr_min),
                            seconds=int(subtr_sec)))
     return timezone('Europe/Kiev').localize(sub).strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+
 def adapt_procuringEntity(auction_data):
     auction_data.data.procuringEntity['name'] = u"ПАТ \"Прайм Банк\""
     auction_data.data.procuringEntity['contactPoint']['telephone'] = u"0993698510"
@@ -144,9 +157,21 @@ def adapt_procuringEntity(auction_data):
     return auction_data
 
 def before_create_auction(auction_data, role_name):
-    if role_name == 'tender_owner':
-        auction_data = adapt_procuringEntity(auction_data)
+    if role_name != 'tender_owner':
+        return auction_data
+    if  auction_data.data.has_key('adapt_procuringEntity'):
+            auction_data = adapt_procuringEntity(auction_data)
+    if  auction_data.data.has_key('assetCustodian'):
+        auction_data = adapt_assetCustodian(auction_data)    
     return auction_data
 
 def join(l, separator):
     return separator.join(l)
+
+def adapt_assetCustodian(asset_data):
+    asset_data.data.assetCustodian['name'] = u"ПАТ \"Прайм Банк\""
+    asset_data.data.assetCustodian['identifier']['legalName'] = u"ПАТ \"Прайм Банк\""
+    asset_data.data.assetCustodian['identifier']['id'] = u"11111111"
+    asset_data.data.assetCustodian['contactPoint']['telephone'] = u"0993698510"
+    asset_data.data.assetCustodian['contactPoint']['faxNumber'] = u"0993698511"
+    return asset_data
