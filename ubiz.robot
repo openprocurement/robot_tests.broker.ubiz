@@ -227,6 +227,7 @@ Login
 Пошук тендера по ідентифікатору
   [Arguments]   ${user_name}   ${auction_id}
   Run Keyword And Return If   "UA-AR-P" in "${auction_id}"   ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${auction_id}
+  Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   ubiz.Пошук лоту по ідентифікатору   ${user_name}   ${auction_id}
 
   Switch Browser   ${BROWSER_ALIAS}
   Wait Until Page Contains Element    id=main-auctionsearch-title   45
@@ -708,6 +709,7 @@ Login
 Отримати документ
   [Arguments]   ${user_name}   ${auction_id}   ${document_id}
   Run Keyword And Return If   "UA-AR-P" in "${auction_id}"   Отримати документ з об’єкту   ${user_name}   ${auction_id}   ${document_id}
+  Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   Отримати документ з лоту    ${user_name}   ${auction_id}   ${document_id}
 
   ubiz.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${user_name}   ${auction_id}
   Таб Документи
@@ -1736,3 +1738,16 @@ Scroll To Element
   Wait Until Element Is Visible    id=itempublished-quantity
   Run Keyword If                  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу лоту   ${value}
   Click Element                    css=.inactive-btn
+
+
+Отримати документ з лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${document_id}
+  Скролл до табів
+  Таб Документи
+  ${isAuctionDocument}=    Run Keyword And Return Status   Element Should Not Be Visible   xpath=//a[contains(text(), '${document_id}')]
+  Run Keyword If   ${isAuctionDocument}   Відкрити таб аукціонів в редагуванні лоту
+
+  ${fileName}=   Get Text                 xpath=//a[contains(text(), '${document_id}')]
+  ${fileUrl}=    Get Element Attribute    xpath=//a[contains(text(), '${document_id}')]@href
+  ${fileName}=   download_file_from_url   ${fileUrl}   ${OUTPUT_DIR}${/}${fileName}
+  [return]       ${fileName}
