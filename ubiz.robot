@@ -39,10 +39,7 @@ ${locator.minNumberOfQualifiedBids}                            css=.auction-minN
 
 Підготувати дані для оголошення тендера
   [Arguments]  ${user_name}   ${auction_data}   ${role_name}
-  Log To Console   ${role_name}
-  Log To Console   ${auction_data}
   ${auction_data}=   before_create_auction   ${auction_data}   ${role_name}
-  Log To Console   ${auction_data}
   [return]   ${auction_data}
 
 Підготувати клієнт для користувача
@@ -119,7 +116,6 @@ Login
   Wait Until Page Contains         Створення аукціону
   ${subProcurementtype}=           cdb_format_to_view_format   sub_${is_lease}
   Run Keyword If   ${is_lease}     SelectBox   auction-subprocurementtype    ${subProcurementtype}
-  Log To Console    ${subProcurementtype}
   Sleep    1
   ${minNumberOfQualifiedBids}=     cdb_format_to_view_format   bidder${minNumberOfQualifiedBids}
   Run Keyword If   ${is_lease}     SelectBox   auction-minnumberbids    ${minNumberOfQualifiedBids}
@@ -791,7 +787,6 @@ Login
   ...   Reload Page
   ...   AND   Wait Until Page Contains   Підписаний протокол
   ${bid_doc_number}=   Get Matching Xpath Count   xpath=//a[contains(@class, 'document_title')]
-  Log To Console    ${bid_doc_number}
   [return]  ${bid_doc_number}
 
 Отримати дані із документу пропозиції
@@ -1300,12 +1295,10 @@ Scroll To Element
 
 Створити лот
   [Arguments]   ${user_name}   ${adapted_data}   ${asset_uaid}
-  Log To Console   ${asset_uaid}
   Go To    http://test.ubiz.com.ua/privatization/lot
   Wait Until Element Is Visible   css=.add_tender
   Click Element                   css=.add_tender
   Wait Until Element Is Visible   id=select2-lotdraft-asset-container
-  Log To Console    ${asset_uaid}
   SelectBox                       lotdraft-asset        ${asset_uaid}
   Input Text                      css=input[name='LotDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
   ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
@@ -1368,17 +1361,12 @@ Scroll To Element
 Внести зміни в інформацію по 1 аукціону
   [Arguments]   ${fieldname}  ${fieldvalue}
   Execute JavaScript           $('#auctionlot-auctionperiod-startdate-disp').removeAttr('readonly');
-
-  Log To Console    ${fieldname}
-
   ${fieldvalue}=   Run Keyword If   '${fieldname}' == 'value.amount'   Convert To String     ${fieldvalue}
   ...  ELSE IF  '${fieldname}' == 'minimalStep.amount'   Convert To String     ${fieldvalue}
   ...  ELSE IF  '${fieldname}' == 'guarantee.amount'   Convert To String     ${fieldvalue}
   ...  ELSE IF  '${fieldname}' == 'registrationFee.amount'   Convert To String     ${fieldvalue}
   ...  ELSE IF  '${fieldname}' == 'auctionPeriod.startDate'   auction_period_to_broker_format     ${fieldvalue}
   ...  ELSE   ${fieldvalue}
-
-  Log To Console    вносимо ${fieldvalue} в '${fieldname}'
 
   Run Keyword If   '${fieldname}' == 'value.amount'   Input Text   id=AuctionLot-value-amount    ${fieldvalue}
   Run Keyword If   '${fieldname}' == 'minimalStep.amount'   Input Text   id=AuctionLot-minimalStep-amount    ${fieldvalue}
@@ -1415,7 +1403,6 @@ Scroll To Element
   [Arguments]   ${user_name}   ${lot_id}  ${fieldname}  ${fieldvalue}  ${auction_index}
   Відкрити лот на редагування
   Відкрити таб аукціонів в редагуванні лоту
-  Log To Console    'Внести зміни в умови проведення аукціону'
 
   ${auction_index}=                Evaluate   ${auction_index} + 1
   Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
@@ -1426,9 +1413,6 @@ Scroll To Element
   Run Keyword If   ${auction_index} == 1   Внести зміни в інформацію по 1 аукціону  ${fieldname}  ${fieldvalue}
   Run Keyword If   ${auction_index} == 2   Внести ізміни в нформацію по 2 аукціону  ${fieldname}  ${fieldvalue}
   Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
-  ubiz.Пошук лоту по ідентифікатору   ${user_name}   ${lot_id}
-  Відкрити таб аукціонів в редагуванні лоту
-  Log To Console    'Внести зміни в умови проведення аукціону ||||'
 
 Перейти в модуль реєстра об’єктів
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
@@ -1596,6 +1580,8 @@ Scroll To Element
   [return]       ${quantity}
 
 Отримати інформацію про auctions[0].value.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
   ${return_value}=   Get Text   css=.auction-value-amount-1
   ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
   ${return_value}=   Convert To Number   ${return_value}
@@ -1614,6 +1600,8 @@ Scroll To Element
   [return]           ${return_value}
 
 Отримати інформацію про auctions[0].minimalStep.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
   ${return_value}=   Get Text   css=.auction-minimalStep-amount-1
   ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
   ${return_value}=   Convert To Number   ${return_value}
@@ -1632,6 +1620,8 @@ Scroll To Element
   [return]           ${return_value}
 
 Отримати інформацію про auctions[0].guarantee.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
   ${return_value}=   Get Text   css=.auction-guarantee-amount-1
   ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
   ${return_value}=   Convert To Number   ${return_value}
@@ -1650,6 +1640,8 @@ Scroll To Element
   [return]           ${return_value}
 
 Отримати інформацію про auctions[0].registrationFee.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
   ${return_value}=   Get Text   css=.auction-registrationFee-amount-1
   ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
   ${return_value}=   Convert To Number   ${return_value}
