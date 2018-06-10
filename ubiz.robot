@@ -226,8 +226,8 @@ Login
 
 Пошук тендера по ідентифікатору
   [Arguments]   ${user_name}   ${auction_id}
-  Run Keyword And Return If   "UA-AR-P" in "${auction_id}"   ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${auction_id}
-  Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   ubiz.Пошук лоту по ідентифікатору   ${user_name}   ${auction_id}
+  Run Keyword And Return If   "UA-AR-P" in "${auction_id}"     ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${auction_id}
+  Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   ubiz.Пошук лоту по ідентифікатору         ${user_name}   ${auction_id}
 
   Switch Browser   ${BROWSER_ALIAS}
   Wait Until Page Contains Element    id=main-auctionsearch-title   45
@@ -939,9 +939,14 @@ Scroll To Element
   Click Element               xpath=//button[contains(text(), 'Оновити')]
   Wait Until Page Contains    Продаю
 
+Перейти в малу приватизацію
+  Wait Until Element Is Visible   xpath=//ul[contains(@class, 'bookmarks')]
+  ${activeModule}=                Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks')]//a[@href='/privatization/asset']@class
+  Run Keyword Unless             '${activeModule}' == 'active'   Click Element   xpath=//ul[contains(@class, 'bookmarks')]//a[@href='/privatization/asset']
+
 Створити об'єкт МП
   [Arguments]   ${user_name}   ${adapted_data}
-  Go To    http://test.ubiz.com.ua/privatization/asset
+  Перейти в малу приватизацію
   Wait Until Element Is Visible   css=.add_tender
   Click Element                   css=.add_tender
   Wait Until Element Is Visible   id=assetdraft-title
@@ -1006,7 +1011,6 @@ Scroll To Element
   ${assetID}=                     Get Text   css=.asset-assetID
   [return]                        ${assetID}
 
-
 Додати активи до об`єкту
   [Arguments]   ${items}
   ${count}=   Get Length   ${items}
@@ -1063,7 +1067,7 @@ Scroll To Element
 Пошук об’єкта МП по ідентифікатору
   [Arguments]   ${user_name}   ${asset_id}
   Switch Browser                      ${BROWSER_ALIAS}
-  Перейти в модуль реєстра об’єктів
+  Перейти в малу приватизацію
   Wait Until Page Contains Element    id=main-assetsearch-title
   ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
   ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти об`єкт   ${asset_id}
@@ -1164,7 +1168,6 @@ Scroll To Element
   ${quantity}=   Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-quantity']
   ${quantity}=   Convert To Number   ${quantity}
   [return]       ${quantity}
-
 
 Отримати інформацію з активу об'єкта МП
   [Arguments]   ${user_name}   ${asset_id}   ${uniq_id}   ${field}
@@ -1293,11 +1296,14 @@ Scroll To Element
   ${fileName}=   download_file_from_url   ${fileUrl}   ${OUTPUT_DIR}${/}${fileName}
   [return]       ${fileName}
 
-
+Перейти до лотів
+  Перейти в малу приватизацію
+  ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/lot']@class
+  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/lot']
 
 Створити лот
   [Arguments]   ${user_name}   ${adapted_data}   ${asset_uaid}
-  Go To    http://test.ubiz.com.ua/privatization/lot
+  Перейти до лотів
   Wait Until Element Is Visible   css=.add_tender
   Click Element                   css=.add_tender
   Wait Until Element Is Visible   id=select2-lotdraft-asset-container
@@ -1383,7 +1389,6 @@ Scroll To Element
   SelectBox       auctionlot-tenderingduration   30
   Click Element   css=.inactive-btn
 
-
 Додати умови проведення аукціону
   [Arguments]   ${user_name}   ${auction_data}  ${auction_index}  ${asset_id}
   Відкрити лот на редагування
@@ -1416,11 +1421,6 @@ Scroll To Element
   Run Keyword If   ${auction_index} == 2   Внести ізміни в нформацію по 2 аукціону  ${fieldname}  ${fieldvalue}
   Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
 
-Перейти в модуль реєстра об’єктів
-  Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
-  ${currentModule}=   Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks ')]//a[@class='active']@href
-  Run Keyword If     '${currentModule}' != '/privatization/asset'   Click Link   xpath=//a[@href='/privatization/asset']
-
 Отримати інформацію про статус лоту
    Reload Page
    Wait Until Element Is Visible   xpath=//span[@class='status']
@@ -1436,7 +1436,7 @@ Scroll To Element
 Пошук лоту по ідентифікатору
   [Arguments]   ${user_name}   ${lot_id}
   Switch Browser                      ${BROWSER_ALIAS}
-  Go To                               http://test.ubiz.com.ua/privatization/lot
+  Перейти до лотів
   Wait Until Page Contains Element    id=main-lotsearch-title
   ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
   ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти лот   ${lot_id}
@@ -1498,7 +1498,6 @@ Scroll To Element
 Отримати інформацію про assets
   Run Keyword And Return  Get Text  css=.assetID
 
-
 Отримати інформацію про decisions[1].title
   Відкрити таб рішень
   Run Keyword And Return   Get Text   xpath=//td[@class='decision-title-1']
@@ -1547,24 +1546,24 @@ Scroll To Element
   [return]                ${contactPointEmail}
 
 Отримати інформацію про auctions[0].procurementMethodType
-    Відкрити таб аукціонів в редагуванні лоту
-    Execute Javascript       $("#auctions .tab-pane").addClass("active")
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-1']@data-origin-procurementMethodType
+  Відкрити таб аукціонів в редагуванні лоту
+  Execute Javascript       $("#auctions .tab-pane").addClass("active")
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-1']@data-origin-procurementMethodType
 
 Отримати інформацію про auctions[1].procurementMethodType
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-2']@data-origin-procurementMethodType
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-2']@data-origin-procurementMethodType
 
 Отримати інформацію про auctions[2].procurementMethodType
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-3']@data-origin-procurementMethodType
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-3']@data-origin-procurementMethodType
 
 Отримати інформацію про auctions[0].status
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-1']@data-origin-auction-status
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-1']@data-origin-auction-status
 
 Отримати інформацію про auctions[1].status
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-2']@data-origin-auction-status
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-2']@data-origin-auction-status
 
 Отримати інформацію про auctions[2].status
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-3']@data-origin-auction-status
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-3']@data-origin-auction-status
 
 Отримати інформацію про auctions[0].tenderAttempts
   ${quantity}=   Get Text   css=.auction-tenderAttempts-1
@@ -1670,7 +1669,6 @@ Scroll To Element
 Отримати інформацію про auctions[2].tenderingDuration
     Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-tenderingduration
 
-
 Отримати інформацію з активу лоту
   [Arguments]   ${user_name}   ${lot_id}   ${uniq_id}   ${field}
   Таб Активи аукціону
@@ -1738,7 +1736,6 @@ Scroll To Element
   Wait Until Element Is Visible    id=itempublished-quantity
   Run Keyword If                  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу лоту   ${value}
   Click Element                    css=.inactive-btn
-
 
 Отримати документ з лоту
   [Arguments]   ${user_name}   ${lot_id}   ${document_id}
