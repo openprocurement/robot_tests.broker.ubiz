@@ -1365,6 +1365,28 @@ Scroll To Element
   Click Element                css=.document_box
   Click Element                css=.inactive-btn
 
+Внести зміни в інформацію по 1 аукціону
+  [Arguments]   ${fieldname}  ${fieldvalue}
+  Execute JavaScript           $('#auctionlot-auctionperiod-startdate-disp').removeAttr('readonly');
+
+  Log To Console    ${fieldname}
+
+  ${fieldvalue}=   Run Keyword If   '${fieldname}' == 'value.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'minimalStep.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'guarantee.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'registrationFee.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'auctionPeriod.startDate'   auction_period_to_broker_format     ${fieldvalue}
+  ...  ELSE   ${fieldvalue}
+
+  Log To Console    вносимо ${fieldvalue} в '${fieldname}'
+
+  Run Keyword If   '${fieldname}' == 'value.amount'   Input Text   id=AuctionLot-value-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'minimalStep.amount'   Input Text   id=AuctionLot-minimalStep-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'guarantee.amount'   Input Text   id=AuctionLot-guarantee-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'registrationFee.amount'   Input Text   id=AuctionLot-registrationFee-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'auctionPeriod.startDate'   Input Text   id=auctionlot-auctionperiod-startdate-disp    ${fieldvalue}
+
+  Click Element                css=.inactive-btn
 
 Внести інформацію по 2 аукціону
   [Arguments]   ${auction_data}
@@ -1388,6 +1410,25 @@ Scroll To Element
   Run Keyword If   ${auction_index} == 2   Run Keywords
   ...   Click Element  xpath=//a[contains(@href, '/privatization/lot/verification')]
   ...   AND   Відкрити всі лоти
+
+Внести зміни в умови проведення аукціону
+  [Arguments]   ${user_name}   ${lot_id}  ${fieldname}  ${fieldvalue}  ${auction_index}
+  Відкрити лот на редагування
+  Відкрити таб аукціонів в редагуванні лоту
+  Log To Console    'Внести зміни в умови проведення аукціону'
+
+  ${auction_index}=                Evaluate   ${auction_index} + 1
+  Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
+  Click Element                    xpath=//a[contains(@class, 'position-${auction_index}')]
+
+  Wait Until Element Is Visible    css=.inactive-btn
+
+  Run Keyword If   ${auction_index} == 1   Внести зміни в інформацію по 1 аукціону  ${fieldname}  ${fieldvalue}
+  Run Keyword If   ${auction_index} == 2   Внести ізміни в нформацію по 2 аукціону  ${fieldname}  ${fieldvalue}
+  Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
+  ubiz.Пошук лоту по ідентифікатору   ${user_name}   ${lot_id}
+  Відкрити таб аукціонів в редагуванні лоту
+  Log To Console    'Внести зміни в умови проведення аукціону ||||'
 
 Перейти в модуль реєстра об’єктів
   Wait Until Element Is Visible               xpath=//ul[contains(@class, 'bookmarks')]//a[@class='active']
@@ -1521,6 +1562,7 @@ Scroll To Element
 
 Отримати інформацію про auctions[0].procurementMethodType
     Відкрити таб аукціонів в редагуванні лоту
+    Execute Javascript       $("#auctions .tab-pane").addClass("active")
     Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-1']@data-origin-procurementMethodType
 
 Отримати інформацію про auctions[1].procurementMethodType
@@ -1539,58 +1581,100 @@ Scroll To Element
     Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-3']@data-origin-auction-status
 
 Отримати інформацію про auctions[0].tenderAttempts
-    Run Keyword And Return   Get Text   class=auction-tenderAttempts-1
+  ${quantity}=   Get Text   css=.auction-tenderAttempts-1
+  ${quantity}=   Convert To Number   ${quantity}
+  [return]       ${quantity}
 
 Отримати інформацію про auctions[1].tenderAttempts
-    Run Keyword And Return   Get Text   class=auction-tenderAttempts-2
+  ${quantity}=   Get Text   css=.auction-tenderAttempts-2
+  ${quantity}=   Convert To Number   ${quantity}
+  [return]       ${quantity}
 
 Отримати інформацію про auctions[2].tenderAttempts
-    Run Keyword And Return   Get Text   class=auction-tenderAttempts-3
+  ${quantity}=   Get Text   css=.auction-tenderAttempts-3
+  ${quantity}=   Convert To Number   ${quantity}
+  [return]       ${quantity}
 
 Отримати інформацію про auctions[0].value.amount
-    Run Keyword And Return   Get Text   class=auction-value-amount-1
+  ${return_value}=   Get Text   css=.auction-value-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[1].value.amount
-    Run Keyword And Return   Get Text   class=auction-value-amount-2
+  ${return_value}=   Get Text   css=.auction-value-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[2].value.amount
-    Run Keyword And Return   Get Text   class=auction-value-amount-3
+  ${return_value}=   Get Text   css=.auction-value-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[0].minimalStep.amount
-    Run Keyword And Return   Get Text   class=auction-minimalStep-amount-1
+  ${return_value}=   Get Text   css=.auction-minimalStep-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[1].minimalStep.amount
-    Run Keyword And Return   Get Text   class=auction-minimalStep-amount-2
+  ${return_value}=   Get Text   css=.auction-minimalStep-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[2].minimalStep.amount
+  ${return_value}=   Get Text   css=.auction-minimalStep-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[0].guarantee.amount
-    Run Keyword And Return   Get Text   class=auction-guarantee-amount-1
+  ${return_value}=   Get Text   css=.auction-guarantee-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[1].guarantee.amount
-    Run Keyword And Return   Get Text   class=auction-guarantee-amount-2
+  ${return_value}=   Get Text   css=.auction-guarantee-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[2].guarantee.amount
-    Run Keyword And Return   Get Text   class=auction-guarantee-amount-3
+  ${return_value}=   Get Text   css=.auction-guarantee-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[0].registrationFee.amount
-    Run Keyword And Return   Get Text   class=auction-registrationFee-amount-1
+  ${return_value}=   Get Text   css=.auction-registrationFee-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[1].registrationFee.amount
-    Run Keyword And Return   Get Text   class=auction-registrationFee-amount-2
+  ${return_value}=   Get Text   css=.auction-registrationFee-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[2].registrationFee.amount
-    Run Keyword And Return   Get Text   class=auction-registrationFee-amount-3
+  ${return_value}=   Get Text   css=.auction-registrationFee-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про auctions[0].auctionPeriod.startDate
     Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
 
 Отримати інформацію про auctions[1].tenderingDuration
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-auction-tenderingDuration
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-tenderingduration
 
 Отримати інформацію про auctions[2].tenderingDuration
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-auction-tenderingDuration
-
-Отримати інформацію про auctions[0].auctionPeriod.startDate
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-tenderingduration
 
 
 Отримати інформацію з активу лоту
