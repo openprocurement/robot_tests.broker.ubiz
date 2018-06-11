@@ -116,7 +116,6 @@ Login
   Wait Until Page Contains         Створення аукціону
   ${subProcurementtype}=           cdb_format_to_view_format   sub_${is_lease}
   Run Keyword If   ${is_lease}     SelectBox   auction-subprocurementtype    ${subProcurementtype}
-  Log To Console    ${subProcurementtype}
   Sleep    1
   ${minNumberOfQualifiedBids}=     cdb_format_to_view_format   bidder${minNumberOfQualifiedBids}
   Run Keyword If   ${is_lease}     SelectBox   auction-minnumberbids    ${minNumberOfQualifiedBids}
@@ -227,6 +226,9 @@ Login
 
 Пошук тендера по ідентифікатору
   [Arguments]   ${user_name}   ${auction_id}
+  Run Keyword And Return If   "UA-AR-P" in "${auction_id}"     ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${auction_id}
+  Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   ubiz.Пошук лоту по ідентифікатору         ${user_name}   ${auction_id}
+
   Switch Browser   ${BROWSER_ALIAS}
   Wait Until Page Contains Element    id=main-auctionsearch-title   45
   ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
@@ -706,6 +708,9 @@ Login
 
 Отримати документ
   [Arguments]   ${user_name}   ${auction_id}   ${document_id}
+  Run Keyword And Return If   "UA-AR-P" in "${auction_id}"   Отримати документ з об’єкту   ${user_name}   ${auction_id}   ${document_id}
+  Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   Отримати документ з лоту    ${user_name}   ${auction_id}   ${document_id}
+
   ubiz.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${user_name}   ${auction_id}
   Таб Документи
   Wait Until Element Is Visible   id=auction-docs
@@ -784,7 +789,6 @@ Login
   ...   Reload Page
   ...   AND   Wait Until Page Contains   Підписаний протокол
   ${bid_doc_number}=   Get Matching Xpath Count   xpath=//a[contains(@class, 'document_title')]
-  Log To Console    ${bid_doc_number}
   [return]  ${bid_doc_number}
 
 Отримати дані із документу пропозиції
@@ -877,11 +881,13 @@ Login
 
 Таб Активи аукціону
   Скролл до табів
-  Click Link            xpath=//a[@href='#items']
+  Click Link        xpath=//a[@href='#items']
+  Sleep             1
 
 Таб Документи
   Скролл до табів
-  Click Link            xpath=//a[@href='#documents']
+  Click Link        xpath=//a[@href='#documents']
+  Sleep             1
 
 Таб Запитання
   Скролл до табів
@@ -932,3 +938,813 @@ Scroll To Element
   Змінити ціновий показник    ${field.replace('.', '-')}    ${value}
   Click Element               xpath=//button[contains(text(), 'Оновити')]
   Wait Until Page Contains    Продаю
+
+Перейти в малу приватизацію
+  Wait Until Element Is Visible   xpath=//ul[contains(@class, 'bookmarks')]
+  ${activeModule}=                Get Element Attribute   xpath=//ul[contains(@class, 'bookmarks')]//a[@href='/privatization/asset']@class
+  Run Keyword Unless             '${activeModule}' == 'active'   Click Element   xpath=//ul[contains(@class, 'bookmarks')]//a[@href='/privatization/asset']
+
+Створити об'єкт МП
+  [Arguments]   ${user_name}   ${adapted_data}
+  Перейти в малу приватизацію
+  Wait Until Element Is Visible   css=.add_tender
+  Click Element                   css=.add_tender
+  Wait Until Element Is Visible   id=assetdraft-title
+  Input Text                      id=assetdraft-title   ${adapted_data.data.title}
+  Input Text                      id=assetdraft-description   ${adapted_data.data.description}
+  Input Text                      css=input[name='AssetDraft[decisions][0][title]']   ${adapted_data.data.decisions[0].title}
+  Input Text                      css=input[name='AssetDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
+  ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
+  ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
+
+  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
+  Input Text                      id=decision-date-0   ${decisionDate}
+
+  ${contactPoint}=                Get From Dictionary   ${adapted_data.data.assetCustodian}   contactPoint
+  Input Text                      id=contactPerson-name        ${contactPoint.name}
+  Input Text                      id=contactPerson-telephone   ${contactPoint.telephone}
+  Input Text                      id=contactPerson-faxNumber   ${contactPoint.faxNumber}
+  Input Text                      id=contactPerson-email       ${contactPoint.email}
+
+  #AssetHolder section
+  SwitchBox                       assetdraft-assetholderswitch   true
+  Sleep                           1
+  ${assetHolder}=                 Get From Dictionary   ${adapted_data.data}   assetHolder
+  Input Text                      id=assetdraft-assetholdername   ${assetHolder.name}
+  Input Text                      id=assetdraft-assetholderedrpou  ${assetHolder.identifier.id}
+
+  Input Text                      id=assetHolderContactPerson-name        ${assetHolder.contactPoint.name}
+  Input Text                      id=assetHolderContactPerson-telephone   ${assetHolder.contactPoint.telephone}
+  Input Text                      id=assetHolderContactPerson-faxNumber   ${assetHolder.contactPoint.faxNumber}
+  Input Text                      id=assetHolderContactPerson-email       ${assetHolder.contactPoint.email}
+
+  SelectBox                       assetHolderAddress-regionId        ${assetHolder.address.region}
+  Input Text                      id=assetHolderAddress-locality     ${assetHolder.address.locality}
+  Input Text                      id=assetHolderAddress-address      ${assetHolder.address.streetAddress}
+  ${postalCode}=                  Convert To String                  ${assetHolder.address.postalCode}
+  Input Text                      id=assetHolderAddress-postalCode   ${postalCode}
+
+
+  Click Element                   xpath=//button[contains(text(), 'Далі')]
+  ${items}=                       Get From Dictionary   ${adapted_data.data}   items
+
+  Wait Until Element Is Visible   id=itemdraft-description
+  Click Element                   css=a[href*='/privatization/asset-draft/items']
+  Wait Until Element Is Visible   css=a[href*='/privatization/asset-draft/add-item']
+  Додати активи до об`єкту        ${items}
+
+  Wait Until Element Is Visible   css=a[href*='/privatization/asset-draft/add-item']
+  ${assetDraftId}=                Execute JavaScript   return $('span[data-asset-draft-id]').attr('data-asset-draft-id')
+  Click Element                   id=endEdit
+
+  Wait Until Element Is Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
+  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Wait Until Element Is Visible   xpath=//a[contains(@href, '/privatization/asset-draft/publication?id=${assetDraftId}')]
+  Click Element                   xpath=//a[contains(@href, '/privatization/asset-draft/publication?id=${assetDraftId}')]
+  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '#${assetDraftId}')]
+  Перейти в мої об`єкти
+
+  Click Element                   css=.lot_image
+  Wait Until Element Is Visible   css=.asset-assetID
+  ${assetID}=                     Get Text   css=.asset-assetID
+  [return]                        ${assetID}
+
+Додати активи до об`єкту
+  [Arguments]   ${items}
+  ${count}=   Get Length   ${items}
+  : FOR    ${index}    IN RANGE   ${count}
+  \   Wait Until Element Is Visible   css=a[href*='/privatization/asset-draft/add-item']
+  \   Click Element                   css=a[href*='/privatization/asset-draft/add-item']
+  \   Wait Until Element Is Visible   id=itemdraft-description
+  \   Додати актив до об`єкту         ${items[${index}]}
+
+Додати актив до об`єкту
+  [Arguments]   ${item}
+  Input Text                       id=itemdraft-description   ${item.description}
+  ${quantity}=                     Convert To String          ${item.quantity}
+  Input Text                       id=itemdraft-quantity      ${quantity}
+  ${unitName}=                     Get From Dictionary        ${item.unit}   name
+  SelectBox                        itemdraft-unitid           ${unitName}
+
+  ${currilicRegistrationStatus}=   getRegistrationDetailsStatus          ${item.registrationDetails.status}
+  SelectBox                        itemdraft-registrationdetailsstatus   ${currilicRegistrationStatus}
+
+  ${classificationId}=             Get From Dictionary   ${item.classification}   id
+  ${classificationScheme}=         Get From Dictionary   ${item.classification}   scheme
+  Обрати класифікатор              //div[@data-attr='classifications']//button[contains(@class,'choose')]   ${classificationId}   ${classificationScheme}
+
+  ${address}=                      Get From Dictionary     ${item}   address
+
+  SelectBox                        address-regionId        ${address.region}
+  Input Text                       id=address-locality     ${address.locality}
+  Input Text                       id=address-address      ${address.streetAddress}
+  ${postalCode}=                   Convert To String       ${address.postalCode}
+  Input Text                       id=address-postalCode   ${postalCode}
+
+  Click Element                    xpath=//button[contains(text(), 'Зберегти')]
+
+Обрати класифікатор
+  [Arguments]   ${path}   ${id}   ${scheme}
+  Click Element                   xpath=${path}
+  Wait Until Element Is Visible   xpath=//div[@class='fade modal in']//input[contains(@class,'input-search')]
+  Click Element                   xpath=//div[@class='fade modal in']//a[@data-type='${scheme}']
+  Input Text                      xpath=//div[@class='fade modal in']//input[contains(@class,'input-search')]   ${id}
+  Sleep                           2
+  Execute JavaScript              $('span:contains("${id}")').siblings('.fancytree-checkbox').trigger('click')
+  Wait Until Element Is Visible   xpath=//div[@class='fade modal in']//span[@class='remove']
+  Click Element                   xpath=//div[@class='fade modal in']//a[contains(@class,'close-modal')]
+  Sleep                           2
+
+Перейти в мої об`єкти
+  На початок сторінки
+  Click Element                   id=category-select
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/asset/sell']
+  Click Link                      xpath=//a[@href='/privatization/asset/sell']
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Мої')]    10
+
+Пошук об’єкта МП по ідентифікатору
+  [Arguments]   ${user_name}   ${asset_id}
+  Switch Browser                      ${BROWSER_ALIAS}
+  Перейти в малу приватизацію
+  Wait Until Page Contains Element    id=main-assetsearch-title
+  ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
+  ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти об`єкт   ${asset_id}
+  Run Keyword Unless                  ${passed}   Fail   Об`єкт не знайдено за ${timeout_on_wait} секунд
+  ${assetViewUrl}=                    Get Element Attribute   xpath=//div[contains(@class, 'one_card')]//a[contains(@class, 'auct_image')]@href
+  Execute JavaScript                  window.location.href = '${assetViewUrl}';
+  Wait Until Page Contains Element    xpath=//span[contains(@class, 'asset-assetID')]   45
+
+Шукати і знайти об`єкт
+  [Arguments]   ${asset_id}
+  Input Text                         id=main-assetsearch-title   ${asset_id}
+  Click Element                      id=search-main
+  Wait Until Page Contains Element   xpath=//span[contains(text() ,'${asset_id}')]   10
+  Sleep                              3
+
+Оновити сторінку з об'єктом МП
+  [Arguments]   ${user_name}   ${asset_id}
+  ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${asset_id}
+  Click Element                          css=.asset-reload
+  Wait Until Page Contains Element       xpath=//span[contains(@class, 'asset-assetID')]   45
+
+Отримати інформацію із об'єкта МП
+  [Arguments]   ${user_name}   ${asset_id}   ${field}
+  Run Keyword And Return If   '${field}' == 'title'        Get Text  css=.title
+  Run Keyword And Return If   '${field}' == 'description'  Get Text  css=.description
+  Run Keyword And Return If   '${field}' == 'status'       Get Element Attribute   xpath=//span[@class='status']@data-origin-status
+  Run Keyword And Return       Отримати інформацію про ${field}
+
+Отримати інформацію про assetID
+  Run Keyword And Return  Get Text  css=.asset-assetID
+
+Отримати інформацію про date
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='date-create']@data-origin-date
+
+Отримати інформацію про dateModified
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='date-modified']@data-origin-date-modified
+
+Отримати інформацію про rectificationPeriod.endDate
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='rectification-period-end']@data-origin-rectification-period-end
+
+Отримати інформацію про decisions[0].title
+  Відкрити таб рішень
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title-0']
+
+Отримати інформацію про decisions[0].decisionID
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id-0']
+
+Отримати інформацію про decisions[0].decisionDate
+  ${decisionDate}=   Get Text   xpath=//td[@class='decision-date-0']
+  ${decisionDate}=   convert_date_to_dash_format   ${decisionDate}
+  [return]           ${decisionDate}
+
+Відкрити таб рішень
+  Click Element   xpath=//a[@href='#decisions']
+  Sleep           1
+
+Отримати інформацію про assetHolder.name
+  Click Element                   xpath=//a[@data-target='#assetHolder-info-modal']
+  Wait Until Element Is Visible   css=.assetHolder-name
+  Run Keyword And Return          Get Text   css=.assetHolder-name
+
+Отримати інформацію про assetHolder.identifier.scheme
+  Run Keyword And Return   Get Text   css=.assetHolder-identifier-scheme
+
+Отримати інформацію про assetHolder.identifier.id
+  ${identifierId}=   Get Text   css=.assetHolder-identifier-id
+                     Закрити модальне вікно
+  [return]           ${identifierId}
+
+Отримати інформацію про assetCustodian.identifier.scheme
+  Click Element                   xpath=//a[@data-target='#assetCustodian-info-modal']
+  Wait Until Element Is Visible   css=.assetCustodian-identifier-scheme
+  Run Keyword And Return          Get Text   css=.assetCustodian-identifier-scheme
+
+Отримати інформацію про assetCustodian.identifier.id
+  Run Keyword And Return   Get Text   css=.assetCustodian-identifier-id
+
+Отримати інформацію про assetCustodian.identifier.legalName
+  Run Keyword And Return   Get Text   css=.assetCustodian-name
+
+Отримати інформацію про assetCustodian.contactPoint.name
+  Run Keyword And Return   Get Text   css=.assetCustodian-contact-point-name
+
+Отримати інформацію про assetCustodian.contactPoint.telephone
+  Run Keyword And Return   Get Text   css=.assetCustodian-contact-point-telephone
+
+Отримати інформацію про assetCustodian.contactPoint.email
+  ${contactPointEmail}=   Get Text   css=.assetCustodian-contact-point-email
+                          Закрити модальне вікно
+  [return]                ${contactPointEmail}
+
+Отримати інформацію про documents[0].documentType
+  Таб Документи
+  Run Keyword And Return   Get Element Attribute   xpath=//div[@id='documents_asset']//p[contains(@class, 'document-type')]@data-origin-document-type
+
+Отримати кількість одиниць виміру активу об’єкта МП
+  [Arguments]    ${uniq_id}
+  ${quantity}=   Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-quantity']
+  ${quantity}=   Convert To Number   ${quantity}
+  [return]       ${quantity}
+
+Отримати інформацію з активу об'єкта МП
+  [Arguments]   ${user_name}   ${asset_id}   ${uniq_id}   ${field}
+  Таб Активи аукціону
+  Run Keyword And Return If   '${field}' == 'description'                  Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//p[@class='item-description']
+  Run Keyword And Return If   '${field}' == 'classification.scheme'        Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-classification-scheme']
+  Run Keyword And Return If   '${field}' == 'classification.id'            Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-classification-id']
+  Run Keyword And Return If   '${field}' == 'unit.name'                    Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-unit-name']
+  Run Keyword And Return If   '${field}' == 'quantity'                     Отримати кількість одиниць виміру активу об’єкта МП   ${uniq_id}
+  Run Keyword And Return If   '${field}' == 'registrationDetails.status'   Get Element Attribute   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-registration-details-status']@data-origin-registration-details-status
+
+Завантажити документ в об'єкт МП з типом
+  [Arguments]   ${user_name}   ${asset_id}   ${file_path}   ${document_type}
+  Перейти на редагування об’єкту
+  Click Element               xpath=//a[contains(@href, '/privatization/asset-edit/asset')]
+                              Розгорнути блоки
+  Click Element               xpath=//div[@id='documents-box']//button[contains(@class, 'add-item')]
+  Sleep                       2
+  ${addedBlock}=              Execute JavaScript   return $('#documents-list-w0-documents').find('.form-documents-item').last().attr('id');
+  Choose File                 xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
+  Wait Until Page Contains    Done    30
+  Select From List By Value   xpath=//div[@id='${addedBlock}']//select  ${document_type}
+  Click Element               xpath=//button[contains(text(), 'Оновити')]
+
+Завантажити ілюстрацію в об'єкт МП
+  [Arguments]   ${user_name}   ${asset_id}   ${file_path}
+  ubiz.Завантажити документ в об'єкт МП з типом   ${user_name}   ${asset_id}   ${file_path}   illustration
+
+Перейти на редагування об’єкту
+  Перейти в мої об`єкти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/asset-edit/items')]
+  Wait Until Element Is Visible    id=endEdit
+
+Внести зміни в об'єкт МП
+  [Arguments]   ${user_name}   ${asset_id}   ${field}   ${value}
+  Перейти на редагування об’єкту
+  Click Element     xpath=//a[contains(@href, '/privatization/asset-edit/asset')]
+  Run Keyword If   '${field}' == 'title'         Input Text  id=assetpublished-title         ${value}
+  Run Keyword If   '${field}' == 'description'   Input Text  id=assetpublished-description   ${value}
+  Click Element     css=.inactive-btn
+
+Внести зміни до кількості одиниць виміру активу об’єкта МП
+  [Arguments]   ${value}
+  ${value}=     Convert To String           ${value}
+  Input Text    id=itempublished-quantity   ${value}
+
+Внести зміни в актив об'єкта МП
+  [Arguments]   ${user_name}   ${uniq_id}   ${asset_id}   ${field}   ${value}
+  Перейти на редагування об’єкту
+  Click Element    xpath=//table[@class='table']//a[contains(@href, '/privatization/asset-edit/item')]
+  Run Keyword If  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу об’єкта МП   ${value}
+  Click Element    css=.inactive-btn
+
+Отримати кількість активів в об'єкті МП
+  [Arguments]   ${user_name}   ${asset_id}
+  ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${asset_id}
+  Таб Активи аукціону
+  Run Keyword And Return   Get Matching Xpath Count   //p[contains(@class,'item-description')]
+
+Додати актив до об'єкта МП
+  [Arguments]   ${user_name}   ${asset_id}   ${item}
+  Перейти на редагування об’єкту
+  Click Element                    xpath=//div//a[contains(@href, '/privatization/asset-edit/item')]
+  Input Text                       id=itempublished-description   ${item.description}
+  ${quantity}=                     Convert To String              ${item.quantity}
+  Input Text                       id=itempublished-quantity      ${quantity}
+  ${unitName}=                     Get From Dictionary            ${item.unit}   name
+  SelectBox                        itempublished-unitid           ${unitName}
+
+  ${currilicRegistrationStatus}=   getRegistrationDetailsStatus              ${item.registrationDetails.status}
+  SelectBox                        itempublished-registrationdetailsstatus   ${currilicRegistrationStatus}
+
+  ${classificationId}=             Get From Dictionary   ${item.classification}   id
+  ${classificationScheme}=         Get From Dictionary   ${item.classification}   scheme
+  Обрати класифікатор              //div[@data-attr='classifications']//button[contains(@class,'choose')]   ${classificationId}   ${classificationScheme}
+
+  ${address}=                      Get From Dictionary     ${item}   address
+
+  SelectBox                        address-regionId        ${address.region}
+  Input Text                       id=address-locality     ${address.locality}
+  Input Text                       id=address-address      ${address.streetAddress}
+  ${postalCode}=                   Convert To String       ${address.postalCode}
+  Input Text                       id=address-postalCode   ${postalCode}
+
+  Click Element                    css=.inactive-btn
+  Wait Until Element Is Visible    id=endEdit
+  Click Element                    id=endEdit
+  Перейти на головну сторінку об’єктів
+
+Перейти на головну сторінку об’єктів
+  На початок сторінки
+  Click Element                   id=category-select
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/asset/index']
+  Click Link                      xpath=//a[@href='/privatization/asset/index']
+  Sleep                           2
+
+Завантажити документ для видалення об'єкта МП
+  [Arguments]   ${user_name}   ${asset_id}   ${file_path}
+  Перейти в мої об`єкти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/asset/delete')]
+  Wait Until Element Is Visible    css=.upload-documents
+  Click Element                    css=.add-item
+  Wait Until Element Is Visible    css=.delete-document
+  Choose File                      css=.document-img   ${file_path}
+  Wait Until Page Contains         Done    30
+  Click Element                    css=.upload-documents
+
+Видалити об'єкт МП
+  [Arguments]   ${user_name}   ${asset_id}
+  Перейти в мої об`єкти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/asset/delete')]
+  Wait Until Element Is Visible    css=.terminate
+  Click Element                    css=.terminate
+
+Отримати документ з об’єкту
+  [Arguments]   ${user_name}   ${asset_id}   ${document_id}
+  Таб Документи
+  ${fileName}=   Get Text                 xpath=//div[@id='documents_asset']//a[contains(text(), '${document_id}')]
+  ${fileUrl}=    Get Element Attribute    xpath=//div[@id='documents_asset']//a[contains(text(), '${document_id}')]@href
+  ${fileName}=   download_file_from_url   ${fileUrl}   ${OUTPUT_DIR}${/}${fileName}
+  [return]       ${fileName}
+
+Перейти до лотів
+  Перейти в малу приватизацію
+  ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/lot']@class
+  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/lot']
+
+Створити лот
+  [Arguments]   ${user_name}   ${adapted_data}   ${asset_uaid}
+  Перейти до лотів
+  Wait Until Element Is Visible   css=.add_tender
+  Click Element                   css=.add_tender
+  Wait Until Element Is Visible   id=select2-lotdraft-asset-container
+  SelectBox                       lotdraft-asset        ${asset_uaid}
+  Input Text                      css=input[name='LotDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
+  ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
+  ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
+  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
+  Input Text                      id=decision-date-0   ${decisionDate}
+  Click Element                   xpath=//button[contains(text(), 'Далі')]
+
+  Wait Until Element Is Visible   xpath=//a[contains(text(), '${asset_uaid}')]
+  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                           1
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
+  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '${asset_uaid}')]
+  Перейти в мої лоти
+
+  Click Element                   css=.lot_image
+  Wait Until Element Is Visible   css=.auction-auctionID
+  ${lotID}=                       Get Text   css=.auction-auctionID
+  [return]                        ${lotID}
+
+Перейти в мої лоти
+  Click Element                   id=category-select
+  Sleep                           1
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/sell']
+  Click Link                      xpath=//a[@href='/privatization/lot/sell']
+  Wait Until Element Is Visible   css=.lot_image
+
+Оновити сторінку з лотом
+  [Arguments]   ${user_name}   ${lot_id}
+  ubiz.Пошук лоту по ідентифікатору   ${user_name}   ${lot_id}
+  Click Element                          css=.lot-reload
+  Wait Until Page Contains Element       xpath=//span[contains(@class, 'auction-auctionID')]   45
+
+
+Відкрити таб аукціонів в редагуванні лоту
+  Wait Until Element Is Visible   xpath=//a[contains(@href, '#auctions')]
+  Click Element                   xpath=//a[contains(@href, '#auctions')]
+  Sleep                           1
+
+Внести інформацію по 1 аукціону
+  [Arguments]   ${auction_data}
+  ${auctionPeriodStartDate}=   auction_period_to_broker_format   ${auction_data.auctionPeriod.startDate}
+  ${valueAmount} =             Convert To String      ${auction_data.value.amount}
+  ${valueAddedTaxIncluded}     Convert To String      ${auction_data.value.valueAddedTaxIncluded}
+  ${valueAddedTaxIncluded}     Convert To Lowercase   ${valueAddedTaxIncluded}
+  ${minimalStepAmount}=        Convert To String      ${auction_data.minimalStep.amount}
+  ${guaranteeAmount}=          Convert To String      ${auction_data.guarantee.amount}
+
+  Execute JavaScript           $('#auctionlot-auctionperiod-startdate-disp').removeAttr('readonly');
+  Input Text                   id=auctionlot-auctionperiod-startdate-disp   ${auctionPeriodStartDate}
+  Input Text                   id=AuctionLot-value-amount               ${valueAmount}
+  SelectBox                    AuctionLot-value-valueAddedTaxIncluded   ${valueAddedTaxIncluded}
+  Input Text                   id=AuctionLot-minimalStep-amount         ${minimalStepAmount}
+  Input Text                   id=AuctionLot-guarantee-amount           ${guaranteeAmount}
+  Click Element                css=.document_box
+  Click Element                css=.inactive-btn
+
+Внести зміни в інформацію по 1 аукціону
+  [Arguments]   ${fieldname}  ${fieldvalue}
+  Execute JavaScript           $('#auctionlot-auctionperiod-startdate-disp').removeAttr('readonly');
+  ${fieldvalue}=   Run Keyword If   '${fieldname}' == 'value.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'minimalStep.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'guarantee.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'registrationFee.amount'   Convert To String     ${fieldvalue}
+  ...  ELSE IF  '${fieldname}' == 'auctionPeriod.startDate'   auction_period_to_broker_format     ${fieldvalue}
+  ...  ELSE   ${fieldvalue}
+
+  Run Keyword If   '${fieldname}' == 'value.amount'   Input Text   id=AuctionLot-value-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'minimalStep.amount'   Input Text   id=AuctionLot-minimalStep-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'guarantee.amount'   Input Text   id=AuctionLot-guarantee-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'registrationFee.amount'   Input Text   id=AuctionLot-registrationFee-amount    ${fieldvalue}
+  Run Keyword If   '${fieldname}' == 'auctionPeriod.startDate'   Input Text   id=auctionlot-auctionperiod-startdate-disp    ${fieldvalue}
+
+  Click Element                css=.inactive-btn
+
+Внести інформацію по 2 аукціону
+  [Arguments]   ${auction_data}
+  SelectBox       auctionlot-tenderingduration   30
+  Click Element   css=.inactive-btn
+
+Додати умови проведення аукціону
+  [Arguments]   ${user_name}   ${auction_data}  ${auction_index}  ${asset_id}
+  Відкрити лот на редагування
+  Відкрити таб аукціонів в редагуванні лоту
+
+  ${auction_index}=                Evaluate   ${auction_index} + 1
+  Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
+  Click Element                    xpath=//a[contains(@class, 'position-${auction_index}')]
+
+  Wait Until Element Is Visible    css=.inactive-btn
+  Run Keyword If   ${auction_index} == 1   Внести інформацію по 1 аукціону  ${auction_data}
+  Run Keyword If   ${auction_index} == 2   Внести інформацію по 2 аукціону  ${auction_data}
+  Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
+  Run Keyword If   ${auction_index} == 2   Run Keywords
+  ...   Click Element  xpath=//a[contains(@href, '/privatization/lot/verification')]
+  ...   AND   Відкрити всі лоти
+
+Внести зміни в умови проведення аукціону
+  [Arguments]   ${user_name}   ${lot_id}  ${fieldname}  ${fieldvalue}  ${auction_index}
+  Відкрити лот на редагування
+  Відкрити таб аукціонів в редагуванні лоту
+
+  ${auction_index}=                Evaluate   ${auction_index} + 1
+  Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
+  Click Element                    xpath=//a[contains(@class, 'position-${auction_index}')]
+
+  Wait Until Element Is Visible    css=.inactive-btn
+
+  Run Keyword If   ${auction_index} == 1   Внести зміни в інформацію по 1 аукціону  ${fieldname}  ${fieldvalue}
+  Run Keyword If   ${auction_index} == 2   Внести ізміни в нформацію по 2 аукціону  ${fieldname}  ${fieldvalue}
+  Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
+
+Отримати інформацію про статус лоту
+   Reload Page
+   Wait Until Element Is Visible   xpath=//span[@class='status']
+   Run Keyword And Return          Get Element Attribute   xpath=//span[@class='status']@data-origin-status
+
+Отримати інформацію із лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${field}
+  Run Keyword And Return If   '${field}' == 'title'        Get Text  css=.title
+  Run Keyword And Return If   '${field}' == 'description'  Get Text  css=.description
+  Run Keyword And Return If   '${field}' == 'status'       Отримати інформацію про статус лоту
+  Run Keyword And Return       Отримати інформацію про ${field}
+
+Пошук лоту по ідентифікатору
+  [Arguments]   ${user_name}   ${lot_id}
+  Switch Browser                      ${BROWSER_ALIAS}
+  Перейти до лотів
+  Wait Until Page Contains Element    id=main-lotsearch-title
+  ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
+  ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти лот   ${lot_id}
+  Run Keyword Unless                  ${passed}   Fail   Лот не знайдено за ${timeout_on_wait} секунд
+  ${lotViewUrl}=                      Get Element Attribute   xpath=//div[contains(@class, 'one_card')]//a[contains(@class, 'auct_image')]@href
+  Execute JavaScript                  window.location.href = '${lotViewUrl}';
+  Wait Until Page Contains Element    css=.auction-auctionID   45
+
+Шукати і знайти лот
+  [Arguments]   ${lot_id}
+  Input Text                         id=main-lotsearch-title   ${lot_id}
+  Click Element                      id=search-main
+  Wait Until Page Contains Element   xpath=//span[contains(text() ,'${lot_id}')]   10
+  Sleep                              3
+
+Завантажити документ для видалення лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}
+  Перейти в мої лоти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
+  Wait Until Element Is Visible    css=.upload-documents
+  Click Element                    css=.add-item
+  Wait Until Element Is Visible    css=.delete-document
+  Choose File                      css=.document-img   ${file_path}
+  Wait Until Page Contains         Done    30
+  Click Element                    css=.upload-documents
+
+
+Видалити лот
+  [Arguments]   ${user_name}   ${lot_id}
+  Перейти в мої лоти
+  Execute JavaScript               $('.one_card').first().find('.fa-angle-down').click();
+  Sleep                            1
+  Click Element                    xpath=//a[contains(@href, '/privatization/lot/delete')]
+  Wait Until Element Is Visible    css=.terminate
+  Click Element                    css=.terminate
+
+Відкрити всі лоти
+  На початок сторінки
+  Click Element                   id=category-select
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/index']
+  Click Link                      xpath=//a[@href='/privatization/lot/index']
+
+
+Відкрити лот на редагування
+  На початок сторінки
+  Перейти в мої лоти
+  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
+  Sleep    1
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/')]
+  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Wait Until Page Contains Element    id=endEdit  45
+
+Отримати інформацію про lotID
+  Run Keyword And Return  Get Text  css=.auction-auctionID
+
+Отримати інформацію про assets
+  Run Keyword And Return  Get Text  css=.assetID
+
+Отримати інформацію про decisions[1].title
+  Відкрити таб рішень
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-title-1']
+
+Отримати інформацію про decisions[1].decisionID
+  Run Keyword And Return   Get Text   xpath=//td[@class='decision-id-1']
+
+Отримати інформацію про decisions[1].decisionDate
+  ${decisionDate}=   Get Text   xpath=//td[@class='decision-date-1']
+  ${decisionDate}=   convert_date_to_dash_format   ${decisionDate}
+  [return]           ${decisionDate}
+
+Отримати інформацію про lotHolder.name
+  Click Element                   xpath=//a[@data-target='#lotHolder-info-modal']
+  Wait Until Element Is Visible   css=.lotHolder-name
+  Run Keyword And Return          Get Text   css=.lotHolder-name
+
+Отримати інформацію про lotHolder.identifier.scheme
+  Run Keyword And Return   Get Text   css=.lotHolder-identifier-scheme
+
+Отримати інформацію про lotHolder.identifier.id
+  ${identifierId}=   Get Text   css=.lotHolder-identifier-id
+                     Закрити модальне вікно
+  [return]           ${identifierId}
+
+Отримати інформацію про lotCustodian.identifier.scheme
+  Click Element                   xpath=//a[@data-target='#lotCustodian-info-modal']
+  Wait Until Element Is Visible   css=.lotCustodian-identifier-scheme
+  Run Keyword And Return          Get Text   css=.lotCustodian-identifier-scheme
+
+Отримати інформацію про lotCustodian.identifier.id
+  Run Keyword And Return   Get Text   css=.lotCustodian-identifier-id
+
+Отримати інформацію про lotCustodian.identifier.legalName
+  Run Keyword And Return   Get Text   css=.lotCustodian-name
+
+Отримати інформацію про lotCustodian.contactPoint.name
+  Run Keyword And Return   Get Text   css=.lotCustodian-contact-point-name
+
+Отримати інформацію про lotCustodian.contactPoint.telephone
+  Run Keyword And Return   Get Text   css=.lotCustodian-contact-point-telephone
+
+Отримати інформацію про lotCustodian.contactPoint.email
+  ${contactPointEmail}=   Get Text   css=.lotCustodian-contact-point-email
+                          Закрити модальне вікно
+  [return]                ${contactPointEmail}
+
+Отримати інформацію про auctions[0].procurementMethodType
+  Відкрити таб аукціонів в редагуванні лоту
+  Execute Javascript       $("#auctions .tab-pane").addClass("active")
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-1']@data-origin-procurementMethodType
+
+Отримати інформацію про auctions[1].procurementMethodType
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-2']@data-origin-procurementMethodType
+
+Отримати інформацію про auctions[2].procurementMethodType
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType-3']@data-origin-procurementMethodType
+
+Отримати інформацію про auctions[0].status
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-1']@data-origin-auction-status
+
+Отримати інформацію про auctions[1].status
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-2']@data-origin-auction-status
+
+Отримати інформацію про auctions[2].status
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-status-3']@data-origin-auction-status
+
+Отримати інформацію про auctions[0].tenderAttempts
+  ${quantity}=   Get Text   css=.auction-tenderAttempts-1
+  ${quantity}=   Convert To Number   ${quantity}
+  [return]       ${quantity}
+
+Отримати інформацію про auctions[1].tenderAttempts
+  ${quantity}=   Get Text   css=.auction-tenderAttempts-2
+  ${quantity}=   Convert To Number   ${quantity}
+  [return]       ${quantity}
+
+Отримати інформацію про auctions[2].tenderAttempts
+  ${quantity}=   Get Text   css=.auction-tenderAttempts-3
+  ${quantity}=   Convert To Number   ${quantity}
+  [return]       ${quantity}
+
+Отримати інформацію про auctions[0].value.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
+  ${return_value}=   Get Text   css=.auction-value-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[1].value.amount
+  ${return_value}=   Get Text   css=.auction-value-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[2].value.amount
+  ${return_value}=   Get Text   css=.auction-value-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[0].minimalStep.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
+  ${return_value}=   Get Text   css=.auction-minimalStep-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[1].minimalStep.amount
+  ${return_value}=   Get Text   css=.auction-minimalStep-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[2].minimalStep.amount
+  ${return_value}=   Get Text   css=.auction-minimalStep-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[0].guarantee.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
+  ${return_value}=   Get Text   css=.auction-guarantee-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[1].guarantee.amount
+  ${return_value}=   Get Text   css=.auction-guarantee-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[2].guarantee.amount
+  ${return_value}=   Get Text   css=.auction-guarantee-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[0].registrationFee.amount
+  Скролл до табів
+  Відкрити таб аукціонів в редагуванні лоту
+  ${return_value}=   Get Text   css=.auction-registrationFee-amount-1
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[1].registrationFee.amount
+  ${return_value}=   Get Text   css=.auction-registrationFee-amount-2
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[2].registrationFee.amount
+  ${return_value}=   Get Text   css=.auction-registrationFee-amount-3
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
+
+Отримати інформацію про auctions[0].auctionPeriod.startDate
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
+
+Отримати інформацію про auctions[1].tenderingDuration
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-tenderingduration
+
+Отримати інформацію про auctions[2].tenderingDuration
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-tenderingduration
+
+Отримати інформацію з активу лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${uniq_id}   ${field}
+  Таб Активи аукціону
+  Run Keyword And Return If   '${field}' == 'description'                  Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//p[contains(@class, 'item-description')]
+  Run Keyword And Return If   '${field}' == 'classification.scheme'        Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-classification-scheme']
+  Run Keyword And Return If   '${field}' == 'classification.id'            Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-classification-id']
+  Run Keyword And Return If   '${field}' == 'unit.name'                    Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-unit-name']
+  Run Keyword And Return If   '${field}' == 'quantity'                     Отримати кількість одиниць виміру активу об’єкта МП   ${uniq_id}
+  Run Keyword And Return If   '${field}' == 'registrationDetails.status'   Get Element Attribute   xpath=//div[contains(@data-item-description, '${uniq_id}')]//*[@class='item-registration-details-status']@data-origin-registration-details-status
+
+Завантажити ілюстрацію в лот
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}
+  ubiz.Завантажити документ в лот з типом   ${user_name}   ${lot_id}   ${file_path}   illustration
+
+Завантажити документ в лот з типом
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}   ${document_type}
+  Відкрити лот на редагування
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/lot')]
+  Wait Until Element Is Visible   id=lotpublished-description
+                                  Розгорнути блоки
+  Click Element                   xpath=//div[@id='documents-box']//button[contains(@class, 'add-item')]
+  Sleep                           2
+  ${addedBlock}=                  Execute JavaScript   return $('#documents-list-w0-documents').find('.form-documents-item').last().attr('id');
+  Choose File                     xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
+  Wait Until Page Contains        Done    30
+  Select From List By Value       xpath=//div[@id='${addedBlock}']//select  ${document_type}
+  Click Element                   css=.inactive-btn
+
+Завантажити документ в умови проведення аукціону
+  [Arguments]   ${user_name}   ${lot_id}   ${file_path}   ${document_type}   ${auction_index}
+  Відкрити лот на редагування
+  Відкрити таб аукціонів в редагуванні лоту
+  ${auction_index}=               Evaluate   ${auction_index} + 1
+  Click Link                      css=.position-${auction_index}
+  Wait Until Element Is Visible   id=AuctionLot-value-amount
+                                  Розгорнути блоки
+  Click Element                   xpath=//div[@id='documents-box']//button[contains(@class, 'add-item')]
+  Sleep                           2
+  ${addedBlock}=                  Execute JavaScript   return $('#documents-list-w0-documents').find('.form-documents-item').last().attr('id');
+  Choose File                     xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
+  Wait Until Page Contains        Done    30
+  Select From List By Value       xpath=//div[@id='${addedBlock}']//select  ${document_type}
+  Click Element                   css=.inactive-btn
+
+Внести зміни в лот
+  [Arguments]   ${user_name}   ${lot_id}   ${field}   ${value}
+  Відкрити лот на редагування
+  Click Element                   xpath=//a[contains(@href, '/privatization/lot-edit/lot')]
+  Wait Until Element Is Visible   id=lotpublished-description
+  Run Keyword If   '${field}' == 'title'         Input Text  id=lotpublished-title         ${value}
+  Run Keyword If   '${field}' == 'description'   Input Text  id=lotpublished-description   ${value}
+  Click Element     css=.inactive-btn
+
+Внести зміни до кількості одиниць виміру активу лоту
+  [Arguments]    ${value}
+  ${quantity}=   Convert To String           ${value}
+  Input Text     id=itempublished-quantity   ${quantity}
+
+Внести зміни в актив лоту
+  [Arguments]   ${user_name}   ${uniq_id}   ${lot_id}   ${field}   ${value}
+  Відкрити лот на редагування
+  Таб Активи аукціону
+  ${itemEditUrl}=                  Execute JavaScript   return $('td:contains("${uniq_id}")').siblings('td').last().find('a').last().attr('href')
+  Click Element                    xpath=//a[@href='${itemEditUrl}']
+  Wait Until Element Is Visible    id=itempublished-quantity
+  Run Keyword If                  '${field}' == 'quantity'   Внести зміни до кількості одиниць виміру активу лоту   ${value}
+  Click Element                    css=.inactive-btn
+
+Отримати документ з лоту
+  [Arguments]   ${user_name}   ${lot_id}   ${document_id}
+  Скролл до табів
+  Таб Документи
+  ${isAuctionDocument}=    Run Keyword And Return Status   Element Should Not Be Visible   xpath=//a[contains(text(), '${document_id}')]
+  Run Keyword If   ${isAuctionDocument}   Відкрити таб аукціонів в редагуванні лоту
+
+  ${fileName}=   Get Text                 xpath=//a[contains(text(), '${document_id}')]
+  ${fileUrl}=    Get Element Attribute    xpath=//a[contains(text(), '${document_id}')]@href
+  ${fileName}=   download_file_from_url   ${fileUrl}   ${OUTPUT_DIR}${/}${fileName}
+  [return]       ${fileName}
