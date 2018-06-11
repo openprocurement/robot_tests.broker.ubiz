@@ -1418,7 +1418,6 @@ Scroll To Element
   Wait Until Element Is Visible    css=.inactive-btn
 
   Run Keyword If   ${auction_index} == 1   Внести зміни в інформацію по 1 аукціону  ${fieldname}  ${fieldvalue}
-  Run Keyword If   ${auction_index} == 2   Внести ізміни в нформацію по 2 аукціону  ${fieldname}  ${fieldvalue}
   Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
 
 Отримати інформацію про статус лоту
