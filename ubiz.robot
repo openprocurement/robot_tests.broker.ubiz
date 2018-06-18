@@ -1313,7 +1313,7 @@ Scroll To Element
   ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
   Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
   Input Text                      id=decision-date-0   ${decisionDate}
-  Click Element                   xpath=//button[contains(text(), 'Далі')]
+  Click Element                   css=.draft
 
   Wait Until Element Is Visible   xpath=//a[contains(text(), '${asset_uaid}')]
   Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
@@ -1364,6 +1364,11 @@ Scroll To Element
   Input Text                   id=AuctionLot-minimalStep-amount         ${minimalStepAmount}
   Input Text                   id=AuctionLot-guarantee-amount           ${guaranteeAmount}
   Click Element                css=.document_box
+  Input Text                   xpath=//input[@name='AuctionLot[bankAccount][bankName]']      ${auction_data.bankAccount.bankName}
+  Input Text                   xpath=//input[@name='AuctionLot[bankAccount][description]']   ${auction_data.bankAccount.description}
+  Select From List By Value    id=auctionlot-bankaccount-accountidentification-0-scheme      ${auction_data.bankAccount.accountIdentification[0].scheme}
+  ${accountIdentificationId}=  Convert To String                                             ${auction_data.bankAccount.accountIdentification[0].id}
+  Input Text                   id=auctionlot-bankaccount-accountidentification-0-id          ${accountIdentificationId}
   Click Element                css=.inactive-btn
 
 Внести зміни в інформацію по 1 аукціону
