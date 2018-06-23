@@ -10,9 +10,10 @@ ${locator.auctionID}                                           css=.auction-auct
 ${locator.title}                                               css=.auction-title
 ${locator.status}                                              css=.auction-status
 ${locator.dgfID}                                               css=.auction-dgfId
-${locator.procurementMethodType}                               css=.auction-procurementMethodType
+${locator.procurementMethodType}                               xpath=//span[contains(@class, 'auction-procurementMethodType')]
 ${locator.description}                                         css=.auction-description
 ${locator.minimalStep.amount}                                  css=.auction-minimalStep-amount
+${locator.registrationFee.amount}                              css=.auction-registrationFee-amount
 ${locator.procuringEntity.name}                                css=.auction-procuringEntity-name
 ${locator.value.amount}                                        css=.auction-value-amount
 ${locator.guarantee.amount}                                    css=.auction-guarantee-amount
@@ -34,6 +35,9 @@ ${locator.cancellations[0].reason}                             css=.cancellation
 ${locator.awards[0].status}                                    css=.award-status-0
 ${locator.awards[1].status}                                    css=.award-status-1
 ${locator.minNumberOfQualifiedBids}                            css=.auction-minNumberOfQualifiedBids
+
+${questions[0].answer}                                         css=.aquestion-answer-0
+${questions[1].answer}                                         css=.aquestion-answer-1
 
 *** Keywords ***
 
@@ -229,14 +233,20 @@ Login
   Run Keyword And Return If   "UA-AR-P" in "${auction_id}"     ubiz.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${auction_id}
   Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   ubiz.Пошук лоту по ідентифікатору         ${user_name}   ${auction_id}
 
-  Switch Browser   ${BROWSER_ALIAS}
+  Перейти до аукціонів
+
   Wait Until Page Contains Element    id=main-auctionsearch-title   45
   ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
   ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти   ${auction_id}
-  Run Keyword Unless   ${passed}      Fail   Аукціо не знайдено за ${timeout_on_wait} секунд
+  Run Keyword Unless   ${passed}      Fail   Аукціон не знайдено за ${timeout_on_wait} секунд
   ${url}=                             Get Element Attribute   xpath=//div[contains(@class, 'one_card')]//a[contains(@class, 'auction-view')]@href
   Execute JavaScript                  window.location.href = '${url}';
   Wait Until Page Contains Element    xpath=//a[@href='#parameters']   45
+
+Перейти до аукціонів
+  Перейти в малу приватизацію
+  ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/auction']@class
+  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/auction']
 
 На початок сторінки
   Execute JavaScript     $(window).scrollTop(0);
@@ -305,17 +315,14 @@ Login
   ${qualified}=                   Get From Dictionary   ${bid_data.data}   qualified
   Run Keyword And Return If       ${qualified} == ${FALSE}   Fail   Учасник не кваліфікований
   ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
-  ${isFinancialProcedure}         Run Keyword   Чи фінасова процедура
+
   Click Link                      css=.auction-bid-create
-  Wait Until Page Contains        ПОДАЧА ЦІНОВОЇ ПРОПОЗИЦІЇ
+  Wait Until Element Is Visible   css=.send
   Scroll To Element               .container
-  ${isExistValueAmount}=          Run Keyword And Return Status   Dictionary Should Contain Key  ${bid_data.data}   value
-  Run Keyword If                  ${isExistValueAmount}   Ввести цінову пропозицію   ${bid_data.data.value.amount}
-  Run Keyword If                  ${isFinancialProcedure}   Прикріпити фейковий док до пропозиції
+  Ввести цінову пропозицію        ${bid_data.data.value.amount}
   Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
-  Click Element                   xpath=//button[contains(text(), 'Зберегти')]
+  Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]
-  Run Keyword If                  ${isFinancialProcedure} == ${FALSE}   Дія з пропозицією   bid-publication
 
 Дія з пропозицією
   [Arguments]   ${class}
@@ -338,13 +345,12 @@ Login
 
 Завантажити документ в ставку
   [Arguments]  ${user_name}  ${file_path}  ${auction_id}
-  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
-  Перейти в розділ купую
   Дія з пропозицією   bid-edit
-  Wait Until Page contains        ПОДАЧА ЦІНОВОЇ ПРОПОЗИЦІЇ   45
-  Click Element                   xpath=//button[contains(text(), 'Зберегти')]
+  Wait Until Element Is Visible   css=.draft
+  Завантажити один документ          ${file_path}
+  Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
+  Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]
-
 
 Перейти в розділ купую
   Click Element                   id=category-select
@@ -390,15 +396,13 @@ Login
 
 Змінити цінову пропозицію
   [Arguments]   ${user_name}   ${auction_id}   ${field}   ${value}
-  ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
-  Click Element                   css=.bid-change-value-amount
-  Wait Until Element Is Visible   id=BidChangeValueAmount-value-amount
+  # ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
+  Дія з пропозицією        bid-edit
+  Wait Until Element Is Visible   id=Bid-value-amount
   ${valueAmountToString}=         Convert To String   ${value}
-  Input Text                      id=BidChangeValueAmount-value-amount   ${valueAmountToString}
+  Input Text                      id=Bid-value-amount   ${valueAmountToString}
   Sleep                           1
-  Click Element                   xpath=//button[contains(text(), 'Змінити цінову пропозицію')]
-  Wait Until Page Contains        Пропозиція успішно оновлена   30
-  Закрити модальне вікно
+  Click Element                   css=.draft
 
 Оновити сторінку з тендером
   [Arguments]   ${user_name}   ${auction_id}
@@ -419,7 +423,7 @@ Login
   SelectBox                       question-element   ${auctionTitle}
   Input text                      id=question-title   ${title}
   Input text                      id=question-description   ${description}
-  Click Element                   xpath=//button[contains(text(), 'Запитати')]
+  Click Element                   xpath=//button[contains(@class, 'question-create')]
   Wait Until Page Contains        Параметри аукціону   45
 
 Задати запитання на предмет
@@ -433,7 +437,7 @@ Login
   Execute JavaScript              $("#question-element").val($("#question-element :contains('${item_id}')").last().attr("value")).change();
   Input text                      id=question-title   ${title}
   Input text                      id=question-description   ${description}
-  Click Element                   xpath=//button[contains(text(), 'Запитати')]
+  Click Element                   xpath=//button[contains(@class, 'question-create')]
   Wait Until Page Contains        Параметри аукціону   45
 
 Відповісти на запитання
@@ -442,7 +446,7 @@ Login
   Таб Запитання
   ${answer}=                      Get From Dictionary  ${answer_data.data}   answer
   Wait Until Page Contains        ${question_id}
-  Click Element                   xpath=//div[contains(@data-question-title, '${question_id}')]//a[contains(@class, 'question-answer')]
+  Click Element                   xpath=//div[contains(@data-question-title, '${question_id}')]//a[contains(@href, 'question-answer')]
   Wait Until Element Is Visible   id=question-answer
   Input Text                      id=question-answer   ${answer}
   Click Element                   xpath=//button[contains(text(), 'Надати відповідь')]
@@ -479,9 +483,13 @@ Login
   [return]           ${return_value}
 
 Отримати інформацію про procurementMethodType
-  ${procurementMethodType}=   Отримати текст із поля і показати на сторінці   procurementMethodType
-  ${procurementMethodType}=   view_to_cdb_fromat   ${procurementMethodType}
-  [return]                    ${procurementMethodType}
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType']@data-procurementMethodType
+
+Отримати інформацію про registrationFee.amount
+  ${return_value}=   Отримати текст із поля і показати на сторінці   registrationFee.amount
+  ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
+  ${return_value}=   Convert To Number   ${return_value}
+  [return]           ${return_value}
 
 Отримати інформацію про dgfID
   ${dgfID}=   Отримати текст із поля і показати на сторінці   dgfID
@@ -684,6 +692,10 @@ Login
   ...   Reload Page
   ...   AND   Таб Запитання
   ...   AND   Page Should Contain   ${question_id}
+  Run Keyword If    '${field}' == 'answer'    Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Запитання
+  ...   AND   Page Should Contain Element   xpath=//div[contains(@data-question-title, '${question_id}')]//*[contains(@class, 'question-${field}')]
   ${fieldValue}=    Get Text   xpath=//div[contains(@data-question-title, '${question_id}')]//*[contains(@class, 'question-${field}')]
   [return]          ${fieldValue}
 
@@ -1048,6 +1060,7 @@ Scroll To Element
 Обрати класифікатор
   [Arguments]   ${path}   ${id}   ${scheme}
   Click Element                   xpath=${path}
+  Sleep   1
   Wait Until Element Is Visible   xpath=//div[@class='fade modal in']//input[contains(@class,'input-search')]
   Click Element                   xpath=//div[@class='fade modal in']//a[@data-type='${scheme}']
   Input Text                      xpath=//div[@class='fade modal in']//input[contains(@class,'input-search')]   ${id}
@@ -1549,6 +1562,11 @@ Scroll To Element
                           Закрити модальне вікно
   [return]                ${contactPointEmail}
 
+Отримати інформацію про auctions[0].auctionID
+  Відкрити таб аукціонів в редагуванні лоту
+  Execute Javascript       $("#auctions .tab-pane").addClass("active")
+  Run Keyword And Return   Get Text   css=.auction-auctionID-1
+
 Отримати інформацію про auctions[0].procurementMethodType
   Відкрити таб аукціонів в редагуванні лоту
   Execute Javascript       $("#auctions .tab-pane").addClass("active")
@@ -1752,3 +1770,7 @@ Scroll To Element
   ${fileUrl}=    Get Element Attribute    xpath=//a[contains(text(), '${document_id}')]@href
   ${fileName}=   download_file_from_url   ${fileUrl}   ${OUTPUT_DIR}${/}${fileName}
   [return]       ${fileName}
+
+Активувати процедуру
+  [Arguments]   ${user_name}   ${tender_uaid}
+  Log To Console     Активувати процедуру
