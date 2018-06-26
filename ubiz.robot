@@ -322,7 +322,7 @@ Login
   Ввести цінову пропозицію        ${bid_data.data.value.amount}
   Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
   Click Element                   css=.draft
-  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
 
 Дія з пропозицією
   [Arguments]   ${class}
@@ -340,7 +340,7 @@ Login
   Choose File                        css=.document-img   ${file_path}
   Wait Until Page Contains           Done
   Click Element                      xpath=//button[contains(text(), 'Зберегти')]
-  Wait Until Element Is Visible      xpath=//p[contains(text(), 'Купую')]
+  Wait Until Element Is Visible      xpath=//p[contains(text(), 'Купую')]   30
   Дія з пропозицією                  bid-publication
 
 Завантажити документ в ставку
@@ -350,13 +350,15 @@ Login
   Завантажити один документ          ${file_path}
   Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
   Click Element                   css=.draft
-  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
 Перейти в розділ купую
+  На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[contains(text(), 'Купую')]
-  Click Link                      xpath=//a[contains(text(), 'Купую')]
-  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]
+  Sleep    1
+  # Wait Until Element Is Visible   xpath=//a[contains(text(), 'Купую')]
+  Click Link                      xpath=//a[@href="/privatization/bid/buy"]
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
 Перейти в розділ продаю
   Click Element                   id=category-select
@@ -384,9 +386,10 @@ Login
 
 Отримати інформацію із пропозиції
   [Arguments]   ${user_name}   ${auction_id}   ${field}
-  ubiz.Пошук тендера по ідентифікатору       ${user_name}   ${auction_id}
+  # ubiz.Пошук тендера по ідентифікатору       ${user_name}   ${auction_id}
   Перейти в розділ купую
   ${bidValueAmount}=         Get Text   css=.bid-value-amount
+  ${bidValueAmount}=         Evaluate   "".join("${bidValueAmount}".replace(",",".").split(' '))
   ${bidValueAmount}=         Convert To Number   ${bidValueAmount}
   [return]                   ${bidValueAmount}
 
@@ -397,6 +400,7 @@ Login
 Змінити цінову пропозицію
   [Arguments]   ${user_name}   ${auction_id}   ${field}   ${value}
   # ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
+  Перейти в розділ купую
   Дія з пропозицією        bid-edit
   Wait Until Element Is Visible   id=Bid-value-amount
   ${valueAmountToString}=         Convert To String   ${value}
@@ -416,7 +420,7 @@ Login
   ${title}=                       Get From Dictionary  ${question_data.data}  title
   ${description}=                 Get From Dictionary  ${question_data.data}  description
   ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
-  Wait Until Element Is Visible   css=.auction-question-create
+  Wait Until Element Is Visible   css=.auction-question-create   30
   Click Link                      css=.auction-question-create
   Wait Until Element Is Visible   id=question-title   30
   ${auctionTitle}=                Get Text    xpath=//a[contains(@class, 'text-justify')]
@@ -693,7 +697,8 @@ Login
   ...   AND   Таб Запитання
   ...   AND   Page Should Contain   ${question_id}
   Run Keyword If    '${field}' == 'answer'    Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
-  ...   Reload Page
+  ...   На початок сторінки
+  ...   AND   Click Element   css=.auction-reload
   ...   AND   Таб Запитання
   ...   AND   Page Should Contain Element   xpath=//div[contains(@data-question-title, '${question_id}')]//*[contains(@class, 'question-${field}')]
   ${fieldValue}=    Get Text   xpath=//div[contains(@data-question-title, '${question_id}')]//*[contains(@class, 'question-${field}')]
