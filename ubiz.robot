@@ -252,8 +252,8 @@ Login
 Відкрити всі аукціони
   На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/auction/index']
-  Click Link                      xpath=//a[@href='/privatization/auction/index']
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/auction']
+  Click Link                      xpath=//a[@href='/privatization/auction']
 
 На початок сторінки
   Execute JavaScript     $(window).scrollTop(0);
@@ -330,6 +330,7 @@ Login
   Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
   Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
+  Return From Keyword If          "Можливість подати пропозицію другим учасником" in "${TEST_NAME}"   Дія з пропозицією   bid-publication
 
 Дія з пропозицією
   [Arguments]   ${class}
@@ -1291,8 +1292,8 @@ Scroll To Element
 Перейти на головну сторінку об’єктів
   На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/asset/index']
-  Click Link                      xpath=//a[@href='/privatization/asset/index']
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/asset']
+  Click Link                      xpath=//a[@href='/privatization/asset']
   Sleep                           2
 
 Завантажити документ для видалення об'єкта МП
@@ -1511,8 +1512,8 @@ Scroll To Element
 Відкрити всі лоти
   На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/index']
-  Click Link                      xpath=//a[@href='/privatization/lot/index']
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot']
+  Click Link                      xpath=//a[@href='/privatization/lot']
 
 
 Відкрити лот на редагування
