@@ -247,6 +247,13 @@ Login
   Перейти в малу приватизацію
   ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/auction']@class
   Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/auction']
+  Відкрити всі аукціони
+
+Відкрити всі аукціони
+  На початок сторінки
+  Click Element                   id=category-select
+  Wait Until Element Is Visible   xpath=//a[@href='/privatization/auction/index']
+  Click Link                      xpath=//a[@href='/privatization/auction/index']
 
 На початок сторінки
   Execute JavaScript     $(window).scrollTop(0);
@@ -345,18 +352,21 @@ Login
 
 Завантажити документ в ставку
   [Arguments]  ${user_name}  ${file_path}  ${auction_id}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Перейти в розділ купую
   Дія з пропозицією   bid-edit
   Wait Until Element Is Visible   css=.draft
-  Завантажити один документ          ${file_path}
-  Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
+  Scroll To Element               .action_period
+  Завантажити один документ       ${file_path}
+  # Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
   Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
+  Дія з пропозицією   bid-publication
 
 Перейти в розділ купую
   На початок сторінки
   Click Element                   id=category-select
   Sleep    1
-  # Wait Until Element Is Visible   xpath=//a[contains(text(), 'Купую')]
   Click Link                      xpath=//a[@href="/privatization/bid/buy"]
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
@@ -407,6 +417,7 @@ Login
   Input Text                      id=Bid-value-amount   ${valueAmountToString}
   Sleep                           1
   Click Element                   css=.draft
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
 
 Оновити сторінку з тендером
   [Arguments]   ${user_name}   ${auction_id}
