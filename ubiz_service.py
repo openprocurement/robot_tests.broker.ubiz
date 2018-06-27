@@ -141,6 +141,7 @@ def view_to_cdb_fromat(string):
             u"Кандидат забрав гарантійний внесок" : u"cancelled",
             u"Аукціон неуспішний" : u"unsuccessful",
             u"Оплачено, очікується підписання договору" : u"active",
+            u"АУКЦІОН" : u"active.auction",
             u"Скасування активоване": u'active'
     }.get(string, string)
 
@@ -162,7 +163,7 @@ def before_create_auction(auction_data, role_name):
     if  auction_data.data.has_key('adapt_procuringEntity'):
             auction_data = adapt_procuringEntity(auction_data)
     if  auction_data.data.has_key('assetCustodian'):
-        auction_data = adapt_assetCustodian(auction_data)    
+        auction_data = adapt_assetCustodian(auction_data)
     return auction_data
 
 def join(l, separator):
