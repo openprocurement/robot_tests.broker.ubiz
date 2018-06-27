@@ -393,7 +393,10 @@ Login
   [Arguments]   ${user_name}   ${auction_id}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Перейти в розділ купую
-  Дія з пропозицією        bid-cancellation
+  Дія з пропозицією               bid-publication
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
+  Дія з пропозицією               bid-recall
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
 Отримати інформацію із пропозиції
   [Arguments]   ${user_name}   ${auction_id}   ${field}
