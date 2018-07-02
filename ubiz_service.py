@@ -142,6 +142,7 @@ def view_to_cdb_fromat(string):
             u"Аукціон неуспішний" : u"unsuccessful",
             u"Оплачено, очікується підписання договору" : u"active",
             u"АУКЦІОН" : u"active.auction",
+            u"АУКЦІОН НЕ ВІДБУВСЯ": u"unsuccessful",
             u"Скасування активоване": u'active'
     }.get(string, string)
 
