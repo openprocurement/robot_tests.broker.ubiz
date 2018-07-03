@@ -727,7 +727,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}   ${document_id}   ${field}
   ubiz.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${user_name}   ${auction_id}
   ${currentStatus}=               Get Text   css=.auction-status
-  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   СКАСОВАНИЙ
+  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   АУКЦІОН ВІДМІНЕНО
   Run Keyword If   ${wasCancelled}   Таб Скасування
   ...   ELSE    Таб Документи
   ${fieldValue}=                  Get Text   xpath=//div[contains(@data-document-title, '${document_id}')]//*[contains(@class, 'document-${field}')]
@@ -762,12 +762,12 @@ Login
 Скасувати закупівлю
   [Arguments]   ${user_name}   ${auction_id}   ${reason}   ${file_path}   ${description}
   ubiz.Пошук тендера по ідентифікатору               ${user_name}   ${auction_id}
-  Click Link                         css=.auction-cancellation
+  Click Link                         css=.auction-cancel
   Wait Until Page Contains           Скасування аукціону   45
   Scroll To Element                  .container
-  SelectBox                          cancellation-reason   ${reason}
+  Input Text                         id=cancellation-reason   ${reason}
   Завантажити один документ          ${file_path}
-  Click Element                      xpath=//button[contains(text(), 'Скасувати')]
+  Click Element                      xpath=//button[contains(text(), 'Відмінити аукціон')]
   Wait Until Page Contains Element   xpath=//a[@href='#cancellations']   45
 
 Отримати інформацію про awards[0].status
