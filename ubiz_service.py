@@ -137,6 +137,7 @@ def view_to_cdb_fromat(string):
             u"Порядку ознайомлення з майном" : u'x_dgfAssetFamiliarization',
             u"Очікується кінець кваліфікації" : u"pending.waiting",
             u"Очікується протокол" : u"pending.verification",
+            u"ОЧІКУЄТЬСЯ ОПУБЛІКУВАННЯ ПРОТОКОЛУ" : u"active.qualification",
             u"Очікується оплата" : u"pending.payment",
             u"Кандидат забрав гарантійний внесок" : u"cancelled",
             u"Аукціон неуспішний" : u"unsuccessful",
