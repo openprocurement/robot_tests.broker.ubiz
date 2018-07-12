@@ -886,6 +886,21 @@ Login
   Завантажити один документ           ${file_path}
   Click Element                       css=.upload
 
+Розгорнути таби на кваліфікації
+  Wait Until Element Is Visible   id=awards_awards-tab
+  Execute JavaScript              $('#awards_awards-tab').find('.fa-plus').click();
+  Sleep                           1
+
+Завантажити протокол дискваліфікації в авард
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${award_index}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Таб Кваліфікація
+  Розгорнути таби на кваліфікації
+  Click Element                    css=.award-rejection-protocol
+  Wait Until Element Is Visible    id=documents-box
+  Завантажити один документ        ${file_path}
+  Click Element                    css=.inactive-btn
+
 Підтвердити наявність протоколу аукціону
   [Arguments]   ${user_name}   ${auction_id}   ${award_index}
   Wait Until Page Contains Element   xpath=//button[contains(text(), 'Завантажити')]
