@@ -422,6 +422,8 @@ Login
   Sleep                           1
   Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
+  Дія з пропозицією               bid-publication
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
 Оновити сторінку з тендером
   [Arguments]   ${user_name}   ${auction_id}
@@ -1814,3 +1816,12 @@ Scroll To Element
 Активувати процедуру
   [Arguments]   ${user_name}   ${tender_uaid}
   Log To Console     Активувати процедуру
+
+Отримати кількість авардів в тендері
+  [Arguments]   ${user_name}   ${auction_id}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Таб Кваліфікація
+  Розгорнути таби на кваліфікації
+  ${count}=   Get Matching Xpath Count  xpath=//div[@id='awards_awards-tab']//h3[contains(@class, 'award-status')]
+  ${count}=   Convert To Integer   ${count}
+  [return]    ${count}
