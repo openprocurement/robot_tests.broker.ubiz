@@ -1376,7 +1376,7 @@ Scroll To Element
   Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
   Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
   ...   Reload Page
-  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '${asset_uaid}')]
+  ...   AND   Wait Until Element Is Not Visible   xpath=//a[contains(text(), '${asset_uaid}')]
   Перейти в мої лоти
 
   Click Element                   css=.lot_image
