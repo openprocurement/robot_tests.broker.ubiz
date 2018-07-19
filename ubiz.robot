@@ -863,17 +863,25 @@ Login
   Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
   ...   Reload Page
   ...   AND   Таб Контракт
-  Wait Until Page Contains Element     css=.contract-publication
-  Click Link                           css=.contract-publication
-  Wait Until Page Contains             Публікація договору   45
-  Завантажити один документ            ${file_path}
-  Scroll To Element                    .action_period
+  Wait Until Page Contains Element    css=.contract-update
+  Click Link                          css=.contract-update
+  Wait Until Page Contains Element    css=.update
+  Scroll To Element                   .update
+  Завантажити один документ           ${file_path}
+  Click Element                       css=.update
 
 Підтвердити підписання контракту
   [Arguments]   ${user_name}   ${auction_id}   ${contract_index}
-  Wait Until Page Contains Element   xpath=//button[contains(text(), 'Опублікувати')]
-  Click Element                      xpath=//button[contains(text(), 'Опублікувати')]
-  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Контракт
+  Wait Until Page Contains Element    css=.contract-update
+  Click Link                          css=.contract-update
+  Wait Until Page Contains Element    css=.activation
+  Scroll To Element                   .activation
+  Click Element                       css=.activation
+
 
 Завантажити протокол аукціону в авард
   [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${award_index}
@@ -887,6 +895,34 @@ Login
   Scroll To Element                   .upload
   Завантажити один документ           ${file_path}
   Click Element                       css=.upload
+
+Завантажити протокол погодження в авард
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${award_index}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Кваліфікація
+  Wait Until Page Contains Element    css=.award-activation
+  Click Link                          css=.award-activation
+  Wait Until Page Contains Element    css=.upload
+  Scroll To Element                   .upload
+  Завантажити один документ           ${file_path}
+  Click Element                       css=.upload
+
+Встановити дату підписання угоди
+  [Arguments]   ${user_name}   ${auction_id}   ${contract_num}   ${fieldvalue}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Контракт
+  Wait Until Page Contains Element    css=.contract-update
+  Click Link                          css=.contract-update
+  Wait Until Page Contains Element    css=.update
+  Scroll To Element                   .update
+  Execute JavaScript                  $('#contractpublication-datesigned').removeAttr('readonly');
+  Input Text                          id=contractpublication-datesigned   ${fieldvalue}
+  Click Element                       css=.update
+
 
 Розгорнути таби на кваліфікації
   Wait Until Element Is Visible   id=awards_awards-tab
