@@ -850,12 +850,9 @@ Login
 
 Дискваліфікувати постачальника
   [Arguments]   ${user_name}   ${auction_id}  ${award_index}  ${description}
-  ${isForm}=   Run Keyword And Return Status   Page Should Contain Element   id=disqualification-title
-  Run Keyword If   ${isForm} == ${FALSE}   Дискваліфікація   ${user_name}   ${auction_id}
-  Input Text                               id=disqualification-title   Дискваліфікація учасника
-  Input Text                               id=disqualification-description   ${description}
-  Click Element                            xpath=//button[contains(text(), 'Дискваліфікувати')]
-  Wait Until Page Contains Element         xpath=//a[@href='#parameters']   45
+  Wait Until Element Is Visible      css=.inactive-btn
+  Click Element                      css=.inactive-btn
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
 Завантажити угоду до тендера
   [Arguments]   ${user_name}   ${auction_id}   ${contract_index}   ${file_path}
@@ -937,7 +934,7 @@ Login
   Click Element                    css=.award-rejection-protocol
   Wait Until Element Is Visible    id=documents-box
   Завантажити один документ        ${file_path}
-  Click Element                    css=.inactive-btn
+  # Click Element                    css=.inactive-btn
 
 Підтвердити наявність протоколу аукціону
   [Arguments]   ${user_name}   ${auction_id}   ${award_index}
@@ -1410,7 +1407,7 @@ Scroll To Element
   Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
   Sleep                           1
   Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
-  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  Wait Until Keyword Succeeds   10 x   60 s   Run Keywords
   ...   Reload Page
   ...   AND   Wait Until Element Is Not Visible   xpath=//a[contains(text(), '${asset_uaid}')]
   Перейти в мої лоти
