@@ -1864,7 +1864,7 @@ Scroll To Element
   [return]    ${count}
 
 Завантажити протокол скасування в контракт
-  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${contract_id}
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${contract_num}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Таб Контракт
   Розгорнути таби на контрактах
@@ -1874,7 +1874,7 @@ Scroll To Element
   Завантажити один документ       ${file_path}
 
 Скасувати контракт
-  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${contract_id}
+  [Arguments]   ${user_name}   ${auction_id}   ${contract_num}
   Click Element                      css=.inactive-btn
   Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
