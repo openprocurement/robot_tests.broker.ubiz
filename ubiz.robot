@@ -899,12 +899,15 @@ Login
   Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
   ...   Reload Page
   ...   AND   Таб Кваліфікація
-  Wait Until Page Contains Element    css=.award-activation
-  Click Link                          css=.award-activation
-  Wait Until Page Contains Element    css=.upload
-  Scroll To Element                   .upload
+  Wait Until Page Contains Element    css=.award-pending
+  Click Link                          css=.award-pending
+  Wait Until Page Contains Element    id=documents-box
   Завантажити один документ           ${file_path}
-  Click Element                       css=.upload
+
+Активувати кваліфікацію учасника
+  [Arguments]   ${user_name}   ${auction_id}
+  Wait Until Page Contains Element   css=.inactive-btn
+  Click Element                      css=.inactive-btn
 
 Встановити дату підписання угоди
   [Arguments]   ${user_name}   ${auction_id}   ${contract_num}   ${fieldvalue}
