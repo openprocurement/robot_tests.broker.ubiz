@@ -1862,3 +1862,23 @@ Scroll To Element
   ${count}=   Get Matching Xpath Count  xpath=//div[@id='awards_awards-tab']//h3[contains(@class, 'award-status')]
   ${count}=   Convert To Integer   ${count}
   [return]    ${count}
+
+Завантажити протокол скасування в контракт
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${contract_id}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Таб Контракт
+  Розгорнути таби на контрактах
+  Wait Until Element Is Visible   css=.contract-rejection-protocol
+  Click Element                   css=.contract-rejection-protocol
+  Wait Until Element Is Visible   id=documents-box
+  Завантажити один документ       ${file_path}
+
+Скасувати контракт
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${contract_id}
+  Click Element                      css=.inactive-btn
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
+
+Розгорнути таби на контрактах
+  Wait Until Element Is Visible   id=contracts_contracts-tab
+  Execute JavaScript              $('#contracts_contracts-tab').find('.fa-plus').click();
+  Sleep                           1
