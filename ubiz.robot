@@ -330,7 +330,8 @@ Login
   Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
   Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
-  Run Keyword If                  "Можливість подати пропозицію другим учасником" in "${TEST_NAME}"   Дія з пропозицією   bid-publication
+  # Run Keyword If                  "Можливість подати пропозицію другим учасником" in "${TEST_NAME}"   Дія з пропозицією   bid-publication
+  Дія з пропозицією   bid-publication
 
 Дія з пропозицією
   [Arguments]   ${class}
