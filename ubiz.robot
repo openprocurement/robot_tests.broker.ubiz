@@ -921,10 +921,10 @@ Login
   Wait Until Page Contains Element    css=.update
   Scroll To Element                   .update
   ${fieldvalue}=   auction_period_to_broker_format   ${fieldvalue}
-  Execute JavaScript                  $('#contractpublication-datesigned').removeAttr('readonly');
-  Input Text                          id=contractpublication-datesigned   ${fieldvalue}
+  Execute JavaScript                  $('#contractpublication-datesigned-disp').removeAttr('readonly');
+  Input Text                          id=contractpublication-datesigned-disp   ${fieldvalue}
   Click Element                       id=documents-box
-  Sleep  1
+  Sleep  60
   Click Element                       css=.update
 
 
