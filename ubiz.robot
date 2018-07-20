@@ -920,8 +920,11 @@ Login
   Click Link                          css=.contract-update
   Wait Until Page Contains Element    css=.update
   Scroll To Element                   .update
+  ${fieldvalue}=   auction_period_to_broker_format   ${fieldvalue}
   Execute JavaScript                  $('#contractpublication-datesigned').removeAttr('readonly');
   Input Text                          id=contractpublication-datesigned   ${fieldvalue}
+  Click Element                       id=documents-box
+  Sleep  1
   Click Element                       css=.update
 
 
