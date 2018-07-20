@@ -924,7 +924,7 @@ Login
   Execute JavaScript                  $('#contractpublication-datesigned-disp').removeAttr('readonly');
   Input Text                          id=contractpublication-datesigned-disp   ${fieldvalue}
   Click Element                       id=documents-box
-  Sleep  60
+  Sleep                               30
   Click Element                       css=.update
 
 
