@@ -861,6 +861,7 @@ Login
   Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
   ...   Reload Page
   ...   AND   Таб Контракт
+  Розгорнути таби на контрактах
   Wait Until Page Contains Element    css=.contract-update
   Click Link                          css=.contract-update
   Wait Until Page Contains Element    css=.update
@@ -874,6 +875,7 @@ Login
   Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
   ...   Reload Page
   ...   AND   Таб Контракт
+  Розгорнути таби на контрактах
   Wait Until Page Contains Element    css=.contract-update
   Click Link                          css=.contract-update
   Wait Until Page Contains Element    css=.activation
@@ -916,11 +918,12 @@ Login
   Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
   ...   Reload Page
   ...   AND   Таб Контракт
+  Розгорнути таби на контрактах
   Wait Until Page Contains Element    css=.contract-update
   Click Link                          css=.contract-update
   Wait Until Page Contains Element    css=.update
   Scroll To Element                   .update
-  ${fieldvalue}=   auction_period_to_broker_format   ${fieldvalue}
+  ${fieldvalue}=                      auction_period_to_broker_format   ${fieldvalue}
   Execute JavaScript                  $('#contractpublication-datesigned-disp').removeAttr('readonly');
   Input Text                          id=contractpublication-datesigned-disp   ${fieldvalue}
   Click Element                       id=documents-box
