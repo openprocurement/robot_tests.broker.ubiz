@@ -868,6 +868,7 @@ Login
   Scroll To Element                   .update
   Завантажити один документ           ${file_path}
   Click Element                       css=.update
+  Sleep                               10
 
 Підтвердити підписання контракту
   [Arguments]   ${user_name}   ${auction_id}   ${contract_index}
@@ -927,9 +928,8 @@ Login
   Execute JavaScript                  $('#contractpublication-datesigned-disp').removeAttr('readonly');
   Input Text                          id=contractpublication-datesigned-disp   ${fieldvalue}
   Click Element                       id=documents-box
-  Sleep                               30
   Click Element                       css=.update
-
+  Sleep                               10
 
 Розгорнути таби на кваліфікації
   Wait Until Element Is Visible   id=awards_awards-tab
