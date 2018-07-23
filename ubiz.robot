@@ -293,6 +293,7 @@ Login
   [Arguments]  ${user_name}   ${file_path}   ${auction_id}
   ubiz.Завантажити документ в тендер з типом   ${user_name}   ${auction_id}   ${file_path}
 
+
 Змінити документ в ставці
   [Arguments]   ${username}   ${tender_uaid}    ${path}   ${docid}
   Fail    Після відправки заявки оператору майданчика  - змінити доки неможливо
@@ -329,7 +330,7 @@ Login
   Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
   Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
-  Run Keyword If                  "Можливість подати пропозицію другим учасником" in "${TEST_NAME}"   Дія з пропозицією   bid-publication
+  Дія з пропозицією               bid-publication
 
 Дія з пропозицією
   [Arguments]   ${class}
@@ -354,13 +355,12 @@ Login
   [Arguments]  ${user_name}  ${file_path}  ${auction_id}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Перейти в розділ купую
-  Дія з пропозицією   bid-edit
-  Wait Until Element Is Visible   css=.draft
+  Дія з пропозицією               bid-edit
+  Wait Until Element Is Visible   css=.update
   Scroll To Element               .action_period
-  Завантажити один документ       ${file_path}
-  Click Element                   css=.draft
+  Run Keyword And Ignore Error    Завантажити один документ       ${file_path}
+  Click Element                   css=.update
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
-  Дія з пропозицією               bid-publication
 
 Перейти в розділ купую
   На початок сторінки
@@ -398,7 +398,7 @@ Login
 
 Отримати інформацію із пропозиції
   [Arguments]   ${user_name}   ${auction_id}   ${field}
-  Перейти в розділ купую
+                       Перейти в розділ купую
   ${bidValueAmount}=   Get Text   css=.bid-value-amount
   ${bidValueAmount}=   Evaluate   "".join("${bidValueAmount}".replace(",",".").split(' '))
   ${bidValueAmount}=   Convert To Number   ${bidValueAmount}
@@ -411,13 +411,13 @@ Login
 Змінити цінову пропозицію
   [Arguments]   ${user_name}   ${auction_id}   ${field}   ${value}
   Перейти в розділ купую
-  Дія з пропозицією        bid-edit
+  Дія з пропозицією               bid-edit
   Wait Until Element Is Visible   id=Bid-value-amount
   ${valueAmountToString}=         Convert To String   ${value}
   Input Text                      id=Bid-value-amount   ${valueAmountToString}
   Sleep                           1
-  Click Element                   css=.draft
-  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
+  Click Element                   css=.update
+  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
 Оновити сторінку з тендером
   [Arguments]   ${user_name}   ${auction_id}
@@ -429,7 +429,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}   ${question_data}
   ${title}=                       Get From Dictionary  ${question_data.data}  title
   ${description}=                 Get From Dictionary  ${question_data.data}  description
-  ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Wait Until Element Is Visible   css=.auction-question-create   30
   Click Link                      css=.auction-question-create
   Wait Until Element Is Visible   id=question-title   30
@@ -727,7 +727,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}   ${document_id}   ${field}
   ubiz.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${user_name}   ${auction_id}
   ${currentStatus}=               Get Text   css=.auction-status
-  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   АУКЦІОН ВІДМІНЕНО
+  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   СКАСОВАНИЙ
   Run Keyword If   ${wasCancelled}   Таб Скасування
   ...   ELSE    Таб Документи
   ${fieldValue}=                  Get Text   xpath=//div[contains(@data-document-title, '${document_id}')]//*[contains(@class, 'document-${field}')]
@@ -762,12 +762,12 @@ Login
 Скасувати закупівлю
   [Arguments]   ${user_name}   ${auction_id}   ${reason}   ${file_path}   ${description}
   ubiz.Пошук тендера по ідентифікатору               ${user_name}   ${auction_id}
-  Click Link                         css=.auction-cancel
+  Click Link                         css=.auction-cancellation
   Wait Until Page Contains           Скасування аукціону   45
   Scroll To Element                  .container
-  Input Text                         id=cancellation-reason   ${reason}
+  SelectBox                          cancellation-reason   ${reason}
   Завантажити один документ          ${file_path}
-  Click Element                      xpath=//button[contains(text(), 'Відмінити аукціон')]
+  Click Element                      xpath=//button[contains(text(), 'Скасувати')]
   Wait Until Page Contains Element   xpath=//a[@href='#cancellations']   45
 
 Отримати інформацію про awards[0].status
@@ -843,12 +843,9 @@ Login
 
 Дискваліфікувати постачальника
   [Arguments]   ${user_name}   ${auction_id}  ${award_index}  ${description}
-  ${isForm}=   Run Keyword And Return Status   Page Should Contain Element   id=disqualification-title
-  Run Keyword If   ${isForm} == ${FALSE}   Дискваліфікація   ${user_name}   ${auction_id}
-  Input Text                               id=disqualification-title   Дискваліфікація учасника
-  Input Text                               id=disqualification-description   ${description}
-  Click Element                            xpath=//button[contains(text(), 'Дискваліфікувати')]
-  Wait Until Page Contains Element         xpath=//a[@href='#parameters']   45
+  Wait Until Element Is Visible      css=.inactive-btn
+  Click Element                      css=.inactive-btn
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
 Завантажити угоду до тендера
   [Arguments]   ${user_name}   ${auction_id}   ${contract_index}   ${file_path}
@@ -856,16 +853,27 @@ Login
   Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
   ...   Reload Page
   ...   AND   Таб Контракт
-  Wait Until Page Contains Element     css=.contract-publication
-  Click Link                           css=.contract-publication
-  Wait Until Page Contains             Публікація договору   45
-  Завантажити один документ            ${file_path}
-  Scroll To Element                    .action_period
+  Розгорнути таби на контрактах
+  Wait Until Page Contains Element    css=.contract-update
+  Click Link                          css=.contract-update
+  Wait Until Page Contains Element    css=.update
+  Scroll To Element                   .update
+  Завантажити один документ           ${file_path}
+  Click Element                       css=.update
+  Sleep                               10
 
 Підтвердити підписання контракту
   [Arguments]   ${user_name}   ${auction_id}   ${contract_index}
-  Wait Until Page Contains Element   xpath=//button[contains(text(), 'Опублікувати')]
-  Click Element                      xpath=//button[contains(text(), 'Опублікувати')]
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Контракт
+  Розгорнути таби на контрактах
+  Wait Until Page Contains Element    css=.contract-update
+  Click Link                          css=.contract-update
+  Wait Until Page Contains Element    css=.activation
+  Scroll To Element                   .activation
+  Click Element                       css=.activation
   Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
 Завантажити протокол аукціону в авард
@@ -874,11 +882,62 @@ Login
   Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
   ...   Reload Page
   ...   AND   Таб Кваліфікація
-  Wait Until Page Contains Element    css=.award-upload-protocol
-  Click Link                          css=.award-upload-protocol
-  Wait Until Page Contains            Завантаження протоколу аукціону   30
+  Wait Until Page Contains Element    css=.award-activation
+  Click Link                          css=.award-activation
+  Wait Until Page Contains Element    css=.upload
+  Scroll To Element                   .upload
   Завантажити один документ           ${file_path}
-  Scroll To Element                   .action_period
+  Click Element                       css=.upload
+
+Завантажити протокол погодження в авард
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${award_index}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Кваліфікація
+  Wait Until Page Contains Element    css=.award-pending
+  Click Link                          css=.award-pending
+  Wait Until Page Contains Element    id=documents-box
+  Завантажити один документ           ${file_path}
+
+Активувати кваліфікацію учасника
+  [Arguments]   ${user_name}   ${auction_id}
+  Wait Until Page Contains Element   css=.inactive-btn
+  Click Element                      css=.inactive-btn
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
+
+Встановити дату підписання угоди
+  [Arguments]   ${user_name}   ${auction_id}   ${contract_num}   ${fieldvalue}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Контракт
+  Розгорнути таби на контрактах
+  Wait Until Page Contains Element    css=.contract-update
+  Click Link                          css=.contract-update
+  Wait Until Page Contains Element    css=.update
+  Scroll To Element                   .update
+  ${fieldvalue}=                      auction_period_to_broker_format   ${fieldvalue}
+  Execute JavaScript                  $('#contractpublication-datesigned-disp').removeAttr('readonly');
+  Input Text                          id=contractpublication-datesigned-disp   ${fieldvalue}
+  Click Element                       id=documents-box
+  Sleep                               60
+  Click Element                       css=.update
+  Sleep                               5
+
+Розгорнути таби на кваліфікації
+  Wait Until Element Is Visible   id=awards_awards-tab
+  Execute JavaScript              $('#awards_awards-tab').find('.fa-plus').click();
+  Sleep                           1
+
+Завантажити протокол дискваліфікації в авард
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${award_index}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Таб Кваліфікація
+  Розгорнути таби на кваліфікації
+  Click Element                    css=.award-rejection-protocol
+  Wait Until Element Is Visible    id=documents-box
+  Завантажити один документ        ${file_path}
 
 Підтвердити наявність протоколу аукціону
   [Arguments]   ${user_name}   ${auction_id}   ${award_index}
@@ -889,10 +948,15 @@ Login
 Підтвердити постачальника
   [Arguments]   ${user_name}   ${auction_id}   ${award_index}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
-  Таб Кваліфікація
+  Wait Until Keyword Succeeds   10 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Кваліфікація
   Wait Until Page Contains Element    css=.award-activation
   Click Link                          css=.award-activation
-  Wait Until Page Contains Element    xpath=//a[@href='#parameters']   45
+  Wait Until Page Contains Element    css=.activation
+  Scroll To Element                   .activation
+  Click Element                       css=.activation
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
 Скасування рішення кваліфікаційної комісії
   [Arguments]   ${user_name}   ${auction_id}   ${award_num}
@@ -1347,9 +1411,9 @@ Scroll To Element
   Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
   Sleep                           1
   Click Element                   xpath=//a[contains(@href, '/privatization/lot-draft/publication')]
-  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
+  Wait Until Keyword Succeeds   10 x   60 s   Run Keywords
   ...   Reload Page
-  ...   AND   Wait Until Element Is Not Visible   xpath=//span[contains(text(), '${asset_uaid}')]
+  ...   AND   Wait Until Element Is Not Visible   xpath=//a[contains(text(), '${asset_uaid}')]
   Перейти в мої лоти
 
   Click Element                   css=.lot_image
@@ -1369,6 +1433,7 @@ Scroll To Element
   ubiz.Пошук лоту по ідентифікатору   ${user_name}   ${lot_id}
   Click Element                          css=.lot-reload
   Wait Until Page Contains Element       xpath=//span[contains(@class, 'auction-auctionID')]   45
+
 
 Відкрити таб аукціонів в редагуванні лоту
   Wait Until Element Is Visible   xpath=//a[contains(@href, '#auctions')]
@@ -1413,7 +1478,6 @@ Scroll To Element
   Run Keyword If   '${fieldname}' == 'guarantee.amount'   Input Text   id=AuctionLot-guarantee-amount    ${fieldvalue}
   Run Keyword If   '${fieldname}' == 'registrationFee.amount'   Input Text   id=AuctionLot-registrationFee-amount    ${fieldvalue}
   Run Keyword If   '${fieldname}' == 'auctionPeriod.startDate'   Input Text   id=auctionlot-auctionperiod-startdate-disp    ${fieldvalue}
-
   Click Element                css=.inactive-btn
 
 Внести інформацію по 2 аукціону
@@ -1695,13 +1759,13 @@ Scroll To Element
   [return]           ${return_value}
 
 Отримати інформацію про auctions[0].auctionPeriod.startDate
-  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
 
 Отримати інформацію про auctions[1].tenderingDuration
-  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-tenderingduration
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-tenderingduration
 
 Отримати інформацію про auctions[2].tenderingDuration
-  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-tenderingduration
+    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-tenderingduration
 
 Отримати інформацію з активу лоту
   [Arguments]   ${user_name}   ${lot_id}   ${uniq_id}   ${field}
@@ -1786,3 +1850,32 @@ Scroll To Element
 Активувати процедуру
   [Arguments]   ${user_name}   ${tender_uaid}
   Log To Console     Активувати процедуру
+
+Отримати кількість авардів в тендері
+  [Arguments]   ${user_name}   ${auction_id}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Таб Кваліфікація
+  Розгорнути таби на кваліфікації
+  ${count}=   Get Matching Xpath Count  xpath=//div[@id='awards_awards-tab']//h3[contains(@class, 'award-status')]
+  ${count}=   Convert To Integer   ${count}
+  [return]    ${count}
+
+Завантажити протокол скасування в контракт
+  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${contract_num}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+  Таб Контракт
+  Розгорнути таби на контрактах
+  Wait Until Element Is Visible   css=.contract-rejection-protocol
+  Click Element                   css=.contract-rejection-protocol
+  Wait Until Element Is Visible   id=documents-box
+  Завантажити один документ       ${file_path}
+
+Скасувати контракт
+  [Arguments]   ${user_name}   ${auction_id}   ${contract_num}
+  Click Element                      css=.inactive-btn
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
+
+Розгорнути таби на контрактах
+  Wait Until Element Is Visible   id=contracts_contracts-tab
+  Execute JavaScript              $('#contracts_contracts-tab').find('.fa-plus').click();
+  Sleep                           1
