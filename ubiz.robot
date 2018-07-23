@@ -330,8 +330,7 @@ Login
   Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
   Click Element                   css=.draft
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
-  # Run Keyword If                  "Можливість подати пропозицію другим учасником" in "${TEST_NAME}"   Дія з пропозицією   bid-publication
-  Дія з пропозицією   bid-publication
+  Дія з пропозицією               bid-publication
 
 Дія з пропозицією
   [Arguments]   ${class}
@@ -356,14 +355,12 @@ Login
   [Arguments]  ${user_name}  ${file_path}  ${auction_id}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Перейти в розділ купую
-  Дія з пропозицією   bid-edit
-  Wait Until Element Is Visible   css=.draft
+  Дія з пропозицією               bid-edit
+  Wait Until Element Is Visible   css=.update
   Scroll To Element               .action_period
-  Завантажити один документ       ${file_path}
-  # Execute JavaScript              $('input[id*=bid-condition]').trigger('click');
-  Click Element                   css=.draft
+  Run Keyword And Ignore Error    Завантажити один документ       ${file_path}
+  Click Element                   css=.update
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
-  Дія з пропозицією   bid-publication
 
 Перейти в розділ купую
   На початок сторінки
@@ -401,12 +398,11 @@ Login
 
 Отримати інформацію із пропозиції
   [Arguments]   ${user_name}   ${auction_id}   ${field}
-  # ubiz.Пошук тендера по ідентифікатору       ${user_name}   ${auction_id}
-  Перейти в розділ купую
-  ${bidValueAmount}=         Get Text   css=.bid-value-amount
-  ${bidValueAmount}=         Evaluate   "".join("${bidValueAmount}".replace(",",".").split(' '))
-  ${bidValueAmount}=         Convert To Number   ${bidValueAmount}
-  [return]                   ${bidValueAmount}
+                       Перейти в розділ купую
+  ${bidValueAmount}=   Get Text   css=.bid-value-amount
+  ${bidValueAmount}=   Evaluate   "".join("${bidValueAmount}".replace(",",".").split(' '))
+  ${bidValueAmount}=   Convert To Number   ${bidValueAmount}
+  [return]             ${bidValueAmount}
 
 Закрити модальне вікно
   Execute JavaScript   $('.close').trigger('click');
@@ -414,16 +410,13 @@ Login
 
 Змінити цінову пропозицію
   [Arguments]   ${user_name}   ${auction_id}   ${field}   ${value}
-  # ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
   Перейти в розділ купую
-  Дія з пропозицією        bid-edit
+  Дія з пропозицією               bid-edit
   Wait Until Element Is Visible   id=Bid-value-amount
   ${valueAmountToString}=         Convert To String   ${value}
   Input Text                      id=Bid-value-amount   ${valueAmountToString}
   Sleep                           1
-  Click Element                   css=.draft
-  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]    30
-  Дія з пропозицією               bid-publication
+  Click Element                   css=.update
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
 Оновити сторінку з тендером
@@ -432,12 +425,11 @@ Login
   Return From Keyword If   "завантажити угоду до лоту" in "${TEST_NAME}"   ${TRUE}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
 
-
 Задати запитання на тендер
   [Arguments]   ${user_name}   ${auction_id}   ${question_data}
   ${title}=                       Get From Dictionary  ${question_data.data}  title
   ${description}=                 Get From Dictionary  ${question_data.data}  description
-  ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Wait Until Element Is Visible   css=.auction-question-create   30
   Click Link                      css=.auction-question-create
   Wait Until Element Is Visible   id=question-title   30
@@ -882,7 +874,7 @@ Login
   Wait Until Page Contains Element    css=.activation
   Scroll To Element                   .activation
   Click Element                       css=.activation
-
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
 Завантажити протокол аукціону в авард
   [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${award_index}
@@ -912,6 +904,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}
   Wait Until Page Contains Element   css=.inactive-btn
   Click Element                      css=.inactive-btn
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
 Встановити дату підписання угоди
   [Arguments]   ${user_name}   ${auction_id}   ${contract_num}   ${fieldvalue}
@@ -928,8 +921,9 @@ Login
   Execute JavaScript                  $('#contractpublication-datesigned-disp').removeAttr('readonly');
   Input Text                          id=contractpublication-datesigned-disp   ${fieldvalue}
   Click Element                       id=documents-box
+  Sleep                               60
   Click Element                       css=.update
-  Sleep                               10
+  Sleep                               5
 
 Розгорнути таби на кваліфікації
   Wait Until Element Is Visible   id=awards_awards-tab
@@ -944,7 +938,6 @@ Login
   Click Element                    css=.award-rejection-protocol
   Wait Until Element Is Visible    id=documents-box
   Завантажити один документ        ${file_path}
-  # Click Element                    css=.inactive-btn
 
 Підтвердити наявність протоколу аукціону
   [Arguments]   ${user_name}   ${auction_id}   ${award_index}
@@ -963,6 +956,7 @@ Login
   Wait Until Page Contains Element    css=.activation
   Scroll To Element                   .activation
   Click Element                       css=.activation
+  Wait Until Page Contains Element   xpath=//a[@href='#parameters']   45
 
 Скасування рішення кваліфікаційної комісії
   [Arguments]   ${user_name}   ${auction_id}   ${award_num}
@@ -1484,7 +1478,6 @@ Scroll To Element
   Run Keyword If   '${fieldname}' == 'guarantee.amount'   Input Text   id=AuctionLot-guarantee-amount    ${fieldvalue}
   Run Keyword If   '${fieldname}' == 'registrationFee.amount'   Input Text   id=AuctionLot-registrationFee-amount    ${fieldvalue}
   Run Keyword If   '${fieldname}' == 'auctionPeriod.startDate'   Input Text   id=auctionlot-auctionperiod-startdate-disp    ${fieldvalue}
-
   Click Element                css=.inactive-btn
 
 Внести інформацію по 2 аукціону
@@ -1524,9 +1517,9 @@ Scroll To Element
   Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
 
 Отримати інформацію про статус лоту
-   Reload Page
-   Wait Until Element Is Visible   xpath=//span[@class='status']
-   Run Keyword And Return          Get Element Attribute   xpath=//span[@class='status']@data-origin-status
+  Reload Page
+  Wait Until Element Is Visible   xpath=//span[@class='status']
+  Run Keyword And Return          Get Element Attribute   xpath=//span[@class='status']@data-origin-status
 
 Отримати інформацію із лоту
   [Arguments]   ${user_name}   ${lot_id}   ${field}
@@ -1567,7 +1560,6 @@ Scroll To Element
   Wait Until Page Contains         Done    30
   Click Element                    css=.upload-documents
 
-
 Видалити лот
   [Arguments]   ${user_name}   ${lot_id}
   Перейти в мої лоти
@@ -1582,7 +1574,6 @@ Scroll To Element
   Click Element                   id=category-select
   Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot']
   Click Link                      xpath=//a[@href='/privatization/lot']
-
 
 Відкрити лот на редагування
   На початок сторінки
