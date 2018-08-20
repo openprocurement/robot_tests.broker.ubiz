@@ -144,8 +144,9 @@ def view_to_cdb_fromat(string):
             u"Оплачено, очікується підписання договору" : u"active",
             u"АУКЦІОН" : u"active.auction",
             u"АУКЦІОН НЕ ВІДБУВСЯ": u"unsuccessful",
-            u"Скасування активоване": u'active',
-            u"АУКЦІОН ВІДМІНЕНО" : u"cancelled"
+            u"Аукціон відмінено": u'active',
+            u"АУКЦІОН ВІДМІНЕНО" : u"cancelled",
+            u"ПРИЙНЯТТЯ ЗАЯВ НА УЧАСТЬ":u"active.tendering"
     }.get(string, string)
 
 def subtract_from_time(date_time, subtr_min, subtr_sec):

@@ -61,6 +61,7 @@ Login
   Wait Until Page Contains Element    id=login-button
   Click Element                       id=login-button
   Wait Until Element Is Visible       id=login-form-login   30
+  Sleep                               1
   Input text                          xpath=//input[contains(@id, 'login-form-login')]   ${USERS.users['${username}'].login}
   Input text                          xpath=//input[contains(@id, 'login-form-password')]   ${USERS.users['${username}'].password}
   Click Element                       id=login-form-button
@@ -101,18 +102,18 @@ Login
   ${items}=                                Get From Dictionary   ${auction_data.data}   items
   ${number_of_items}=                      Get Length   ${items}
   ${isContainMinNumberOfQualifiedBids}=    Run Keyword And Return Status   Dictionary Should Contain Key  ${auction_data.data}  minNumberOfQualifiedBids
-	${minNumberOfQualifiedBids}=                 Run Keyword If          ${isContainMinNumberOfQualifiedBids}
-	...   Get From Dictionary                    ${auction_data.data}    minNumberOfQualifiedBids
-	...   ELSE                                   Set Variable            2
+  ${minNumberOfQualifiedBids}=                 Run Keyword If          ${isContainMinNumberOfQualifiedBids}
+  ...   Get From Dictionary                    ${auction_data.data}    minNumberOfQualifiedBids
+  ...   ELSE                                   Set Variable            2
 
-	##====================== Продаж / Оренда ========================
-	${is_lease}=          Set Variable    ${FALSE}
-	:FOR  ${index}        IN RANGE        ${number_of_items}
-	\  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA01-7
-	\  Exit For Loop If   ${is_lease}
-	\  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA02-0
-	\  Exit For Loop If   ${is_lease}
-	##====================== Продаж / Оренда ========================
+  ##====================== Продаж / Оренда ========================
+  ${is_lease}=          Set Variable    ${FALSE}
+  :FOR  ${index}        IN RANGE        ${number_of_items}
+  \  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA01-7
+  \  Exit For Loop If   ${is_lease}
+  \  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA02-0
+  \  Exit For Loop If   ${is_lease}
+  ##====================== Продаж / Оренда ========================
 
 
   Wait Until Element Is Visible    id=add_auction
@@ -323,6 +324,12 @@ Login
   Run Keyword And Return If       ${qualified} == ${FALSE}   Fail   Учасник не кваліфікований
   ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
 
+  Wait Until Keyword Succeeds   15 x   40 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб Параметри аукціону
+  ...   AND   Element Should Be Visible   css=.auction-period-start
+  На початок сторінки
+  Sleep   1
   Click Link                      css=.auction-bid-create
   Wait Until Element Is Visible   css=.send
   Scroll To Element               .container
@@ -391,7 +398,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Перейти в розділ купую
-  Дія з пропозицією               bid-publication
+  # Дія з пропозицією               bid-publication
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
   Дія з пропозицією               bid-recall
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
@@ -727,7 +734,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}   ${document_id}   ${field}
   ubiz.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${user_name}   ${auction_id}
   ${currentStatus}=               Get Text   css=.auction-status
-  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   СКАСОВАНИЙ
+  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   АУКЦІОН ВІДМІНЕНО
   Run Keyword If   ${wasCancelled}   Таб Скасування
   ...   ELSE    Таб Документи
   ${fieldValue}=                  Get Text   xpath=//div[contains(@data-document-title, '${document_id}')]//*[contains(@class, 'document-${field}')]
@@ -762,12 +769,12 @@ Login
 Скасувати закупівлю
   [Arguments]   ${user_name}   ${auction_id}   ${reason}   ${file_path}   ${description}
   ubiz.Пошук тендера по ідентифікатору               ${user_name}   ${auction_id}
-  Click Link                         css=.auction-cancellation
-  Wait Until Page Contains           Скасування аукціону   45
+  Click Link                         css=.auction-cancel
+  Wait Until Page Contains           Відміна аукціону   45
   Scroll To Element                  .container
-  SelectBox                          cancellation-reason   ${reason}
+  Input Text                         id=cancellation-reason   ${reason}
   Завантажити один документ          ${file_path}
-  Click Element                      xpath=//button[contains(text(), 'Скасувати')]
+  Click Element                      xpath=//button[contains(text(), 'Відмінити аукціон')]
   Wait Until Page Contains Element   xpath=//a[@href='#cancellations']   45
 
 Отримати інформацію про awards[0].status
@@ -1048,8 +1055,8 @@ Scroll To Element
   ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
   ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
 
-  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
-  Input Text                      id=decision-date-0   ${decisionDate}
+  Execute JavaScript              $('#assetdraft-decisions-0-decisiondate').removeAttr('readonly');
+  Input Text                      id=assetdraft-decisions-0-decisiondate   ${decisionDate}
 
   ${contactPoint}=                Get From Dictionary   ${adapted_data.data.assetCustodian}   contactPoint
   Input Text                      id=contactPerson-name        ${contactPoint.name}
@@ -1403,8 +1410,8 @@ Scroll To Element
   Input Text                      css=input[name='LotDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
   ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
   ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
-  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
-  Input Text                      id=decision-date-0   ${decisionDate}
+  Execute JavaScript              $('#lotdraft-decisions-0-decisiondate').removeAttr('readonly');
+  Input Text                      id=lotdraft-decisions-0-decisiondate   ${decisionDate}
   Click Element                   css=.draft
 
   Wait Until Element Is Visible   xpath=//a[contains(text(), '${asset_uaid}')]
@@ -1452,7 +1459,7 @@ Scroll To Element
   Execute JavaScript           $('#auctionlot-auctionperiod-startdate-disp').removeAttr('readonly');
   Input Text                   id=auctionlot-auctionperiod-startdate-disp   ${auctionPeriodStartDate}
   Input Text                   id=AuctionLot-value-amount               ${valueAmount}
-  SelectBox                    AuctionLot-value-valueAddedTaxIncluded   ${valueAddedTaxIncluded}
+  SwitchBox                    AuctionLot-value-valueAddedTaxIncluded   ${valueAddedTaxIncluded}
   Input Text                   id=AuctionLot-minimalStep-amount         ${minimalStepAmount}
   Input Text                   id=AuctionLot-guarantee-amount           ${guaranteeAmount}
   Click Element                css=.document_box
