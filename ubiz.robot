@@ -392,7 +392,6 @@ Login
   [Arguments]   ${user_name}   ${auction_id}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Перейти в розділ купую
-  # Дія з пропозицією               bid-publication
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
   Дія з пропозицією               bid-recall
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
@@ -1887,11 +1886,6 @@ Scroll To Element
   Перейти в малу приватизацію
   ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/contracting']@class
   Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/contracting']
-
-Відкрити всі контракти
-  На початок сторінки
-  Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/contracting']
 
 Пошук контракту по ідентифікатору
   [Arguments]   ${user_name}   ${contract_id}
