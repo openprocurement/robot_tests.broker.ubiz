@@ -61,6 +61,7 @@ Login
   Wait Until Page Contains Element    id=login-button
   Click Element                       id=login-button
   Wait Until Element Is Visible       id=login-form-login   30
+  Sleep                               1
   Input text                          xpath=//input[contains(@id, 'login-form-login')]   ${USERS.users['${username}'].login}
   Input text                          xpath=//input[contains(@id, 'login-form-password')]   ${USERS.users['${username}'].password}
   Click Element                       id=login-form-button
@@ -101,18 +102,18 @@ Login
   ${items}=                                Get From Dictionary   ${auction_data.data}   items
   ${number_of_items}=                      Get Length   ${items}
   ${isContainMinNumberOfQualifiedBids}=    Run Keyword And Return Status   Dictionary Should Contain Key  ${auction_data.data}  minNumberOfQualifiedBids
-	${minNumberOfQualifiedBids}=                 Run Keyword If          ${isContainMinNumberOfQualifiedBids}
-	...   Get From Dictionary                    ${auction_data.data}    minNumberOfQualifiedBids
-	...   ELSE                                   Set Variable            2
+  ${minNumberOfQualifiedBids}=                 Run Keyword If          ${isContainMinNumberOfQualifiedBids}
+  ...   Get From Dictionary                    ${auction_data.data}    minNumberOfQualifiedBids
+  ...   ELSE                                   Set Variable            2
 
-	##====================== Продаж / Оренда ========================
-	${is_lease}=          Set Variable    ${FALSE}
-	:FOR  ${index}        IN RANGE        ${number_of_items}
-	\  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA01-7
-	\  Exit For Loop If   ${is_lease}
-	\  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA02-0
-	\  Exit For Loop If   ${is_lease}
-	##====================== Продаж / Оренда ========================
+  ##====================== Продаж / Оренда ========================
+  ${is_lease}=          Set Variable    ${FALSE}
+  :FOR  ${index}        IN RANGE        ${number_of_items}
+  \  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA01-7
+  \  Exit For Loop If   ${is_lease}
+  \  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA02-0
+  \  Exit For Loop If   ${is_lease}
+  ##====================== Продаж / Оренда ========================
 
 
   Wait Until Element Is Visible    id=add_auction
@@ -322,7 +323,7 @@ Login
   ${qualified}=                   Get From Dictionary   ${bid_data.data}   qualified
   Run Keyword And Return If       ${qualified} == ${FALSE}   Fail   Учасник не кваліфікований
   ubiz.Пошук тендера по ідентифікатору            ${user_name}   ${auction_id}
-
+  Wait Until Element Is Visible   css=.auction-bid-create
   Click Link                      css=.auction-bid-create
   Wait Until Element Is Visible   css=.send
   Scroll To Element               .container
@@ -391,7 +392,6 @@ Login
   [Arguments]   ${user_name}   ${auction_id}
   ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
   Перейти в розділ купую
-  Дія з пропозицією               bid-publication
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
   Дія з пропозицією               bid-recall
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
@@ -727,7 +727,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}   ${document_id}   ${field}
   ubiz.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${user_name}   ${auction_id}
   ${currentStatus}=               Get Text   css=.auction-status
-  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   СКАСОВАНИЙ
+  ${wasCancelled}=                Run Keyword And Return Status   Should Be Equal   ${currentStatus}   АУКЦІОН ВІДМІНЕНО
   Run Keyword If   ${wasCancelled}   Таб Скасування
   ...   ELSE    Таб Документи
   ${fieldValue}=                  Get Text   xpath=//div[contains(@data-document-title, '${document_id}')]//*[contains(@class, 'document-${field}')]
@@ -762,12 +762,12 @@ Login
 Скасувати закупівлю
   [Arguments]   ${user_name}   ${auction_id}   ${reason}   ${file_path}   ${description}
   ubiz.Пошук тендера по ідентифікатору               ${user_name}   ${auction_id}
-  Click Link                         css=.auction-cancellation
-  Wait Until Page Contains           Скасування аукціону   45
+  Click Link                         css=.auction-cancel
+  Wait Until Page Contains           Відміна аукціону   45
   Scroll To Element                  .container
-  SelectBox                          cancellation-reason   ${reason}
+  Input Text                         id=cancellation-reason   ${reason}
   Завантажити один документ          ${file_path}
-  Click Element                      xpath=//button[contains(text(), 'Скасувати')]
+  Click Element                      xpath=//button[contains(text(), 'Відмінити аукціон')]
   Wait Until Page Contains Element   xpath=//a[@href='#cancellations']   45
 
 Отримати інформацію про awards[0].status
@@ -1048,8 +1048,8 @@ Scroll To Element
   ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
   ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
 
-  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
-  Input Text                      id=decision-date-0   ${decisionDate}
+  Execute JavaScript              $('#assetdraft-decisions-0-decisiondate').removeAttr('readonly');
+  Input Text                      id=assetdraft-decisions-0-decisiondate   ${decisionDate}
 
   ${contactPoint}=                Get From Dictionary   ${adapted_data.data.assetCustodian}   contactPoint
   Input Text                      id=contactPerson-name        ${contactPoint.name}
@@ -1118,22 +1118,17 @@ Scroll To Element
   Input Text                       id=itemdraft-quantity      ${quantity}
   ${unitName}=                     Get From Dictionary        ${item.unit}   name
   SelectBox                        itemdraft-unitid           ${unitName}
-
   ${currilicRegistrationStatus}=   getRegistrationDetailsStatus          ${item.registrationDetails.status}
   SelectBox                        itemdraft-registrationdetailsstatus   ${currilicRegistrationStatus}
-
   ${classificationId}=             Get From Dictionary   ${item.classification}   id
   ${classificationScheme}=         Get From Dictionary   ${item.classification}   scheme
   Обрати класифікатор              //div[@data-attr='classifications']//button[contains(@class,'choose')]   ${classificationId}   ${classificationScheme}
-
   ${address}=                      Get From Dictionary     ${item}   address
-
   SelectBox                        address-regionId        ${address.region}
   Input Text                       id=address-locality     ${address.locality}
   Input Text                       id=address-address      ${address.streetAddress}
   ${postalCode}=                   Convert To String       ${address.postalCode}
   Input Text                       id=address-postalCode   ${postalCode}
-
   Click Element                    xpath=//button[contains(text(), 'Зберегти')]
 
 Обрати класифікатор
@@ -1198,6 +1193,9 @@ Scroll To Element
   Run Keyword And Return   Get Element Attribute   xpath=//span[@class='date-modified']@data-origin-date-modified
 
 Отримати інформацію про rectificationPeriod.endDate
+  Wait Until Keyword Succeeds   5 x   30 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Element Should Be Visible   css=.rectification-period-end
   Run Keyword And Return   Get Element Attribute   xpath=//span[@class='rectification-period-end']@data-origin-rectification-period-end
 
 Отримати інформацію про decisions[0].title
@@ -1330,22 +1328,17 @@ Scroll To Element
   Input Text                       id=itempublished-quantity      ${quantity}
   ${unitName}=                     Get From Dictionary            ${item.unit}   name
   SelectBox                        itempublished-unitid           ${unitName}
-
   ${currilicRegistrationStatus}=   getRegistrationDetailsStatus              ${item.registrationDetails.status}
   SelectBox                        itempublished-registrationdetailsstatus   ${currilicRegistrationStatus}
-
   ${classificationId}=             Get From Dictionary   ${item.classification}   id
   ${classificationScheme}=         Get From Dictionary   ${item.classification}   scheme
   Обрати класифікатор              //div[@data-attr='classifications']//button[contains(@class,'choose')]   ${classificationId}   ${classificationScheme}
-
   ${address}=                      Get From Dictionary     ${item}   address
-
   SelectBox                        address-regionId        ${address.region}
   Input Text                       id=address-locality     ${address.locality}
   Input Text                       id=address-address      ${address.streetAddress}
   ${postalCode}=                   Convert To String       ${address.postalCode}
   Input Text                       id=address-postalCode   ${postalCode}
-
   Click Element                    css=.inactive-btn
   Wait Until Element Is Visible    id=endEdit
   Click Element                    id=endEdit
@@ -1403,10 +1396,9 @@ Scroll To Element
   Input Text                      css=input[name='LotDraft[decisions][0][decisionID]']   ${adapted_data.data.decisions[0].decisionID}
   ${decisionDate}=                Get From Dictionary   ${adapted_data.data.decisions[0]}   decisionDate
   ${decisionDate}=                parse_iso   ${decisionDate}   %Y-%m-%d
-  Execute JavaScript              $('#decision-date-0').removeAttr('readonly');
-  Input Text                      id=decision-date-0   ${decisionDate}
+  Execute JavaScript              $('#lotdraft-decisions-0-decisiondate').removeAttr('readonly');
+  Input Text                      id=lotdraft-decisions-0-decisiondate   ${decisionDate}
   Click Element                   css=.draft
-
   Wait Until Element Is Visible   xpath=//a[contains(text(), '${asset_uaid}')]
   Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
   Sleep                           1
@@ -1415,7 +1407,6 @@ Scroll To Element
   ...   Reload Page
   ...   AND   Wait Until Element Is Not Visible   xpath=//a[contains(text(), '${asset_uaid}')]
   Перейти в мої лоти
-
   Click Element                   css=.lot_image
   Wait Until Element Is Visible   css=.auction-auctionID
   ${lotID}=                       Get Text   css=.auction-auctionID
@@ -1452,7 +1443,7 @@ Scroll To Element
   Execute JavaScript           $('#auctionlot-auctionperiod-startdate-disp').removeAttr('readonly');
   Input Text                   id=auctionlot-auctionperiod-startdate-disp   ${auctionPeriodStartDate}
   Input Text                   id=AuctionLot-value-amount               ${valueAmount}
-  SelectBox                    AuctionLot-value-valueAddedTaxIncluded   ${valueAddedTaxIncluded}
+  SwitchBox                    AuctionLot-value-valueAddedTaxIncluded   ${valueAddedTaxIncluded}
   Input Text                   id=AuctionLot-minimalStep-amount         ${minimalStepAmount}
   Input Text                   id=AuctionLot-guarantee-amount           ${guaranteeAmount}
   Click Element                css=.document_box
@@ -1493,7 +1484,6 @@ Scroll To Element
   ${auction_index}=                Evaluate   ${auction_index} + 1
   Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
   Click Element                    xpath=//a[contains(@class, 'position-${auction_index}')]
-
   Wait Until Element Is Visible    css=.inactive-btn
   Run Keyword If   ${auction_index} == 1   Внести інформацію по 1 аукціону  ${auction_data}
   Run Keyword If   ${auction_index} == 2   Внести інформацію по 2 аукціону  ${auction_data}
@@ -1506,13 +1496,10 @@ Scroll To Element
   [Arguments]   ${user_name}   ${lot_id}  ${fieldname}  ${fieldvalue}  ${auction_index}
   Відкрити лот на редагування
   Відкрити таб аукціонів в редагуванні лоту
-
   ${auction_index}=                Evaluate   ${auction_index} + 1
   Wait Until Element Is Visible    xpath=//a[contains(@class, 'position-${auction_index}')]
   Click Element                    xpath=//a[contains(@class, 'position-${auction_index}')]
-
   Wait Until Element Is Visible    css=.inactive-btn
-
   Run Keyword If   ${auction_index} == 1   Внести зміни в інформацію по 1 аукціону  ${fieldname}  ${fieldvalue}
   Wait Until Page Contains Element         xpath=//a[contains(@class, 'position-${auction_index}')]  30
 
@@ -1759,13 +1746,13 @@ Scroll To Element
   [return]           ${return_value}
 
 Отримати інформацію про auctions[0].auctionPeriod.startDate
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auctionperiod-startdate']@data-origin-auctionperiod-startdate
 
 Отримати інформацію про auctions[1].tenderingDuration
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-tenderingduration
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-2']@data-origin-tenderingduration
 
 Отримати інформацію про auctions[2].tenderingDuration
-    Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-tenderingduration
+  Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-tenderingDuration-3']@data-origin-tenderingduration
 
 Отримати інформацію з активу лоту
   [Arguments]   ${user_name}   ${lot_id}   ${uniq_id}   ${field}
@@ -1847,9 +1834,16 @@ Scroll To Element
   ${fileName}=   download_file_from_url   ${fileUrl}   ${OUTPUT_DIR}${/}${fileName}
   [return]       ${fileName}
 
+Очікування активації процедури
+  ${status}=   Get Element Attribute   css=.auction-status@data-origin-status
+  Should Be Equal   '${status}'  'active.tendering'
+
 Активувати процедуру
-  [Arguments]   ${user_name}   ${tender_uaid}
-  Log To Console     Активувати процедуру
+  [Arguments]   ${user_name}   ${auction_id}
+  ubiz.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
+    Wait Until Keyword Succeeds   6 x   60 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Очікування активації процедури
 
 Отримати кількість авардів в тендері
   [Arguments]   ${user_name}   ${auction_id}
@@ -1879,3 +1873,145 @@ Scroll To Element
   Wait Until Element Is Visible   id=contracts_contracts-tab
   Execute JavaScript              $('#contracts_contracts-tab').find('.fa-plus').click();
   Sleep                           1
+
+Активувати контракт
+  [Arguments]   ${user_name}   ${contract_id}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+   Wait Until Keyword Succeeds   6 x   60 s   Run Keywords
+  ...   Reload Page
+  ...   AND   Таб періоди в контрактах
+  На початок сторінки
+
+Перейти до контрактів
+  Перейти в малу приватизацію
+  ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/contracting']@class
+  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/contracting']
+
+Пошук контракту по ідентифікатору
+  [Arguments]   ${user_name}   ${contract_id}
+  Switch Browser                      ${BROWSER_ALIAS}
+  Перейти до контрактів
+  Wait Until Page Contains Element    id=main-ContractingSearch-title
+  ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
+  ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти контракт   ${contract_id}
+  Run Keyword Unless                  ${passed}   Fail   Лот не знайдено за ${timeout_on_wait} секунд
+  ${contractViewUrl}=                 Get Element Attribute   xpath=//div[contains(@class, 'one_card')]//a[contains(@class, 'auct_image')]@href
+  Execute JavaScript                  window.location.href = '${contractViewUrl}';
+  Wait Until Page Contains Element    css=.auction-auctionID   45
+
+Шукати і знайти контракт
+  [Arguments]   ${contract_id}
+  Input Text                         id=main-ContractingSearch-title   ${contract_id}
+  Click Element                      id=search-main
+  Wait Until Page Contains Element   xpath=//span[contains(text() ,'${contract_id}')]   10
+  Sleep                              3
+
+Отримати інформацію з активу в договорі
+  [Arguments]   ${user_name}   ${contract_id}   ${uniq_id}   ${field}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Таб Активи аукціону
+  Run Keyword And Return If   '${field}' == 'description'   Get Text   xpath=//div[contains(@data-item-description, '${uniq_id}')]//p[contains(@class, 'item-description')]
+
+Вказати дату отримання оплати
+  [Arguments]   ${user_name}   ${contract_id}   ${dateMet}   ${milestoneIndex}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Таб періоди в контрактах
+  Wait Until Element Is Visible      css=.contracting-milestone-financing
+  Click Element                      css=.contracting-milestone-financing
+  Wait Until Page Contains Element   id=to-approval
+  Scroll To Element                  .action_period
+  ${dateMet}=                        auction_period_to_broker_format   ${dateMet}
+  Execute JavaScript                 $('#milestone-datemet-disp').removeAttr('readonly');
+  Input Text                         id=milestone-datemet-disp   ${dateMet}
+  Click Element                      id=documents-box
+  Click Element                      id=to-approval
+  Wait Until Page Contains Element   xpath=//a[@href='#milestones']
+
+Таб періоди в контрактах
+  Скролл до табів
+  Click Link   xpath=//a[@href='#milestones']
+  Sleep        1
+
+Завантажити наказ про завершення приватизації
+  [Arguments]   ${user_name}   ${contract_id}   ${file_path}
+  Log To Console     Реализация в кейворде "Вказати дату прийняття наказу"
+
+Вказати дату прийняття наказу
+  [Arguments]   ${user_name}   ${contract_id}   ${orderDate}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Таб періоди в контрактах
+  Розгорнути всі майлстоуни
+  Wait Until Element Is Visible      css=.contracting-milestone-approval
+  Click Element                      css=.contracting-milestone-approval
+  Wait Until Page Contains Element   id=to-active
+  Scroll To Element                  .action_period
+  ${orderDate}=                      auction_period_to_broker_format   ${orderDate}
+  Execute JavaScript                 $('#milestone-datemet-disp').removeAttr('readonly');
+  Input Text                         id=milestone-datemet-disp   ${orderDate}
+  Click Element                      id=documents-box
+  ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
+  Завантажити один документ          ${file_path}
+  Click Element                      id=to-active
+  Wait Until Page Contains Element   xpath=//a[@href='#milestones']
+
+Розгорнути всі майлстоуни
+  Execute Javascript   $("#milestones .tab-pane").addClass("active")
+  Sleep                1
+
+Вказати дату виконання умов контракту
+  [Arguments]   ${user_name}   ${contract_id}   ${finalDate}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Таб періоди в контрактах
+  Розгорнути всі майлстоуни
+  Wait Until Element Is Visible      css=.contracting-milestone-reporting
+  Click Element                      css=.contracting-milestone-reporting
+  Wait Until Page Contains Element   id=to-terminate
+  Scroll To Element                  .action_period
+  ${finalDate}=                      auction_period_to_broker_format   ${finalDate}
+  Execute JavaScript                 $('#milestone-datemet-disp').removeAttr('readonly');
+  Input Text                         id=milestone-datemet-disp   ${finalDate}
+  Click Element                      id=documents-box
+  Click Element                      id=to-terminate
+  Wait Until Page Contains Element   xpath=//a[@href='#milestones']
+
+Отримати інформацію із договору
+  [Arguments]   ${user_name}   ${contract_id}   ${field}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Wait Until Element Is Visible   css=.status
+  Run Keyword And Return          Get Element Attribute   css=.status@data-origin-status
+
+Підтвердити відсутність оплати
+  [Arguments]   ${user_name}   ${contract_id}   ${milestone_index}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Таб періоди в контрактах
+  Wait Until Element Is Visible      css=.contracting-milestone-financing-not-met
+  Click Element                      css=.contracting-milestone-financing-not-met
+  Wait Until Page Contains Element   id=to-unsuccessful
+  Scroll To Element                  .action_period
+  Click Element                      id=to-unsuccessful
+  Wait Until Page Contains Element   xpath=//a[@href='#milestones']
+
+Підтвердити відсутність наказу про приватизацію
+  [Arguments]   ${user_name}   ${contract_id}   ${file_path}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Таб періоди в контрактах
+  Розгорнути всі майлстоуни
+  Wait Until Element Is Visible      css=.contracting-milestone-approval-not-met
+  Click Element                      css=.contracting-milestone-approval-not-met
+  Wait Until Page Contains Element   id=to-unsuccessful
+  Scroll To Element                  .action_period
+  Завантажити один документ          ${file_path}
+  Click Element                      id=to-unsuccessful
+  Wait Until Page Contains Element   xpath=//a[@href='#milestones']
+
+Підтвердити невиконання умов приватизації
+  [Arguments]   ${user_name}   ${contract_id}
+  ubiz.Пошук контракту по ідентифікатору   ${user_name}   ${contract_id}
+  Таб періоди в контрактах
+  Розгорнути всі майлстоуни
+  Wait Until Element Is Visible      css=.contracting-milestone-reporting-not-met
+  Click Element                      css=.contracting-milestone-reporting-not-met
+  Wait Until Page Contains Element   id=to-unsuccessful
+  Scroll To Element                  .action_period
+  Click Element                      id=to-unsuccessful
+  Wait Until Page Contains Element   xpath=//a[@href='#milestones']
